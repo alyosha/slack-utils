@@ -14,7 +14,6 @@ import (
 
 type config struct {
 	UserToken   string `envconfig:"USER_TOKEN" required:"true"`
-	ChannelName string `envconfig:"CHANNEL_NAME" required:"true"`
 	FileName    string `envconfig:"FILE_NAME" required:"true"`
 }
 
@@ -30,19 +29,28 @@ func _main() int {
 		return 1
 	}
 
-	if len(env.ChannelName) > utils.ChannelNameMaxLen {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Enter channel name: ")
+	channelName, _ := reader.ReadString('\n')
+
+	if channelName == "" {
+		log.Print("need a valid channel name")
+		return 1
+	}
+
+	if len(channelName) > utils.ChannelNameMaxLen {
 		log.Print("channel name is too long")
 		return 1
 	}
 
-	reader := bufio.NewReader(os.Stdin)
+	reader = bufio.NewReader(os.Stdin)
 	fmt.Print("Enter init message, leave blank if unnecessary: ")
-	text, _ := reader.ReadString('\n')
+	initMsg, _ := reader.ReadString('\n')
 
 	client := slack.New(env.UserToken)
 	channelHandler := &utils.Channel{
 		Client:      client,
-		ChannelName: env.ChannelName,
+		ChannelName: channelName,
 	}
 
 	userHandler := &utils.User{
@@ -52,7 +60,7 @@ func _main() int {
 	userEmails := utils.UnpackSingleColCSV(env.FileName)
 	userIDs := userHandler.EmailsToSlackIDs(userEmails)
 
-	_, err := channelHandler.CreateChannel(userIDs, text)
+	_, err := channelHandler.CreateChannel(userIDs, initMsg)
 	if err != nil {
 		log.Printf("received the following error: %s", err)
 		return 1
