@@ -13,8 +13,8 @@ import (
 )
 
 type config struct {
-	UserToken   string `envconfig:"USER_TOKEN" required:"true"`
-	FileName    string `envconfig:"FILE_NAME" required:"true"`
+	UserToken string `envconfig:"USER_TOKEN" required:"true"`
+	FileName  string `envconfig:"FILE_NAME" required:"true"`
 }
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 }
 
 func _main() int {
-	log.Print("starting up")
+	log.Println("starting up")
 	var env config
 	if err := envconfig.Process("", &env); err != nil {
 		log.Printf("error processing environment variables: %s", err)
@@ -33,7 +33,7 @@ func _main() int {
 	fmt.Print("Enter channel name: ")
 	channelName, _ := reader.ReadString('\n')
 
-	if channelName == "" {
+	if channelName == "\n" {
 		log.Print("need a valid channel name")
 		return 1
 	}

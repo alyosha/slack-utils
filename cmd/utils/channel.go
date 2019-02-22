@@ -29,16 +29,18 @@ func (c *Channel) CreateChannel(userIDs []string, initMsg string) (string, error
 		}
 	}
 
-	_, ts, err := c.Client.PostMessage(
-		channel.ID,
-		slack.MsgOptionText(initMsg, false),
-		slack.MsgOptionEnableLinkUnfurl(),
-	)
-	if err != nil {
-		return "", fmt.Errorf("failed to post message to Slack: %v", err)
-	}
+	if initMsg != "\n" {
+		_, ts, err := c.Client.PostMessage(
+			channel.ID,
+			slack.MsgOptionText(initMsg, false),
+			slack.MsgOptionEnableLinkUnfurl(),
+		)
+		if err != nil {
+			return "", fmt.Errorf("failed to post message to Slack: %v", err)
+		}
 
-	log.Printf("posted message to %v at %v after successful channel open", channel.ID, ts)
+		log.Printf("posted message to %v at %v after successful channel open", channel.ID, ts)
+	}
 
 	return channel.ID, nil
 }
