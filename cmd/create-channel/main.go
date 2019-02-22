@@ -31,7 +31,11 @@ func _main() int {
 
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter channel name: ")
-	channelName, _ := reader.ReadString('\n')
+	channelName, err := reader.ReadString('\n')
+	if err != nil {
+		log.Printf("failed to read string for channel name: %s", err)
+		return 1
+	}
 
 	if channelName == "\n" {
 		log.Print("need a valid channel name")
@@ -45,7 +49,11 @@ func _main() int {
 
 	reader = bufio.NewReader(os.Stdin)
 	fmt.Print("Enter init message, leave blank if unnecessary: ")
-	initMsg, _ := reader.ReadString('\n')
+	initMsg, err := reader.ReadString('\n')
+	if err != nil {
+		log.Printf("failed to read string for init msg: %s", err)
+		return 1
+	}
 
 	client := slack.New(env.UserToken)
 	channelHandler := &utils.Channel{
@@ -57,12 +65,16 @@ func _main() int {
 		Client: client,
 	}
 
-	userEmails := utils.UnpackSingleColCSV(env.FileName)
+	userEmails, err := utils.UnpackSingleColCSV(env.FileName)
+	if err != nil {
+		log.Printf("failed to unpack single column csv: %s", err)
+		return 1
+	}
 	userIDs := userHandler.EmailsToSlackIDs(userEmails)
 
-	_, err := channelHandler.CreateChannel(userIDs, initMsg)
+	_, err = channelHandler.CreateChannel(userIDs, initMsg)
 	if err != nil {
-		log.Printf("received the following error: %s", err)
+		log.Printf("failed to open channel: %s", err)
 		return 1
 	}
 
