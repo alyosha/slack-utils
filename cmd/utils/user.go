@@ -16,17 +16,23 @@ func (u *User) GetAll() []slack.User {
 	return users
 }
 
-// EmailsToSlackIDs takes in an array of email addresses and finds the IDs of any workplace members with those emails
+// EmailsToSlackIDs takes in an array of email addresses and finds the IDs of
+// any workplace members with those emails
 func (u *User) EmailsToSlackIDs(emails []string) []string {
 	users := u.GetAll()
-	ids := toSlackIDs(users, emails)
+	return toSlackIDs(users, emails)
+}
 
-	return ids
+// EmailToSlackIDsInclusive takes in an array of email addresses, finds the IDs
+// of any workplace members with those emails, and returns both values
+func (u *User) EmailsToSlackIDsInclusive(emails []string) [][]string {
+	users := u.GetAll()
+	log.Println(users)
+	return toSlackIDsInclusive(users, emails)
 }
 
 func toSlackIDs(users []slack.User, emails []string) []string {
 	var ids []string
-
 	for _, email := range emails {
 		for _, user := range users {
 			if user.Profile.Email == email {
@@ -34,6 +40,17 @@ func toSlackIDs(users []slack.User, emails []string) []string {
 			}
 		}
 	}
-
 	return ids
+}
+
+func toSlackIDsInclusive(users []slack.User, emails []string) [][]string {
+	var emailIDPairs [][]string
+	for _, email := range emails {
+		for _, user := range users {
+			if user.Profile.Email == email {
+				emailIDPairs = append(emailIDPairs, []string{email, user.ID})
+			}
+		}
+	}
+	return emailIDPairs
 }

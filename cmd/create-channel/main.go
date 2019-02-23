@@ -23,6 +23,7 @@ func main() {
 
 func _main() int {
 	log.Println("starting up")
+
 	var env config
 	if err := envconfig.Process("", &env); err != nil {
 		log.Printf("error processing environment variables: %s", err)
