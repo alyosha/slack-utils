@@ -1,3 +1,3 @@
-# slack scripts
+# slack-utils 
 
-WIP collection of simple Slack scripts/utilities.
+WIP collection of Slack scripts/utilities
