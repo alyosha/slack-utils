@@ -27,7 +27,6 @@ func (u *User) EmailsToSlackIDs(emails []string) []string {
 // of any workplace members with those emails, and returns both values
 func (u *User) EmailsToSlackIDsInclusive(emails []string) [][]string {
 	users := u.GetAll()
-	log.Println(users)
 	return toSlackIDsInclusive(users, emails)
 }
 

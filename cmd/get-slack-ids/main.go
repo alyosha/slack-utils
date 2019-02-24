@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/alyosha93/slack-scripts/cmd/utils"
+	"github.com/alyosha93/slack-utils/helpers"
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/nlopes/slack"
@@ -54,5 +54,6 @@ func _main() int {
 		log.Fatalf("failed to write csv:", err)
 	}
 
+	log.Print("finished with no issues")
 	return 0
 }
