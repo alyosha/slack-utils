@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:ec5493e99bca33715338ed4ee640d79d68bda175a983bc279220f515f615af1c"
+  name = "github.com/alyosha/slack-utils"
+  packages = ["helpers"]
+  pruneopts = "UT"
+  revision = "074573847a9585e2612a103e14468e8a1b91ab18"
+
+[[projects]]
   digest = "1:7b5c6e2eeaa9ae5907c391a91c132abfd5c9e8a784a341b5625e750c67e6825d"
   name = "github.com/gorilla/websocket"
   packages = ["."]
@@ -40,6 +48,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/alyosha/slack-utils/helpers",
     "github.com/kelseyhightower/envconfig",
     "github.com/nlopes/slack",
   ]
