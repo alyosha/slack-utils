@@ -9,6 +9,7 @@ import (
 
 // ChannelNameMaxLen is the max character length for a Slack channel name
 const ChannelNameMaxLen = 21
+const ErrorInviteSelf = "cant_invite_self"
 
 // CreateChannel opens a new public channel and invites the provided list of member IDs, optionally posting an initial message
 func (c *Channel) CreateChannel(userIDs []string, initMsg Message) (string, error) {
@@ -24,7 +25,7 @@ func (c *Channel) CreateChannel(userIDs []string, initMsg Message) (string, erro
 
 	for _, user := range userIDs {
 		_, err = c.Client.InviteUserToChannel(channel.ID, user)
-		if err != nil {
+		if err != nil && err.Error() != ErrorInviteSelf {
 			return "", fmt.Errorf("failed to invite user to channel: %v", err)
 		}
 	}
