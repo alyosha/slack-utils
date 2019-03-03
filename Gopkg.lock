@@ -2,14 +2,6 @@
 
 
 [[projects]]
-  branch = "master"
-  digest = "1:ec5493e99bca33715338ed4ee640d79d68bda175a983bc279220f515f615af1c"
-  name = "github.com/alyosha/slack-utils"
-  packages = ["helpers"]
-  pruneopts = "UT"
-  revision = "074573847a9585e2612a103e14468e8a1b91ab18"
-
-[[projects]]
   digest = "1:7b5c6e2eeaa9ae5907c391a91c132abfd5c9e8a784a341b5625e750c67e6825d"
   name = "github.com/gorilla/websocket"
   packages = ["."]
@@ -18,23 +10,15 @@
   version = "v1.4.0"
 
 [[projects]]
-  digest = "1:edbef42561faa44c19129b68d1e109fbc1647f63239250391eadc8d0e7c9f669"
-  name = "github.com/kelseyhightower/envconfig"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "f611eb38b3875cc3bd991ca91c51d06446afa14c"
-  version = "v1.3.0"
-
-[[projects]]
   branch = "master"
-  digest = "1:90fc157137d61202780d1712daf78ef7c69fdc93c2aee92a7c6b7a0df2026332"
+  digest = "1:bce2e04677f0d9731bf0bcc7ae61657c653cbb4e1d0cd8ca41af1baa8e3251ac"
   name = "github.com/nlopes/slack"
   packages = [
     ".",
     "slackutilsx",
   ]
   pruneopts = "UT"
-  revision = "e73b432e20b0f00bfa92b15f51e43fc79247611b"
+  revision = "71a00675abf36a35bb4ff7c0fdd3172c9b191b23"
 
 [[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
@@ -47,10 +31,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/alyosha/slack-utils/helpers",
-    "github.com/kelseyhightower/envconfig",
-    "github.com/nlopes/slack",
-  ]
+  input-imports = ["github.com/nlopes/slack"]
   solver-name = "gps-cdcl"
   solver-version = 1

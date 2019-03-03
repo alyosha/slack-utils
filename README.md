@@ -1,3 +1,4 @@
 # slack-utils 
 
-WIP collection of Slack scripts/utilities
+WIP collection of utility methods I frequently use in slackbot projects/other slack
+scripts.
