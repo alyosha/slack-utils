@@ -1,6 +1,15 @@
 package utils
 
-import "github.com/nlopes/slack"
+import (
+	"math/rand"
+
+	"github.com/nlopes/slack"
+)
+
+// Slack is a general purpose struct used when only the client is required
+type Slack struct {
+	Client *slack.Client
+}
 
 // Channel is used in opening/interacting with public Slack channels
 type Channel struct {
@@ -9,7 +18,10 @@ type Channel struct {
 	InitMsg     string
 }
 
-// User is used in interacting with user data
-type User struct {
-	Client *slack.Client
+// Shuffle is used in randmoizing a list of users and splitting them into
+// groups of the designated size
+type Shuffle struct {
+	Client    *slack.Client
+	GroupSize int
+	Rand      *rand.Rand
 }
