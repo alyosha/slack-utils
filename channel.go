@@ -11,7 +11,7 @@ import (
 const ChannelNameMaxLen = 21
 
 // CreateChannel opens a new public channel and invites the provided list of member IDs, optionally posting an initial message
-func (c *Channel) CreateChannel(userIDs []string, initMsg string) (string, error) {
+func (c *Channel) CreateChannel(userIDs []string, initMsg Message) (string, error) {
 	channel, err := c.Client.CreateChannel(c.ChannelName)
 	if err != nil {
 		return "", fmt.Errorf("failed to create channel: %v", err)
@@ -29,10 +29,11 @@ func (c *Channel) CreateChannel(userIDs []string, initMsg string) (string, error
 		}
 	}
 
-	if initMsg != "\n" {
+	if initMsg.Body != "\n" {
 		_, ts, err := c.Client.PostMessage(
 			channel.ID,
-			slack.MsgOptionText(initMsg, false),
+			slack.MsgOptionText(initMsg.Body, false),
+			slack.MsgOptionAttachments(initMsg.Attachment),
 			slack.MsgOptionEnableLinkUnfurl(),
 		)
 		if err != nil {
