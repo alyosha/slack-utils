@@ -1,4 +1,4 @@
-package main
+package utils
 
 func (s *Shuffle) Shuffle(userIDs []string) []string {
 	for i := len(userIDs); i > 0; i-- {
