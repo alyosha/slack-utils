@@ -9,7 +9,7 @@ func (s *Slack) PostMessage(msg Message, channelID string) (string, error) {
 	_, ts, err := s.Client.PostMessage(
 		channelID,
 		slack.MsgOptionText(msg.Body, false),
-		slack.MsgOptionAttachments(msg.Attachment),
+		slack.MsgOptionAttachments(msg.Attachments...),
 		slack.MsgOptionEnableLinkUnfurl(),
 	)
 
@@ -25,7 +25,7 @@ func (s *Slack) PostThreadMessage(msg Message, channelID string, threadTs string
 	_, _, err := s.Client.PostMessage(
 		channelID,
 		slack.MsgOptionText(msg.Body, false),
-		slack.MsgOptionAttachments(msg.Attachment),
+		slack.MsgOptionAttachments(msg.Attachments...),
 		slack.MsgOptionEnableLinkUnfurl(),
 		slack.MsgOptionTS(threadTs),
 	)
