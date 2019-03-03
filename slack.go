@@ -4,8 +4,6 @@ import "github.com/nlopes/slack"
 
 // Channel is used in opening/interacting with public Slack channels
 type Channel struct {
-	UserToken   string
-	BotToken    string
 	Client      *slack.Client
 	ChannelName string
 	InitMsg     string
@@ -13,7 +11,5 @@ type Channel struct {
 
 // User is used in interacting with user data
 type User struct {
-	UserToken string
-	BotToken  string
-	Client    *slack.Client
+	Client *slack.Client
 }
