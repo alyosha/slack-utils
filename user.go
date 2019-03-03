@@ -8,7 +8,7 @@ import (
 
 // GetAll returns all users for a workspace
 func (s *Slack) GetAll() []slack.User {
-	users, err := u.Client.GetUsers()
+	users, err := s.Client.GetUsers()
 	if err != nil {
 		log.Printf("Error getting user profiles: %v", err)
 		return nil
@@ -19,14 +19,14 @@ func (s *Slack) GetAll() []slack.User {
 // EmailsToSlackIDs takes in an array of email addresses and finds the IDs of
 // any workplace members with those emails
 func (s *Slack) EmailsToSlackIDs(emails []string) []string {
-	users := u.GetAll()
+	users := s.GetAll()
 	return toSlackIDs(users, emails)
 }
 
 // EmailToSlackIDsInclusive takes in an array of email addresses, finds the IDs
 // of any workplace members with those emails, and returns both values
 func (s *Slack) EmailsToSlackIDsInclusive(emails []string) [][]string {
-	users := u.GetAll()
+	users := s.GetAll()
 	return toSlackIDsInclusive(users, emails)
 }
 

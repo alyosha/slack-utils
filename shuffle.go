@@ -11,8 +11,8 @@ func (s *Shuffle) Shuffle(userIDs []string) []string {
 func (s *Shuffle) Split(userIDs []string) [][]string {
 	var groups [][]string
 	var stragglers []string
-	stdGroupCnt := len(userIDs) / standardGroupSize
-	stdGroupUserCnt := standardGroupSize * stdGroupCnt
+	stdGroupCnt := len(userIDs) / s.GroupSize
+	stdGroupUserCnt := s.GroupSize * stdGroupCnt
 	if len(userIDs) > stdGroupUserCnt {
 		for _, strag := range userIDs[stdGroupUserCnt:] {
 			stragglers = append(stragglers, strag)
@@ -21,7 +21,7 @@ func (s *Shuffle) Split(userIDs []string) [][]string {
 
 	for i := 0; i < stdGroupCnt; i++ {
 		var group []string
-		for i := 0; i < standardGroupSize; i++ {
+		for i := 0; i < s.GroupSize; i++ {
 			group = append(group, userIDs[0])
 			userIDs = append(userIDs[:0], userIDs[0+1:]...)
 		}

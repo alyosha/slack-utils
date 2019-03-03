@@ -6,6 +6,12 @@ import (
 	"github.com/nlopes/slack"
 )
 
+// Message is an intermediary struct used for posting messages
+type Message struct {
+	Body       string
+	Attachment slack.Attachment
+}
+
 // Slack is a general purpose struct used when only the client is required
 type Slack struct {
 	Client *slack.Client
