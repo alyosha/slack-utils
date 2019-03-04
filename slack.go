@@ -10,6 +10,7 @@ import (
 type Message struct {
 	Body        string
 	Attachments []slack.Attachment
+	AsUser      bool
 }
 
 // Slack is a general purpose struct used when only the client is required

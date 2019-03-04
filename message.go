@@ -11,6 +11,7 @@ func (s *Slack) PostMessage(msg Message, channelID string) (string, error) {
 		slack.MsgOptionText(msg.Body, false),
 		slack.MsgOptionAttachments(msg.Attachments...),
 		slack.MsgOptionEnableLinkUnfurl(),
+		slack.MsgOptionAsUser(msg.AsUser),
 	)
 
 	if err != nil {
