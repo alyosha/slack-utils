@@ -1,8 +1,7 @@
 package utils
 
 import (
-	"fmt"
-	"log"
+	"errors"
 
 	"github.com/nlopes/slack"
 	"golang.org/x/sync/errgroup"
@@ -16,18 +15,17 @@ const ErrorInviteSelf = "cant_invite_self"
 func (c *Channel) CreateChannel(userIDs []string, initMsg Message, postAsBot bool) (string, error) {
 	channel, err := c.UserClient.CreateChannel(c.ChannelName)
 	if err != nil {
-		return "", fmt.Errorf("failed to create channel: %v", err)
+		return "", err
 	}
 
 	if channel == nil {
-		log.Print("invalid channel")
-		return "", nil
+		return "", errors.New("channel is nil")
 	}
 
 	for _, user := range userIDs {
 		_, err = c.UserClient.InviteUserToChannel(channel.ID, user)
 		if err != nil && err.Error() != ErrorInviteSelf {
-			return "", fmt.Errorf("failed to invite user to channel: %v", err)
+			return "", err
 		}
 	}
 
@@ -37,17 +35,15 @@ func (c *Channel) CreateChannel(userIDs []string, initMsg Message, postAsBot boo
 	}
 
 	if initMsg.Body != "\n" {
-		_, ts, err := client.PostMessage(
+		_, _, err := client.PostMessage(
 			channel.ID,
 			slack.MsgOptionText(initMsg.Body, false),
 			slack.MsgOptionAttachments(initMsg.Attachments...),
 			slack.MsgOptionEnableLinkUnfurl(),
 		)
 		if err != nil {
-			return "", fmt.Errorf("failed to post message to Slack: %v", err)
+			return "", err
 		}
-
-		log.Printf("posted message to %v at %v after successful channel open", channel.ID, ts)
 	}
 
 	return channel.ID, nil
@@ -57,7 +53,7 @@ func (c *Channel) CreateChannel(userIDs []string, initMsg Message, postAsBot boo
 func (s *Slack) GetChannelMembers(channelID string) ([]string, error) {
 	channel, err := s.Client.GetChannelInfo(channelID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get channel info: %v", err)
+		return nil, err
 	}
 
 	return channel.Members, nil
@@ -86,10 +82,8 @@ func (s *Slack) GetChannelMemberEmails(channelID string) ([]string, error) {
 	})
 
 	if err := eg.Wait(); err != nil {
-		return nil, fmt.Errorf("failed to get channel member emails: %v", err)
+		return nil, err
 	}
 
-	emails := toEmails(allUsers, memberIDs)
-
-	return emails, nil
+	return toEmails(allUsers, memberIDs), nil
 }

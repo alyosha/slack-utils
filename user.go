@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"fmt"
-
 	"github.com/nlopes/slack"
 )
 
@@ -21,7 +19,7 @@ func (s *Slack) GetAll() ([]slack.User, error) {
 func (s *Slack) EmailsToSlackIDs(emails []string) ([]string, error) {
 	users, err := s.GetAll()
 	if err != nil {
-		return nil, fmt.Errorf("Error getting user profiles: %v", err)
+		return nil, err
 	}
 
 	return toSlackIDs(users, emails), nil
@@ -32,7 +30,7 @@ func (s *Slack) EmailsToSlackIDs(emails []string) ([]string, error) {
 func (s *Slack) EmailsToSlackIDsInclusive(emails []string) ([][]string, error) {
 	users, err := s.GetAll()
 	if err != nil {
-		return nil, fmt.Errorf("Error getting user profiles: %v", err)
+		return nil, err
 	}
 
 	return toSlackIDsInclusive(users, emails), nil
