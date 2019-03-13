@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/nlopes/slack"
+	"golang.org/x/sync/errgroup"
 )
 
 // ChannelNameMaxLen is the max character length for a Slack channel name
@@ -50,4 +51,45 @@ func (c *Channel) CreateChannel(userIDs []string, initMsg Message, postAsBot boo
 	}
 
 	return channel.ID, nil
+}
+
+// GetChannelMembers returns a list of members for a given channel
+func (s *Slack) GetChannelMembers(channelID string) ([]string, error) {
+	channel, err := s.Client.GetChannelInfo(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get channel info: %v", err)
+	}
+
+	return channel.Members, nil
+}
+
+// GetChannelMemberEmails returns a list of emails for members of a given channel
+func (s *Slack) GetChannelMemberEmails(channelID string) ([]string, error) {
+	var eg errgroup.Group
+	var memberIDs []string
+	var allUsers []slack.User
+
+	eg.Go(func() error {
+		channel, err := s.Client.GetChannelInfo(channelID)
+		if err == nil {
+			memberIDs = channel.Members
+		}
+		return err
+	})
+
+	eg.Go(func() error {
+		users, err := s.GetAll()
+		if err == nil {
+			allUsers = users
+		}
+		return err
+	})
+
+	if err := eg.Wait(); err != nil {
+		return nil, fmt.Errorf("failed to get channel member emails: %v", err)
+	}
+
+	emails := toEmails(allUsers, memberIDs)
+
+	return emails, nil
 }

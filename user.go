@@ -1,33 +1,41 @@
 package utils
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/nlopes/slack"
 )
 
 // GetAll returns all users for a workspace
-func (s *Slack) GetAll() []slack.User {
+func (s *Slack) GetAll() ([]slack.User, error) {
 	users, err := s.Client.GetUsers()
 	if err != nil {
-		log.Printf("Error getting user profiles: %v", err)
-		return nil
+		return nil, err
 	}
-	return users
+
+	return users, nil
 }
 
 // EmailsToSlackIDs takes in an array of email addresses and finds the IDs of
 // any workplace members with those emails
-func (s *Slack) EmailsToSlackIDs(emails []string) []string {
-	users := s.GetAll()
-	return toSlackIDs(users, emails)
+func (s *Slack) EmailsToSlackIDs(emails []string) ([]string, error) {
+	users, err := s.GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("Error getting user profiles: %v", err)
+	}
+
+	return toSlackIDs(users, emails), nil
 }
 
 // EmailToSlackIDsInclusive takes in an array of email addresses, finds the IDs
 // of any workplace members with those emails, and returns both values
-func (s *Slack) EmailsToSlackIDsInclusive(emails []string) [][]string {
-	users := s.GetAll()
-	return toSlackIDsInclusive(users, emails)
+func (s *Slack) EmailsToSlackIDsInclusive(emails []string) ([][]string, error) {
+	users, err := s.GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("Error getting user profiles: %v", err)
+	}
+
+	return toSlackIDsInclusive(users, emails), nil
 }
 
 func toSlackIDs(users []slack.User, emails []string) []string {
@@ -39,6 +47,7 @@ func toSlackIDs(users []slack.User, emails []string) []string {
 			}
 		}
 	}
+
 	return ids
 }
 
@@ -51,5 +60,20 @@ func toSlackIDsInclusive(users []slack.User, emails []string) [][]string {
 			}
 		}
 	}
+
 	return emailIDPairs
+}
+
+func toEmails(users []slack.User, userIDs []string) []string {
+	var emails []string
+	for _, id := range userIDs {
+		for _, user := range users {
+			if user.ID == id && user.Profile.Email != "" {
+				emails = append(emails, user.Profile.Email)
+			}
+		}
+	}
+
+	return emails
+
 }
