@@ -17,7 +17,7 @@ func (l *Listener) IsBotImperative(event *slack.MessageEvent) bool {
 	}
 
 	msg := splitMsg(event.Msg.Text)
-	if len(msg) == 0 || msg[0] != fmt.Sprintf("<@%s>", s.botID) {
+	if len(msg) == 0 || msg[0] != fmt.Sprintf("<@%s>", l.BotID) {
 		return false
 	}
 

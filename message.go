@@ -16,7 +16,7 @@ type Msg struct {
 
 // PostMsg sends the provided message to the channel designated by channelID
 func PostMsg(client *slack.Client, msg Msg, channelID string) (string, error) {
-	_, ts, err := r.Client.PostMessage(
+	_, ts, err := client.PostMessage(
 		channelID,
 		slack.MsgOptionText(msg.Body, false),
 		slack.MsgOptionAttachments(msg.Attachments...),
@@ -33,7 +33,7 @@ func PostMsg(client *slack.Client, msg Msg, channelID string) (string, error) {
 
 // PostThreadMsg posts a message response into an existing thread
 func PostThreadMsg(client *slack.Client, msg Msg, channelID string, threadTs string) error {
-	_, _, err := r.Client.PostMessage(
+	_, _, err := client.PostMessage(
 		channelID,
 		slack.MsgOptionText(msg.Body, false),
 		slack.MsgOptionAttachments(msg.Attachments...),

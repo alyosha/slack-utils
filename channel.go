@@ -35,7 +35,7 @@ func (c *Channel) CreateChannel(userIDs []string, initMsg Msg, postAsBot bool) (
 	}
 
 	if initMsg.Body != "" {
-		_, _, err := client.PostMsg(
+		_, _, err := client.PostMessage(
 			channel.ID,
 			slack.MsgOptionText(initMsg.Body, false),
 			slack.MsgOptionAttachments(initMsg.Attachments...),
