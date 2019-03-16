@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"context"
+	"errors"
 	"math/rand"
 
 	"github.com/nlopes/slack"
@@ -25,4 +27,38 @@ type Shuffle struct {
 	Client    *slack.Client
 	GroupSize int
 	Rand      *rand.Rand
+}
+
+// GetClient is the method used to extract the Slack client from the request context
+func GetClient(ctx context.Context) (*nlopes.Client, error) {
+	val := ctx.Value(slackClientKey{})
+	client, ok := val.(*nlopes.Client)
+	if !ok {
+		return nil, errors.New("error extracting the Slack client from context")
+	}
+
+	return client, nil
+}
+
+// WithContext embeds values into to the request context
+func WithContext(ctx context.Context, signingSecret string, client *nlopes.Client) context.Context {
+	return addClient(addSigningSecret(ctx, signingSecret), client)
+}
+
+func addSigningSecret(ctx context.Context, signingSecret string) context.Context {
+	return context.WithValue(ctx, signingSecretKey{}, signingSecret)
+}
+
+func addClient(ctx context.Context, client *nlopes.Client) context.Context {
+	return context.WithValue(ctx, slackClientKey{}, client)
+}
+
+func getSigningSecret(ctx context.Context) (string, error) {
+	val := ctx.Value(signingSecretKey{})
+	secret, ok := val.(string)
+	if !ok {
+		return "", errors.New("error extracting the signing secret from context")
+	}
+
+	return secret, nil
 }
