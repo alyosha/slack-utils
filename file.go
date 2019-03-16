@@ -22,6 +22,24 @@ func UnpackSingleColCSV(fileName string) ([]string, error) {
 	return entries, nil
 }
 
+// CreateAndWriteCSV creates and then writes to a new CSV file
+func CreateAndWriteCSV(fileName string, entries [][]string) error {
+	file, err := os.Create(fileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	w := csv.NewWriter(file)
+	w.WriteAll(entries)
+
+	if err := w.Error(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func readFromFile(fileName string) ([][]string, error) {
 	file, err := os.Open(fileName)
 	defer file.Close()
