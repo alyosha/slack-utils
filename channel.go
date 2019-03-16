@@ -12,7 +12,7 @@ const ChannelNameMaxLen = 21
 const ErrorInviteSelf = "cant_invite_self"
 
 // CreateChannel opens a new public channel and invites the provided list of member IDs, optionally posting an initial message
-func (c *Channel) CreateChannel(userIDs []string, initMsg Message, postAsBot bool) (string, error) {
+func (c *Channel) CreateChannel(userIDs []string, initMsg Msg, postAsBot bool) (string, error) {
 	channel, err := c.UserClient.CreateChannel(c.ChannelName)
 	if err != nil {
 		return "", err
@@ -35,7 +35,7 @@ func (c *Channel) CreateChannel(userIDs []string, initMsg Message, postAsBot boo
 	}
 
 	if initMsg.Body != "" {
-		_, _, err := client.PostMessage(
+		_, _, err := client.PostMsg(
 			channel.ID,
 			slack.MsgOptionText(initMsg.Body, false),
 			slack.MsgOptionAttachments(initMsg.Attachments...),
@@ -51,7 +51,7 @@ func (c *Channel) CreateChannel(userIDs []string, initMsg Message, postAsBot boo
 
 func (c *Channel) InviteUsers(userIDs []string, channelID string) error {
 	for _, user := range userIDs {
-		_, err = c.UserClient.InviteUserToChannel(channelID, user)
+		_, err := c.UserClient.InviteUserToChannel(channelID, user)
 		if err != nil && err.Error() != ErrorInviteSelf {
 			return err
 		}

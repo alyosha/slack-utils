@@ -15,7 +15,7 @@ type Msg struct {
 }
 
 // PostMsg sends the provided message to the channel designated by channelID
-func (r *Responder) PostMsg(msg Msg, channelID string) (string, error) {
+func (r Responder) PostMsg(msg Msg, channelID string) (string, error) {
 	_, ts, err := r.Client.PostMessage(
 		channelID,
 		slack.MsgOptionText(msg.Body, false),
@@ -32,7 +32,7 @@ func (r *Responder) PostMsg(msg Msg, channelID string) (string, error) {
 }
 
 // PostThreadMsg posts a message response into an existing thread
-func (r *Responder) PostThreadMsg(msg Msg, channelID string, threadTs string) error {
+func (r Responder) PostThreadMsg(msg Msg, channelID string, threadTs string) error {
 	_, _, err := r.Client.PostMessage(
 		channelID,
 		slack.MsgOptionText(msg.Body, false),
@@ -49,7 +49,7 @@ func (r *Responder) PostThreadMsg(msg Msg, channelID string, threadTs string) er
 }
 
 // SendResp can be used to send simple callback responses
-func SendResp(w http.ResponseWriter, msg nlopes.Message) {
+func SendResp(w http.ResponseWriter, msg slack.Message) {
 	w.Header().Add("Content-type", "application/json")
 	json.NewEncoder(w).Encode(&msg)
 	return
@@ -57,7 +57,7 @@ func SendResp(w http.ResponseWriter, msg nlopes.Message) {
 
 // SendOKAndDeleteOriginal responds with status 200 and deletes the original message
 func SendOKAndDeleteOriginal(w http.ResponseWriter) {
-	var msg nlopes.Message
+	var msg slack.Message
 	msg.DeleteOriginal = true
 	w.Header().Add("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
