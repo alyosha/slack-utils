@@ -73,5 +73,4 @@ func toEmails(users []slack.User, userIDs []string) []string {
 	}
 
 	return emails
-
 }

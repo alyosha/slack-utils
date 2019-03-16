@@ -62,7 +62,6 @@ func SendOKAndDeleteOriginal(w http.ResponseWriter) {
 	w.Header().Add("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(&msg)
-
 	return
 }
 

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/csv"
-	"log"
 	"os"
 )
 
@@ -27,13 +26,11 @@ func readFromFile(fileName string) ([][]string, error) {
 	file, err := os.Open(fileName)
 	defer file.Close()
 	if err != nil {
-		log.Printf("error opening csv file %v", err)
 		return nil, err
 	}
 
 	lines, err := csv.NewReader(file).ReadAll()
 	if err != nil {
-		log.Printf("error reading csv file %v", err)
 		return nil, err
 	}
 
