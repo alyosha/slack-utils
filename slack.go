@@ -5,14 +5,8 @@ import (
 	"errors"
 	"math/rand"
 
-	"github.com/slack/slack"
+	"github.com/nlopes/slack"
 )
-
-// Responder is an interface implemented when the ability to post response
-// messages to the workspace is required
-type Responder interface {
-	GetClient() *slack.Client
-}
 
 // Listener is used for interacting with real time messaging (RTM) events
 type Listener struct {
@@ -55,14 +49,6 @@ func GetClient(ctx context.Context) (*slack.Client, error) {
 // WithContext embeds values into to the request context
 func WithContext(ctx context.Context, signingSecret string, client *slack.Client) context.Context {
 	return addClient(addSigningSecret(ctx, signingSecret), client)
-}
-
-func (l *Listener) GetClient() *slack.Client {
-	return l.Client
-}
-
-func (s *Slack) GetClient() *slack.Client {
-	return s.Client
 }
 
 func addSigningSecret(ctx context.Context, signingSecret string) context.Context {
