@@ -35,9 +35,9 @@ func VerifyCallbackMsg(r *http.Request) (verifiedBody *slack.InteractionCallback
 	return msg, nil
 }
 
-// VerifySlashCommand confirms the validity of the slash command message via
+// VerifySlashCmd confirms the validity of the slash command message via
 // the signing secret embedded in the context and returns the verified message body
-func VerifySlashCommand(r *http.Request) (verifiedBody *slack.SlashCommand, err error) {
+func VerifySlashCmd(r *http.Request) (verifiedBody *slack.SlashCommand, err error) {
 	if r.Method != http.MethodPost {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func VerifySlashCommand(r *http.Request) (verifiedBody *slack.SlashCommand, err 
 		return nil, err
 	}
 
-	msg := parseCommand(body)
+	msg := parseCmd(body)
 
 	return &msg, nil
 }
@@ -81,7 +81,7 @@ func checkSecretAndWriteBody(r *http.Request) (bytes.Buffer, error) {
 	return buf, nil
 }
 
-func parseCommand(body url.Values) (s slack.SlashCommand) {
+func parseCmd(body url.Values) (s slack.SlashCommand) {
 	s.Token = body.Get("token")
 	s.TeamID = body.Get("team_id")
 	s.TeamDomain = body.Get("team_domain")

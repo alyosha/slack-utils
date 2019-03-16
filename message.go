@@ -7,15 +7,15 @@ import (
 	"github.com/nlopes/slack"
 )
 
-// Message is an intermediary struct used for posting messages
-type Message struct {
+// Msg is an intermediary struct used for posting messages
+type Msg struct {
 	Body        string
 	Attachments []slack.Attachment
 	AsUser      bool
 }
 
-// PostMessage sends the provided message to the channel designated by channelID
-func (r *Responder) PostMessage(msg Message, channelID string) (string, error) {
+// PostMsg sends the provided message to the channel designated by channelID
+func (r *Responder) PostMsg(msg Msg, channelID string) (string, error) {
 	_, ts, err := r.Client.PostMessage(
 		channelID,
 		slack.MsgOptionText(msg.Body, false),
@@ -31,8 +31,8 @@ func (r *Responder) PostMessage(msg Message, channelID string) (string, error) {
 	return ts, nil
 }
 
-// PostThreadMessage posts a message response into an existing thread
-func (r *Responder) PostThreadMessage(msg Message, channelID string, threadTs string) error {
+// PostThreadMsg posts a message response into an existing thread
+func (r *Responder) PostThreadMsg(msg Msg, channelID string, threadTs string) error {
 	_, _, err := r.Client.PostMessage(
 		channelID,
 		slack.MsgOptionText(msg.Body, false),
