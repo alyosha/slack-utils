@@ -1,9 +1,12 @@
 package utils
 
-type Listener struct {
-	Client *slack.Client
-	BotID  string
-}
+import (
+	"fmt"
+	"log"
+	"strings"
+
+	"github.com/nlopes/slack"
+)
 
 // IsBotImperative checks the content of the message event to see if it is
 // a command directed at the bot user

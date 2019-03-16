@@ -8,6 +8,18 @@ import (
 	"github.com/nlopes/slack"
 )
 
+// Responder is an interface implemented when the ability to post response
+// messages to the workspace is required
+type Responder interface {
+	Client() *slack.Client
+}
+
+// Listener is used for interacting with real time messaging (RTM) events
+type Listener struct {
+	Client *slack.Client
+	BotID  string
+}
+
 // Slack is a general purpose struct used when only the client is required
 type Slack struct {
 	Client *slack.Client
@@ -43,6 +55,14 @@ func GetClient(ctx context.Context) (*nlopes.Client, error) {
 // WithContext embeds values into to the request context
 func WithContext(ctx context.Context, signingSecret string, client *nlopes.Client) context.Context {
 	return addClient(addSigningSecret(ctx, signingSecret), client)
+}
+
+func (l *Listener) Client() *slack.Client {
+	return l.Client
+}
+
+func (s *Slack) Client() *slack.Client {
+	return s.Client
 }
 
 func addSigningSecret(ctx context.Context, signingSecret string) context.Context {
