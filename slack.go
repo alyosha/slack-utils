@@ -12,12 +12,6 @@ type signingSecretKey struct{}
 type slackClientKey struct{}
 type channelKey struct{}
 
-// Listener is used for interacting with real time messaging (RTM) events
-type Listener struct {
-	Client *slack.Client
-	BotID  string
-}
-
 // Slack is a general purpose struct used when only the client is required
 type Slack struct {
 	Client *slack.Client
