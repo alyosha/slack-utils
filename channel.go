@@ -113,7 +113,7 @@ func (s *Slack) LeaveChannels(channelIDs []string) error {
 // ArchiveChannels allows the user whose token was used to create the API client to archive multiple channels
 func (s *Slack) ArchiveChannels(channelIDs []string) error {
 	for _, channelID := range channelIDs {
-		_, err := s.Client.ArchiveChannel(channelID)
+		err := s.Client.ArchiveChannel(channelID)
 		if err != nil {
 			return err
 		}
