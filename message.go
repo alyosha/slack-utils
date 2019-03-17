@@ -55,6 +55,15 @@ func SendResp(w http.ResponseWriter, msg slack.Message) {
 	return
 }
 
+// ReplaceOriginal replaces the original message with the newly encoded one
+func ReplaceOriginal(w http.ResponseWriter, msg slack.Message) {
+	w.Header().Add("Content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	msg.ReplaceOriginal = true
+	json.NewEncoder(w).Encode(&msg)
+	return
+}
+
 // SendOKAndDeleteOriginal responds with status 200 and deletes the original message
 func SendOKAndDeleteOriginal(w http.ResponseWriter) {
 	var msg slack.Message
