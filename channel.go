@@ -98,3 +98,25 @@ func (s *Slack) GetChannelMemberEmails(channelID string) ([]string, error) {
 
 	return toEmails(allUsers, memberIDs), nil
 }
+
+// LeaveChannels allows the user whose token was used to create the API client to leave multiple channels
+func (s *Slack) LeaveChannels(channelIDs []string) error {
+	for _, channelID := range channelIDs {
+		_, err := s.Client.LeaveChannel(channelID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ArchiveChannels allows the user whose token was used to create the API client to archive multiple channels
+func (s *Slack) ArchiveChannels(channelIDs []string) error {
+	for _, channelID := range channelIDs {
+		_, err := s.Client.ArchiveChannel(channelID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
