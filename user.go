@@ -4,20 +4,10 @@ import (
 	"github.com/nlopes/slack"
 )
 
-// GetAll returns all users for a workspace
-func (s *Slack) GetAll() ([]slack.User, error) {
-	users, err := s.Client.GetUsers()
-	if err != nil {
-		return nil, err
-	}
-
-	return users, nil
-}
-
 // EmailsToSlackIDs takes in an array of email addresses and finds the IDs of
 // any workplace members with those emails
 func (s *Slack) EmailsToSlackIDs(emails []string) ([]string, error) {
-	users, err := s.GetAll()
+	users, err := s.getAll()
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +18,7 @@ func (s *Slack) EmailsToSlackIDs(emails []string) ([]string, error) {
 // EmailToSlackIDsInclusive takes in an array of email addresses, finds the IDs
 // of any workplace members with those emails, and returns both values
 func (s *Slack) EmailsToSlackIDsInclusive(emails []string) ([][]string, error) {
-	users, err := s.GetAll()
+	users, err := s.getAll()
 	if err != nil {
 		return nil, err
 	}
@@ -73,4 +63,13 @@ func toEmails(users []slack.User, userIDs []string) []string {
 	}
 
 	return emails
+}
+
+func (s *Slack) getAll() ([]slack.User, error) {
+	users, err := s.Client.GetUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }

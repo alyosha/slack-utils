@@ -85,7 +85,7 @@ func (s *Slack) GetChannelMemberEmails(channelID string) ([]string, error) {
 	})
 
 	eg.Go(func() error {
-		users, err := s.GetAll()
+		users, err := s.getAll()
 		if err == nil {
 			allUsers = users
 		}
