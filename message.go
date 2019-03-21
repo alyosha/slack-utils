@@ -10,6 +10,7 @@ import (
 // Msg is an intermediary struct used for posting messages
 type Msg struct {
 	Body        string
+	Blocks      []slack.Block
 	Attachments []slack.Attachment
 	AsUser      bool
 }
@@ -19,9 +20,10 @@ func PostMsg(client *slack.Client, msg Msg, channelID string) (string, error) {
 	_, ts, err := client.PostMessage(
 		channelID,
 		slack.MsgOptionText(msg.Body, false),
+		slack.MsgOptionBlocks(msg.Blocks...),
 		slack.MsgOptionAttachments(msg.Attachments...),
-		slack.MsgOptionEnableLinkUnfurl(),
 		slack.MsgOptionAsUser(msg.AsUser),
+		slack.MsgOptionEnableLinkUnfurl(),
 	)
 
 	if err != nil {

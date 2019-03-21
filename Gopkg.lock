@@ -11,14 +11,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:bce2e04677f0d9731bf0bcc7ae61657c653cbb4e1d0cd8ca41af1baa8e3251ac"
+  digest = "1:8b3ef22d671d14c0f558b316b7e2dca8fb53d018e54e83f9acdcfaca77a03bca"
   name = "github.com/nlopes/slack"
   packages = [
     ".",
     "slackutilsx",
   ]
   pruneopts = "UT"
-  revision = "71a00675abf36a35bb4ff7c0fdd3172c9b191b23"
+  revision = "73f226d818228bd6ca98b123e0319bf745d9afc6"
 
 [[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
@@ -28,9 +28,20 @@
   revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
   version = "v0.8.1"
 
+[[projects]]
+  branch = "master"
+  digest = "1:b521f10a2d8fa85c04a8ef4e62f2d1e14d303599a55d64dabf9f5a02f84d35eb"
+  name = "golang.org/x/sync"
+  packages = ["errgroup"]
+  pruneopts = "UT"
+  revision = "e225da77a7e68af35c70ccbf71af2b83e6acac3c"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/nlopes/slack"]
+  input-imports = [
+    "github.com/nlopes/slack",
+    "golang.org/x/sync/errgroup",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
