@@ -10,6 +10,7 @@ import (
 // ChannelNameMaxLen is the max character length for a Slack channel name
 const ChannelNameMaxLen = 21
 const ErrorInviteSelf = "cant_invite_self"
+const ErrorAlreadyArchived = "already_archived"
 
 // CreateChannel opens a new public channel and invites the provided list of member IDs, optionally posting an initial message
 func (c *Channel) CreateChannel(userIDs []string, initMsg Msg, postAsBot bool) (string, error) {
@@ -114,7 +115,7 @@ func (s *Slack) LeaveChannels(channelIDs []string) error {
 func (s *Slack) ArchiveChannels(channelIDs []string) error {
 	for _, channelID := range channelIDs {
 		err := s.Client.ArchiveChannel(channelID)
-		if err != nil {
+		if err != nil && err.Error() != ErrorAlreadyArchived {
 			return err
 		}
 	}
