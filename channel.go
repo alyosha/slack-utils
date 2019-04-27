@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"errors"
+
 	"github.com/nlopes/slack"
 	"golang.org/x/sync/errgroup"
 )
@@ -85,11 +87,16 @@ func (s *Slack) GetChannelMemberEmails(channelID string) ([]string, error) {
 		if err == nil {
 			allUsers = users
 		}
+
 		return err
 	})
 
 	if err := eg.Wait(); err != nil {
 		return nil, err
+	}
+
+	if len(allUsers) == 0 {
+		return nil, errors.New("no users in workplace")
 	}
 
 	return toEmails(allUsers, memberIDs), nil
