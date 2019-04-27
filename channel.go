@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"errors"
-
 	"github.com/nlopes/slack"
 	"golang.org/x/sync/errgroup"
 )
@@ -17,10 +15,6 @@ func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Ms
 	channel, err := c.UserClient.CreateChannel(channelName)
 	if err != nil {
 		return "", err
-	}
-
-	if channel == nil {
-		return "", errors.New("channel is nil")
 	}
 
 	for _, user := range userIDs {
