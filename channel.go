@@ -34,6 +34,7 @@ func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Ms
 			channel.ID,
 			slack.MsgOptionText(initMsg.Body, false),
 			slack.MsgOptionAttachments(initMsg.Attachments...),
+			slack.MsgOptionBlocks(initMsg.Blocks...),
 			slack.MsgOptionEnableLinkUnfurl(),
 		)
 		if err != nil {
