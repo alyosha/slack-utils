@@ -19,10 +19,8 @@ type Slack struct {
 
 // Channel is used in opening/interacting with public Slack channels
 type Channel struct {
-	UserClient  *slack.Client
-	BotClient   *slack.Client
-	ChannelName string
-	InitMsg     string
+	UserClient *slack.Client
+	BotClient  *slack.Client
 }
 
 // Shuffle is used in randmoizing a list of users and splitting them into
