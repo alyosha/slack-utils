@@ -266,12 +266,14 @@ func TestGetChannelMemberEmails(t *testing.T) {
 		{
 			description:     "failure to retrieve channel info",
 			respChannelInfo: []byte(channelInfoErrResp),
+			respUsersList:   []byte(usersListResp),
 			wantErr:         "channel_not_found",
 		},
 		{
-			description:     "failure to retrieve users list",
-			respChannelInfo: []byte(usersListErrResp),
-			wantErr:         "invalid_cursor",
+			description:     "failure to retrieve user list",
+			respChannelInfo: []byte(channelInfoResp),
+			respUsersList:   []byte(usersListErrResp),
+			wantErr:         "no users in workplace",
 		},
 	}
 
@@ -297,6 +299,7 @@ func TestGetChannelMemberEmails(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
+				return
 			}
 
 			if tc.wantErr != "" {
@@ -312,6 +315,7 @@ func TestGetChannelMemberEmails(t *testing.T) {
 
 			if len(emails) != len(tc.wantEmails) {
 				t.Fatalf("expected to receive %v emails, got %v instead", len(tc.wantEmails), len(emails))
+				return
 			}
 
 			for i, email := range emails {
