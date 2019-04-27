@@ -13,8 +13,8 @@ const ErrorInviteSelf = "cant_invite_self"
 const ErrorAlreadyArchived = "already_archived"
 
 // CreateChannel opens a new public channel and invites the provided list of member IDs, optionally posting an initial message
-func (c *Channel) CreateChannel(userIDs []string, initMsg Msg, postAsBot bool) (string, error) {
-	channel, err := c.UserClient.CreateChannel(c.ChannelName)
+func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Msg, postAsBot bool) (string, error) {
+	channel, err := c.UserClient.CreateChannel(channelName)
 	if err != nil {
 		return "", err
 	}
