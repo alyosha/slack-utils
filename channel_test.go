@@ -68,7 +68,7 @@ func TestCreateChannel(t *testing.T) {
 			wantID:            "C0DEL09A5",
 		},
 		{
-			description:       "successful channel creation including additional invites, successful message post",
+			description:       "successful channel creation including additional invites, failure to post init message",
 			inviteMembers:     []string{"UABC123EFG"},
 			initMsg:           Msg{Body: "Hey!"},
 			respChannelCreate: []byte(channelCreateResp),
