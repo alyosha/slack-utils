@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/csv"
 	"errors"
+	"log"
 	"os"
 	"testing"
 )
@@ -26,7 +27,10 @@ func setupTestFile() error {
 		defer file.Close()
 
 		w := csv.NewWriter(file)
-		w.WriteAll(testEntries)
+		err = w.WriteAll(testEntries)
+		if err != nil {
+			return err
+		}
 
 		return nil
 	}
@@ -34,12 +38,11 @@ func setupTestFile() error {
 	return errors.New("file already exists")
 }
 
-func deleteTestFile() error {
+func deleteTestFile() {
 	err := os.Remove(testFileName)
 	if err != nil {
-		return err
+		log.Fatalf("failed to delete test file: %v", err)
 	}
-	return nil
 }
 
 func TestUnpackSingleColCSV(t *testing.T) {

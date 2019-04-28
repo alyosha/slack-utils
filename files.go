@@ -28,12 +28,13 @@ func CreateAndWriteCSV(fileName string, entries [][]string) error {
 	if err != nil {
 		return err
 	}
+
 	defer file.Close()
 
 	w := csv.NewWriter(file)
-	w.WriteAll(entries)
+	err = w.WriteAll(entries)
 
-	if err := w.Error(); err != nil {
+	if err != nil {
 		return err
 	}
 
@@ -42,10 +43,11 @@ func CreateAndWriteCSV(fileName string, entries [][]string) error {
 
 func readFromFile(fileName string) ([][]string, error) {
 	file, err := os.Open(fileName)
-	defer file.Close()
 	if err != nil {
 		return nil, err
 	}
+
+	defer file.Close()
 
 	lines, err := csv.NewReader(file).ReadAll()
 	if err != nil {
