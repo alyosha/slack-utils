@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/nlopes/slack"
@@ -53,7 +54,10 @@ func PostThreadMsg(client *slack.Client, msg Msg, channelID string, threadTs str
 // SendResp can be used to send simple callback responses
 func SendResp(w http.ResponseWriter, msg slack.Message) {
 	w.Header().Add("Content-type", "application/json")
-	json.NewEncoder(w).Encode(&msg)
+	err := json.NewEncoder(w).Encode(&msg)
+	if err != nil {
+		log.Fatalf("failed to encode JSON response: %s", err)
+	}
 	return
 }
 
@@ -62,7 +66,10 @@ func ReplaceOriginal(w http.ResponseWriter, msg slack.Message) {
 	w.Header().Add("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	msg.ReplaceOriginal = true
-	json.NewEncoder(w).Encode(&msg)
+	err := json.NewEncoder(w).Encode(&msg)
+	if err != nil {
+		log.Fatalf("failed to encode JSON response: %s", err)
+	}
 	return
 }
 
@@ -72,7 +79,10 @@ func SendOKAndDeleteOriginal(w http.ResponseWriter) {
 	msg.DeleteOriginal = true
 	w.Header().Add("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(&msg)
+	err := json.NewEncoder(w).Encode(&msg)
+	if err != nil {
+		log.Fatalf("failed to encode JSON response: %s", err)
+	}
 	return
 }
 
