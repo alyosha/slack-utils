@@ -10,7 +10,6 @@ import (
 
 type signingSecretKey struct{}
 type slackClientKey struct{}
-type channelKey struct{}
 
 // Slack is a general purpose struct used when only the client is required
 type Slack struct {
@@ -21,6 +20,7 @@ type Slack struct {
 type Channel struct {
 	UserClient *slack.Client
 	BotClient  *slack.Client
+	ChannelID  string
 }
 
 // Shuffle is used in randmoizing a list of users and splitting them into

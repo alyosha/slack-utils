@@ -47,9 +47,9 @@ func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Ms
 	return channel.ID, nil
 }
 
-func (c *Channel) InviteUsers(userIDs []string, channelID string) error {
+func (c *Channel) InviteUsers(userIDs []string) error {
 	for _, user := range userIDs {
-		_, err := c.UserClient.InviteUserToChannel(channelID, user)
+		_, err := c.UserClient.InviteUserToChannel(c.ChannelID, user)
 		if err != nil && err.Error() != ErrorInviteSelf {
 			return err
 		}
@@ -59,8 +59,8 @@ func (c *Channel) InviteUsers(userIDs []string, channelID string) error {
 }
 
 // GetChannelMembers returns a list of members for a given channel
-func (s *Slack) GetChannelMembers(channelID string) ([]string, error) {
-	channel, err := s.Client.GetChannelInfo(channelID)
+func (c *Channel) GetChannelMembers() ([]string, error) {
+	channel, err := c.UserClient.GetChannelInfo(c.ChannelID)
 	if err != nil {
 		return nil, err
 	}
