@@ -16,7 +16,7 @@ type Slack struct {
 	Client *slack.Client
 }
 
-// Channel is used in opening/interacting with public Slack channels
+// Channel is used in opening/interacting with a single Slack channel
 type Channel struct {
 	UserClient *slack.Client
 	BotClient  *slack.Client
