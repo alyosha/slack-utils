@@ -17,8 +17,8 @@ type Msg struct {
 }
 
 // PostMsg sends the provided message to the channel designated by channelID
-func PostMsg(client *slack.Client, msg Msg, channelID string) (string, error) {
-	_, ts, err := client.PostMessage(
+func PostMsg(client *slack.Client, msg Msg, channelID string) (string, string, error) {
+	channelID, ts, err := client.PostMessage(
 		channelID,
 		slack.MsgOptionText(msg.Body, false),
 		slack.MsgOptionBlocks(msg.Blocks...),
@@ -28,10 +28,10 @@ func PostMsg(client *slack.Client, msg Msg, channelID string) (string, error) {
 	)
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return ts, nil
+	return channelID, ts, nil
 }
 
 // PostThreadMsg posts a message response into an existing thread
