@@ -13,17 +13,19 @@ import (
 
 func TestPostMsg(t *testing.T) {
 	testCases := []struct {
-		description string
-		msg         Msg
-		respPostMsg []byte
-		wantTS      string
-		wantErr     string
+		description   string
+		msg           Msg
+		respPostMsg   []byte
+		wantTS        string
+		wantChannelID string
+		wantErr       string
 	}{
 		{
-			description: "successfully posted message",
-			msg:         Msg{Body: "Hey!"},
-			respPostMsg: []byte(postMsgResp),
-			wantTS:      "1503435956.000247",
+			description:   "successfully posted message",
+			msg:           Msg{Body: "Hey!"},
+			respPostMsg:   []byte(postMsgResp),
+			wantTS:        "1503435956.000247",
+			wantChannelID: "C1H9RESGL",
 		},
 		{
 			description: "failure to post message",
@@ -45,7 +47,7 @@ func TestPostMsg(t *testing.T) {
 
 			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
 
-			ts, err := PostMsg(client, Msg{}, "C1H9RESGL")
+			channelID, ts, err := PostMsg(client, Msg{}, "C1H9RESGL")
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -64,6 +66,11 @@ func TestPostMsg(t *testing.T) {
 
 			if ts != tc.wantTS {
 				t.Fatalf("expected timestamp: %s, got: %s", tc.wantTS, ts)
+				return
+			}
+
+			if channelID != tc.wantChannelID {
+				t.Fatalf("expected channel ID: %s, got: %s", tc.wantChannelID, channelID)
 			}
 		})
 	}
