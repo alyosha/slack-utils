@@ -7,8 +7,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/nlopes/slack"
 )
 
 func TestVerifyCallbackMsg(t *testing.T) {
@@ -34,7 +32,7 @@ func TestVerifyCallbackMsg(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			req := httptest.NewRequest("POST", "http://example.com/foo", nil)
-			ctx := WithContext(context.Background(), "e6b19c573432dcc6b075501d51b51bb8", &slack.Client{})
+			ctx := WithSigningSecret(context.Background(), "e6b19c573432dcc6b075501d51b51bb8")
 			req = req.WithContext(ctx)
 			req.Header.Set("X-Slack-Signature", "v0=adada4ed31709aef585c2580ca3267678c6a8eaeb7e0c1aca3ee57b656886b2c")
 			req.Header.Set("X-Slack-Request-Timestamp", tc.timestamp)
@@ -76,7 +74,7 @@ func TestVerifySlashCmd(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			req := httptest.NewRequest("POST", "http://example.com/foo", nil)
-			ctx := WithContext(context.Background(), "e6b19c573432dcc6b075501d51b51bb8", &slack.Client{})
+			ctx := WithSigningSecret(context.Background(), "e6b19c573432dcc6b075501d51b51bb8")
 			req = req.WithContext(ctx)
 			req.Header.Set("X-Slack-Signature", "v0=adada4ed31709aef585c2580ca3267678c6a8eaeb7e0c1aca3ee57b656886b2c")
 			req.Header.Set("X-Slack-Request-Timestamp", tc.timestamp)

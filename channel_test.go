@@ -163,9 +163,10 @@ func TestInviteUsers(t *testing.T) {
 			channel := Channel{
 				UserClient: client,
 				BotClient:  nil,
+				ChannelID:  "C1H9RESGL",
 			}
 
-			err := channel.InviteUsers(tc.inviteMembers, "C1H9RESGL")
+			err := channel.InviteUsers(tc.inviteMembers)
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -215,11 +216,12 @@ func TestGetChannelMembers(t *testing.T) {
 			defer testServ.Close()
 
 			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
-			slackClient := Slack{
-				Client: client,
+			channel := Channel{
+				UserClient: client,
+				ChannelID:  "C1H9RESGL",
 			}
 
-			members, err := slackClient.GetChannelMembers("C1H9RESGL")
+			members, err := channel.GetChannelMembers()
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
