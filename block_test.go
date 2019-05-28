@@ -14,10 +14,10 @@ const (
 )
 
 var mockTextObj = &slack.TextBlockObject{
-	slack.PlainTextType,
-	"Click me",
-	false,
-	false,
+	Type:     slack.PlainTextType,
+	Text:     "Click me",
+	Emoji:    false,
+	Verbatim: false,
 }
 
 func TestNewButtonWithStyle(t *testing.T) {
