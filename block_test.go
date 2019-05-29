@@ -77,21 +77,30 @@ func TestNewDatePickerAtTime(t *testing.T) {
 
 	testCases := []struct {
 		description    string
+		placeholder    *slack.TextBlockObject
 		wantDatePicker *slack.DatePickerBlockElement
 	}{
 		{
-			description: "returns new date picker set to provided date and with proper placeholder",
+			description: "returns new date picker with placeholder, which trumps initial date",
+			placeholder: mockTextObj,
 			wantDatePicker: &slack.DatePickerBlockElement{
 				Type:        slack.METDatepicker,
 				ActionID:    mockActionID,
 				Placeholder: mockTextObj,
+			},
+		},
+		{
+			description: "returns new date picker with proper initial date",
+			wantDatePicker: &slack.DatePickerBlockElement{
+				Type:        slack.METDatepicker,
+				ActionID:    mockActionID,
 				InitialDate: expectedStr,
 			},
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			picker := NewDatePickerWithOpts(mockActionID, mockTextObj, now)
+			picker := NewDatePickerWithOpts(mockActionID, tc.placeholder, now)
 			if diff := pretty.Compare(picker, tc.wantDatePicker); diff != "" {
 				t.Fatalf("expected to receive datepicker: %v, got: %v", tc.wantDatePicker, picker)
 			}
