@@ -132,7 +132,10 @@ func TestPostThreadMsg(t *testing.T) {
 func TestSendResp(t *testing.T) {
 	var msg slack.Message
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		SendResp(w, slack.Message{})
+		err := SendResp(w, slack.Message{})
+		if err != nil {
+			t.Fatalf("unexpected error handing request: %s", err)
+		}
 	}
 
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
@@ -172,7 +175,10 @@ func TestSendResp(t *testing.T) {
 func TestReplaceOriginal(t *testing.T) {
 	var msg slack.Message
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		ReplaceOriginal(w, slack.Message{})
+		err := ReplaceOriginal(w, slack.Message{})
+		if err != nil {
+			t.Fatalf("unexpected error handing request: %s", err)
+		}
 	}
 
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
@@ -212,7 +218,10 @@ func TestReplaceOriginal(t *testing.T) {
 func TestSendOKAndDeleteOriginal(t *testing.T) {
 	var msg slack.Message
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		SendOKAndDeleteOriginal(w)
+		err := SendOKAndDeleteOriginal(w)
+		if err != nil {
+			t.Fatalf("unexpected error handing request: %s", err)
+		}
 	}
 
 	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
