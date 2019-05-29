@@ -129,6 +129,70 @@ func TestPostThreadMsg(t *testing.T) {
 	}
 }
 
+func TestUpdateMsg(t *testing.T) {
+	testCases := []struct {
+		description   string
+		msg           Msg
+		respUpdateMsg []byte
+		wantTS        string
+		wantChannelID string
+		wantErr       string
+	}{
+		{
+			description:   "successfully posted message",
+			msg:           Msg{Body: "Hey!"},
+			respUpdateMsg: []byte(updateMsgResp),
+			wantTS:        "1503435956.000400",
+			wantChannelID: "C1H9RESGL",
+		},
+		{
+			description:   "failure to post message",
+			msg:           Msg{Body: "Hey!"},
+			respUpdateMsg: []byte(postMsgErrResp),
+			wantErr:       "too_many_attachments",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			mux := http.NewServeMux()
+			mux.HandleFunc("/chat.update", func(w http.ResponseWriter, r *http.Request) {
+				_, _ = w.Write(tc.respUpdateMsg)
+			})
+
+			testServ := httptest.NewServer(mux)
+			defer testServ.Close()
+
+			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
+
+			channelID, ts, _, err := UpdateMsg(client, Msg{}, "C1H9RESGL", "1503435957.000237")
+
+			if tc.wantErr == "" && err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if tc.wantErr != "" {
+				if err == nil {
+					t.Fatal("expected error but did not receive one")
+					return
+				}
+				if err.Error() != tc.wantErr {
+					t.Fatalf("expected to receive error: %s, got: %s", tc.wantErr, err)
+					return
+				}
+			}
+
+			if ts != tc.wantTS {
+				t.Fatalf("expected timestamp: %s, got: %s", tc.wantTS, ts)
+				return
+			}
+
+			if channelID != tc.wantChannelID {
+				t.Fatalf("expected channel ID: %s, got: %s", tc.wantChannelID, channelID)
+			}
+		})
+	}
+}
 func TestSendResp(t *testing.T) {
 	var msg slack.Message
 	handler := func(w http.ResponseWriter, r *http.Request) {

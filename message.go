@@ -50,7 +50,33 @@ func PostThreadMsg(client *slack.Client, msg Msg, channelID string, threadTs str
 	return nil
 }
 
+// UpdateMsg updates the provided message in the channel designated by channelID
+func UpdateMsg(client *slack.Client, msg Msg, channelID, timestamp string) (string, string, string, error) {
+	channelID, ts, text, err := client.UpdateMessage(
+		channelID,
+		timestamp,
+		slack.MsgOptionText(msg.Body, false),
+		slack.MsgOptionBlocks(msg.Blocks...),
+		slack.MsgOptionAttachments(msg.Attachments...),
+		slack.MsgOptionAsUser(msg.AsUser),
+		slack.MsgOptionEnableLinkUnfurl(),
+	)
+
+	if err != nil {
+		return "", "", "", err
+	}
+
+	return channelID, ts, text, nil
+}
+
+// SendEmptyOK responds with status 200
+func SendEmptyOK(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusOK)
+	return
+}
+
 // SendResp can be used to send simple callback responses
+// NOTE: cannot be used in callback from block messages
 func SendResp(w http.ResponseWriter, msg slack.Message) error {
 	w.Header().Add("Content-type", "application/json")
 	err := json.NewEncoder(w).Encode(&msg)
@@ -61,6 +87,7 @@ func SendResp(w http.ResponseWriter, msg slack.Message) error {
 }
 
 // ReplaceOriginal replaces the original message with the newly encoded one
+// NOTE: can only be used with interactive message button callback (now deprecated)
 func ReplaceOriginal(w http.ResponseWriter, msg slack.Message) error {
 	w.Header().Add("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -73,6 +100,7 @@ func ReplaceOriginal(w http.ResponseWriter, msg slack.Message) error {
 }
 
 // SendOKAndDeleteOriginal responds with status 200 and deletes the original message
+// NOTE: can only be used with interactive message button callback (now deprecated)
 func SendOKAndDeleteOriginal(w http.ResponseWriter) error {
 	var msg slack.Message
 	msg.DeleteOriginal = true
@@ -83,10 +111,4 @@ func SendOKAndDeleteOriginal(w http.ResponseWriter) error {
 		return err
 	}
 	return nil
-}
-
-// SendEmptyOK responds with status 200
-func SendEmptyOK(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusOK)
-	return
 }
