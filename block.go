@@ -12,9 +12,10 @@ func NewButtonWithStyle(actionID, value string, textObj *slack.TextBlockObject, 
 	return btn
 }
 
-func NewDatePickerAtTime(actionID string, initialDate time.Time) *slack.DatePickerBlockElement {
+func NewDatePickerWithOpts(actionID, placeholder string, initialDate time.Time) *slack.DatePickerBlockElement {
 	picker := slack.NewDatePickerBlockElement(actionID)
 	dateStr := initialDate.Format("2006-01-02")
+	picker.Placeholder = placeholder
 	picker.InitialDate = dateStr
 	return picker
 }
