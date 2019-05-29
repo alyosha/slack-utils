@@ -2,6 +2,7 @@ package utils
 
 import (
 	"testing"
+	"time"
 
 	"github.com/kylelemons/godebug/pretty"
 	"github.com/nlopes/slack"
@@ -27,7 +28,7 @@ func TestNewButtonWithStyle(t *testing.T) {
 		wantButton  *slack.ButtonBlockElement
 	}{
 		{
-			description: "returns default style button, no error",
+			description: "returns default style button",
 			style:       slack.StyleDefault,
 			wantButton: &slack.ButtonBlockElement{
 				Type:     slack.METButton,
@@ -38,7 +39,7 @@ func TestNewButtonWithStyle(t *testing.T) {
 			},
 		},
 		{
-			description: "returns danger style button, no error",
+			description: "returns danger style button",
 			style:       slack.StyleDanger,
 			wantButton: &slack.ButtonBlockElement{
 				Type:     slack.METButton,
@@ -49,7 +50,7 @@ func TestNewButtonWithStyle(t *testing.T) {
 			},
 		},
 		{
-			description: "returns primary style button, no error",
+			description: "returns primary style button",
 			style:       slack.StylePrimary,
 			wantButton: &slack.ButtonBlockElement{
 				Type:     slack.METButton,
@@ -68,4 +69,33 @@ func TestNewButtonWithStyle(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestNewDatePickerAtTime(t *testing.T) {
+	now := time.Now()
+	expectedStr := now.Format("2006-01-02")
+
+	testCases := []struct {
+		description    string
+		time           slack.Style
+		wantDatePicker *slack.DatePickerBlockElement
+	}{
+		{
+			description: "returns new date picker set to provided date",
+			wantDatePicker: &slack.DatePickerBlockElement{
+				Type:        slack.METDatepicker,
+				ActionID:    mockActionID,
+				InitialDate: expectedStr,
+			},
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			picker := NewDatePickerAtTime(mockActionID, now)
+			if diff := pretty.Compare(picker, tc.wantDatePicker); diff != "" {
+				t.Fatalf("expected to receive datepicker: %v, got: %v", tc.wantDatePicker, picker)
+			}
+		})
+	}
+
 }
