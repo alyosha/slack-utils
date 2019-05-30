@@ -9,7 +9,11 @@ import (
 var (
 	cancelActionID = "cancel_action"
 	cancelBtnTxt   = slack.NewTextBlockObject(slack.PlainTextType, "Cancel", false, false)
-	CancelBtn      = NewButtonWithStyle(cancelActionID, "cancel", cancelBtnTxt, slack.StyleDanger)
+	ackActionID    = "acknowledge_action"
+	ackBtnTxt      = slack.NewTextBlockObject(slack.PlainTextType, "Got it", false, false)
+
+	CancelBtn = NewButtonWithStyle(cancelActionID, "cancel", cancelBtnTxt, slack.StyleDanger)
+	AckBtn    = NewButtonWithStyle(cancelActionID, "acknowledge", ackBtnTxt, slack.StylePrimary)
 )
 
 func NewButtonWithStyle(actionID, value string, textObj *slack.TextBlockObject, style slack.Style) *slack.ButtonBlockElement {
