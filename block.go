@@ -6,6 +6,12 @@ import (
 	"github.com/nlopes/slack"
 )
 
+var (
+	cancelActionID = "cancel_action"
+	cancelBtnTxt   = slack.NewTextBlockObject(slack.PlainTextType, "Cancel", false, false)
+	CancelBtn      = NewButtonWithStyle(cancelActionID, "cancel", cancelBtnTxt, slack.StyleDanger)
+)
+
 func NewButtonWithStyle(actionID, value string, textObj *slack.TextBlockObject, style slack.Style) *slack.ButtonBlockElement {
 	btn := slack.NewButtonBlockElement(actionID, value, textObj)
 	btn.WithStyle(style)
