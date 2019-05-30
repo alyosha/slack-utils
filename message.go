@@ -13,17 +13,27 @@ type Msg struct {
 	Blocks      []slack.Block
 	Attachments []slack.Attachment
 	AsUser      bool
+	Ephemeral   bool
+	UserID      string
 }
 
 // PostMsg sends the provided message to the channel designated by channelID
 func PostMsg(client *slack.Client, msg Msg, channelID string) (string, string, error) {
-	channelID, ts, err := client.PostMessage(
-		channelID,
+	opts := []slack.MsgOption{
 		slack.MsgOptionText(msg.Body, false),
 		slack.MsgOptionBlocks(msg.Blocks...),
 		slack.MsgOptionAttachments(msg.Attachments...),
 		slack.MsgOptionAsUser(msg.AsUser),
 		slack.MsgOptionEnableLinkUnfurl(),
+	}
+
+	if msg.Ephemeral && msg.UserID != "" {
+		opts = append(opts, slack.MsgOptionPostEphemeral(msg.UserID))
+	}
+
+	channelID, ts, err := client.PostMessage(
+		channelID,
+		opts...,
 	)
 
 	if err != nil {
