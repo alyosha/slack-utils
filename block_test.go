@@ -108,3 +108,43 @@ func TestNewDatePickerAtTime(t *testing.T) {
 	}
 
 }
+
+func TestNewDateOptToTime(t *testing.T) {
+	now := time.Now()
+	dateOptStr := now.Format(datePickTimeFmt)
+	unrecognizedLayoutOptStr := now.Format(time.ANSIC)
+	expectedTime, err := time.Parse(datePickTimeFmt, dateOptStr)
+	if err != nil {
+		t.Fatalf("received unexpected error: %s", err)
+		return
+	}
+
+	testCases := []struct {
+		description string
+		opt         string
+		wantErr     bool
+	}{
+		{
+			description: "returns parsed time value with no error",
+			opt:         dateOptStr,
+		},
+		{
+			description: "unrecognized layout string causes error",
+			opt:         unrecognizedLayoutOptStr,
+			wantErr:     true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			parsedTime, err := DateOptToTime(dateOptStr)
+			if err != nil && !tc.wantErr {
+				t.Fatalf("received unexpected error: %s", err)
+				return
+			}
+			if diff := pretty.Compare(parsedTime, expectedTime); diff != "" {
+				t.Fatalf("expected to receive time: %v, got: %v", expectedTime, parsedTime)
+			}
+		})
+	}
+}
