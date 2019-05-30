@@ -14,6 +14,8 @@ var (
 	AckActionID    = "acknowledge_action"
 	CancelBtn      = NewButtonWithStyle(CancelActionID, "cancel", cancelBtnTxt, slack.StyleDanger)
 	AckBtn         = NewButtonWithStyle(AckActionID, "acknowledge", ackBtnTxt, slack.StylePrimary)
+
+	DivBlock = slack.NewDividerBlock()
 )
 
 func NewButtonWithStyle(actionID, value string, textObj *slack.TextBlockObject, style slack.Style) *slack.ButtonBlockElement {
