@@ -11,6 +11,8 @@ github.com/nlopes/slack v0.5.1-0.20190421170715-65ea2b979a7f h1:au9jp4oED9GY04j+
 github.com/nlopes/slack v0.5.1-0.20190421170715-65ea2b979a7f/go.mod h1:JzQ9m3PMAqcpeCam7UaHSuBuupz7CmpjehYMayT6YOk=
 github.com/nlopes/slack v0.5.1-0.20190515005541-e2954b1409b0 h1:M89l6W6BKfWSn13BtDUcDeePI5bQE0frdE1a/n2bMc8=
 github.com/nlopes/slack v0.5.1-0.20190515005541-e2954b1409b0/go.mod h1:JzQ9m3PMAqcpeCam7UaHSuBuupz7CmpjehYMayT6YOk=
+github.com/nlopes/slack v0.5.1-0.20190605211732-a05dfd3f167d h1:ziZZlaAi8gvHe87RUuDh9kSerJl1pJGIika2qzP1bfk=
+github.com/nlopes/slack v0.5.1-0.20190605211732-a05dfd3f167d/go.mod h1:JzQ9m3PMAqcpeCam7UaHSuBuupz7CmpjehYMayT6YOk=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
