@@ -1,7 +1,6 @@
 module github.com/alyosha/slack-utils
 
 require (
-	github.com/davecgh/go-spew v1.1.1
 	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/kylelemons/godebug v1.1.0
 	github.com/nlopes/slack v0.5.1-0.20190605211732-a05dfd3f167d
