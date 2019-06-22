@@ -1,95 +1,61 @@
 package utils
 
 import (
-	"encoding/csv"
-	"errors"
-	"log"
-	"os"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/kylelemons/godebug/pretty"
+	"github.com/nlopes/slack"
 )
 
-const testFileName = "test-file.csv"
+const mockURL = "files-pri/T012345AB-F01234ABC/download/fake.csv"
 
-var testEntries = [][]string{
-	{"emails"},
-	{"steve@test.com"},
-	{"alyosha@test.com"},
-}
-
-func setupTestFile() error {
-	_, err := os.Stat(testFileName)
-
-	if os.IsNotExist(err) {
-		file, err := os.Create(testFileName)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-
-		w := csv.NewWriter(file)
-		err = w.WriteAll(testEntries)
-		if err != nil {
-			return err
-		}
-
-		return nil
+func TestDownloadAndReadCSV(t *testing.T) {
+	testCases := []struct {
+		description     string
+		csvDownloadResp []byte
+		wantRows        [][]string
+		wantErr         error
+	}{
+		{
+			description:     "successful download returns valid rows",
+			csvDownloadResp: []byte(mockCSVDownloadResp),
+			wantRows: [][]string{
+				[]string{"email"},
+				[]string{"hoge@email.com"},
+				[]string{"foo@email.com"},
+				[]string{"bar@email.com"},
+			},
+			wantErr: nil,
+		},
+		{
+			description: "invalid/empty CSV file err",
+			wantErr:     ErrInvalidCSV,
+		},
 	}
 
-	return errors.New("file already exists")
-}
+	for _, tc := range testCases {
+		mux := http.NewServeMux()
+		mux.HandleFunc(fmt.Sprintf("/%v", mockURL), func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write(tc.csvDownloadResp)
+		})
 
-func deleteTestFile() {
-	err := os.Remove(testFileName)
-	if err != nil {
-		log.Fatalf("failed to delete test file: %v", err)
-	}
-}
+		testServ := httptest.NewServer(mux)
+		defer testServ.Close()
 
-func TestUnpackSingleColCSV(t *testing.T) {
-	if err := setupTestFile(); err != nil {
-		t.Fatalf("failed to create test CSV file: %v", err)
-	}
-	defer deleteTestFile()
+		client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
 
-	emails, err := UnpackSingleColCSV(testFileName)
-	if err != nil {
-		t.Fatalf("failed to unpack single column CSV")
-		return
-	}
+		rows, err := DownloadAndReadCSV(client, fmt.Sprintf("%v/%v", testServ.URL, mockURL))
 
-	if len(emails) != len(testEntries)-1 {
-		t.Fatalf("expected CSV entry of length: %v, got length: %v", len(testEntries), len(emails))
-		return
-	}
-
-	for i, email := range emails {
-		if email != testEntries[i+1][0] {
-			t.Fatalf("expected entry: %v, got %v instead", testEntries[i], email)
+		if diff := pretty.Compare(tc.wantRows, rows); diff != "" {
+			t.Fatalf("expected to receive rows: %v, got: %v", tc.wantRows, rows)
 			return
 		}
-	}
-}
 
-func TestCreateAndWriteCSV(t *testing.T) {
-	if err := CreateAndWriteCSV(testFileName, testEntries); err != nil {
-		t.Fatalf("failed to create and write test CSV file: %v", err)
-	}
-	defer deleteTestFile()
-
-	emails, err := UnpackSingleColCSV(testFileName)
-	if err != nil {
-		t.Fatalf("failed to unpack single column CSV")
-		return
-	}
-
-	if len(emails) != len(testEntries)-1 {
-		t.Fatalf("expected CSV entry of length: %v, got length: %v", len(testEntries), len(emails))
-		return
-	}
-
-	for i, email := range emails {
-		if email != testEntries[i+1][0] {
-			t.Fatalf("expected entry: %v, got %v instead", testEntries[i], email)
+		if diff := pretty.Compare(tc.wantErr, err); diff != "" {
+			t.Fatalf("wantErr does not match received err: %v, got: %v", tc.wantErr, err)
 			return
 		}
 	}
