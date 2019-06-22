@@ -3,7 +3,6 @@ package utils
 import (
 	"context"
 	"errors"
-	"math/rand"
 
 	"github.com/nlopes/slack"
 )
@@ -20,14 +19,6 @@ type Channel struct {
 	UserClient *slack.Client
 	BotClient  *slack.Client
 	ChannelID  string
-}
-
-// Shuffle is used in randmoizing a list of users and splitting them into
-// groups of the designated size
-type Shuffle struct {
-	Client    *slack.Client
-	GroupSize int
-	Rand      *rand.Rand
 }
 
 // WithSigningSecret embeds the signing secret value into to the request context
