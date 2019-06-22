@@ -48,6 +48,7 @@ func TestEmailsToSlackIDs(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
+				return
 			}
 
 			if tc.wantErr != "" {
@@ -63,6 +64,7 @@ func TestEmailsToSlackIDs(t *testing.T) {
 
 			if len(ids) != len(tc.wantIDs) {
 				t.Fatalf("expected to receive %v ids, got %v instead", len(tc.wantIDs), len(ids))
+				return
 			}
 
 			for i, id := range ids {
@@ -113,6 +115,7 @@ func TestEmailsToSlackIDsInclusive(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
+				return
 			}
 
 			if tc.wantErr != "" {
@@ -129,11 +132,13 @@ func TestEmailsToSlackIDsInclusive(t *testing.T) {
 
 			if len(idEmailPairs) != len(tc.wantIDs) {
 				t.Fatalf("expected to receive %v ids, got %v instead", len(tc.wantIDs), len(idEmailPairs))
+				return
 			}
 
 			for i, idEmailPair := range idEmailPairs {
 				if tc.emails[i] != idEmailPair[0] {
 					t.Fatalf("expected email: %v, got: %v", tc.emails[1], idEmailPair[0])
+					return
 				}
 				if tc.wantIDs[i] != idEmailPair[1] {
 					t.Fatalf("expected id: %v, got: %v", tc.wantIDs[1], idEmailPair[1])

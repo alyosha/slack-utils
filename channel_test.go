@@ -104,6 +104,7 @@ func TestCreateChannel(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
+				return
 			}
 
 			if tc.wantErr != "" {
@@ -170,6 +171,7 @@ func TestInviteUsers(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
+				return
 			}
 
 			if tc.wantErr != "" {
@@ -179,7 +181,6 @@ func TestInviteUsers(t *testing.T) {
 				}
 				if err.Error() != tc.wantErr {
 					t.Fatalf("expected to receive error: %s, got: %s", tc.wantErr, err)
-					return
 				}
 			}
 		})
@@ -225,6 +226,7 @@ func TestGetChannelMembers(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
+				return
 			}
 
 			if tc.wantErr != "" {
@@ -240,6 +242,7 @@ func TestGetChannelMembers(t *testing.T) {
 
 			if len(members) != len(tc.wantIDs) {
 				t.Fatalf("expected to receive %v ids, got %v instead", len(tc.wantIDs), len(members))
+				return
 			}
 
 			for i, member := range members {
@@ -365,6 +368,7 @@ func TestLeaveChannels(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
+				return
 			}
 
 			if tc.wantErr != "" {
@@ -374,7 +378,6 @@ func TestLeaveChannels(t *testing.T) {
 				}
 				if err.Error() != tc.wantErr {
 					t.Fatalf("expected to receive error: %s, got: %s", tc.wantErr, err)
-					return
 				}
 			}
 		})
@@ -421,6 +424,7 @@ func TestArchiveChannels(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
+				return
 			}
 
 			if tc.wantErr != "" {
@@ -430,7 +434,6 @@ func TestArchiveChannels(t *testing.T) {
 				}
 				if err.Error() != tc.wantErr {
 					t.Fatalf("expected to receive error: %s, got: %s", tc.wantErr, err)
-					return
 				}
 			}
 		})

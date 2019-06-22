@@ -97,7 +97,7 @@ func SendResp(w http.ResponseWriter, msg slack.Message) error {
 }
 
 // ReplaceOriginal replaces the original message with the newly encoded one
-// NOTE: can only be used with interactive message button callback (now deprecated)
+// NOTE: cannot be used in callback from block messages
 func ReplaceOriginal(w http.ResponseWriter, msg slack.Message) error {
 	w.Header().Add("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -110,7 +110,7 @@ func ReplaceOriginal(w http.ResponseWriter, msg slack.Message) error {
 }
 
 // SendOKAndDeleteOriginal responds with status 200 and deletes the original message
-// NOTE: can only be used with interactive message button callback (now deprecated)
+// NOTE: cannot be used in callback from block messages
 func SendOKAndDeleteOriginal(w http.ResponseWriter) error {
 	var msg slack.Message
 	msg.DeleteOriginal = true

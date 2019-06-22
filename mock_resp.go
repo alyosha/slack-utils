@@ -272,6 +272,11 @@ const channelsArchiveResp = `{
     "ok": true
 }`
 
+const mockCSVDownloadResp = `email
+hoge@email.com
+foo@email.com
+bar@email.com`
+
 const channelCreateErrResp = `{
     "ok": false,
     "error": "invalid_name_specials",

@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"errors"
-
 	"github.com/nlopes/slack"
 )
 
@@ -15,7 +13,7 @@ func (s *Slack) EmailsToSlackIDs(emails []string) ([]string, error) {
 	}
 
 	if len(users) == 0 {
-		return nil, errors.New("no users in workplace")
+		return nil, ErrNoUsersInWorkplace
 	}
 
 	return toSlackIDs(users, emails), nil
@@ -30,7 +28,7 @@ func (s *Slack) EmailsToSlackIDsInclusive(emails []string) ([][]string, error) {
 	}
 
 	if len(users) == 0 {
-		return nil, errors.New("no users in workplace")
+		return nil, ErrNoUsersInWorkplace
 	}
 
 	return toSlackIDsInclusive(users, emails), nil
@@ -82,7 +80,7 @@ func (s *Slack) getAll() ([]slack.User, error) {
 	}
 
 	if len(users) == 0 {
-		return nil, errors.New("no users in workplace")
+		return nil, ErrNoUsersInWorkplace
 	}
 
 	return users, nil

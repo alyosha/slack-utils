@@ -51,6 +51,7 @@ func TestPostMsg(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
+				return
 			}
 
 			if tc.wantErr != "" {
@@ -113,6 +114,7 @@ func TestPostThreadMsg(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
+				return
 			}
 
 			if tc.wantErr != "" {
@@ -122,7 +124,6 @@ func TestPostThreadMsg(t *testing.T) {
 				}
 				if err.Error() != tc.wantErr {
 					t.Fatalf("expected to receive error: %s, got: %s", tc.wantErr, err)
-					return
 				}
 			}
 		})
@@ -169,6 +170,7 @@ func TestUpdateMsg(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
+				return
 			}
 
 			if tc.wantErr != "" {
@@ -199,6 +201,7 @@ func TestSendResp(t *testing.T) {
 		err := SendResp(w, slack.Message{})
 		if err != nil {
 			t.Fatalf("unexpected error handing request: %s", err)
+			return
 		}
 	}
 
@@ -232,7 +235,6 @@ func TestSendResp(t *testing.T) {
 
 	if msg.DeleteOriginal {
 		t.Fatal("delete original should be false, but is true")
-		return
 	}
 }
 
@@ -242,6 +244,7 @@ func TestReplaceOriginal(t *testing.T) {
 		err := ReplaceOriginal(w, slack.Message{})
 		if err != nil {
 			t.Fatalf("unexpected error handing request: %s", err)
+			return
 		}
 	}
 
@@ -275,7 +278,6 @@ func TestReplaceOriginal(t *testing.T) {
 
 	if msg.DeleteOriginal {
 		t.Fatal("delete original should be false, but is true")
-		return
 	}
 }
 
@@ -285,6 +287,7 @@ func TestSendOKAndDeleteOriginal(t *testing.T) {
 		err := SendOKAndDeleteOriginal(w)
 		if err != nil {
 			t.Fatalf("unexpected error handing request: %s", err)
+			return
 		}
 	}
 
@@ -318,7 +321,6 @@ func TestSendOKAndDeleteOriginal(t *testing.T) {
 
 	if !msg.DeleteOriginal {
 		t.Fatal("delete original should be true, but is false")
-		return
 	}
 }
 
@@ -335,6 +337,5 @@ func TestSendEmptyOK(t *testing.T) {
 
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("expected status code 200, got: %v", resp.StatusCode)
-		return
 	}
 }
