@@ -22,6 +22,9 @@ func DownloadAndReadCSV(userClient *slack.Client, urlPrivateDownload string) ([]
 
 	r := csv.NewReader(&b)
 	rows, err := r.ReadAll()
+	if err != nil {
+		return nil, err
+	}
 
 	if len(rows) == 0 {
 		return nil, ErrInvalidCSV
