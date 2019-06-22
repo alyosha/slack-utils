@@ -7,6 +7,8 @@ import (
 	"github.com/nlopes/slack"
 )
 
+var ErrNoSecret = errors.New("no signing secret found in context")
+
 type signingSecretKey struct{}
 
 // Slack is a general purpose struct used when only the client is required
@@ -30,7 +32,7 @@ func getSigningSecret(ctx context.Context) (string, error) {
 	val := ctx.Value(signingSecretKey{})
 	secret, ok := val.(string)
 	if !ok {
-		return "", errors.New("error extracting the signing secret from context")
+		return "", ErrNoSecret
 	}
 
 	return secret, nil

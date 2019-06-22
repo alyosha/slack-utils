@@ -9,8 +9,13 @@ import (
 
 // ChannelNameMaxLen is the max character length for a Slack channel name
 const ChannelNameMaxLen = 21
-const ErrorInviteSelf = "cant_invite_self"
-const ErrorAlreadyArchived = "already_archived"
+
+const (
+	errInviteSelfMsg      = "cant_invite_self"
+	errAlreadyArchivedMsg = "already_archived"
+)
+
+var ErrNoUsersInWorkplace = errors.New("no users in workplace")
 
 // CreateChannel opens a new public channel and invites the provided list of member IDs, optionally posting an initial message
 func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Msg, postAsBot bool) (string, error) {
@@ -21,7 +26,7 @@ func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Ms
 
 	for _, user := range userIDs {
 		_, err = c.UserClient.InviteUserToChannel(channel.ID, user)
-		if err != nil && err.Error() != ErrorInviteSelf {
+		if err != nil && err.Error() != errInviteSelfMsg {
 			return "", err
 		}
 	}
@@ -50,7 +55,7 @@ func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Ms
 func (c *Channel) InviteUsers(userIDs []string) error {
 	for _, user := range userIDs {
 		_, err := c.UserClient.InviteUserToChannel(c.ChannelID, user)
-		if err != nil && err.Error() != ErrorInviteSelf {
+		if err != nil && err.Error() != errInviteSelfMsg {
 			return err
 		}
 	}
@@ -96,7 +101,7 @@ func (s *Slack) GetChannelMemberEmails(channelID string) ([]string, error) {
 	}
 
 	if len(allUsers) == 0 {
-		return nil, errors.New("no users in workplace")
+		return nil, ErrNoUsersInWorkplace
 	}
 
 	return toEmails(allUsers, memberIDs), nil
@@ -117,7 +122,7 @@ func (s *Slack) LeaveChannels(channelIDs []string) error {
 func (s *Slack) ArchiveChannels(channelIDs []string) error {
 	for _, channelID := range channelIDs {
 		err := s.Client.ArchiveChannel(channelID)
-		if err != nil && err.Error() != ErrorAlreadyArchived {
+		if err != nil && err.Error() != errAlreadyArchivedMsg {
 			return err
 		}
 	}
