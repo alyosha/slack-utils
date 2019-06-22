@@ -56,7 +56,6 @@ func TestDownloadAndReadCSV(t *testing.T) {
 
 		if diff := pretty.Compare(tc.wantErr, err); diff != "" {
 			t.Fatalf("wantErr does not match received err: %v, got: %v", tc.wantErr, err)
-			return
 		}
 	}
 }
