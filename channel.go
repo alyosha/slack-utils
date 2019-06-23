@@ -1,9 +1,8 @@
 package utils
 
 import (
-	"errors"
-
 	"github.com/nlopes/slack"
+	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
 

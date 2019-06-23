@@ -3,7 +3,8 @@ package utils
 import (
 	"bytes"
 	"encoding/csv"
-	"errors"
+
+	"github.com/pkg/errors"
 
 	"github.com/nlopes/slack"
 )
