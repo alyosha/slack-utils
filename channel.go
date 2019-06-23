@@ -1,9 +1,8 @@
 package utils
 
 import (
-	"errors"
-
 	"github.com/nlopes/slack"
+	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -21,13 +20,13 @@ var ErrNoUsersInWorkplace = errors.New("no users in workplace")
 func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Msg, postAsBot bool) error {
 	channel, err := c.UserClient.CreateChannel(channelName)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to create new channel")
 	}
 
 	for _, user := range userIDs {
 		_, err = c.UserClient.InviteUserToChannel(channel.ID, user)
 		if err != nil && err.Error() != errInviteSelfMsg {
-			return err
+			return errors.Wrapf(err, "failed to invite user to channel")
 		}
 	}
 
@@ -45,7 +44,7 @@ func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Ms
 			slack.MsgOptionEnableLinkUnfurl(),
 		)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "failed to post message")
 		}
 	}
 
@@ -94,7 +93,6 @@ func (s *Slack) GetChannelMemberEmails(channelID string) ([]string, error) {
 		if err == nil {
 			allUsers = users
 		}
-
 		return err
 	})
 

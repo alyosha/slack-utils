@@ -3,7 +3,8 @@ package utils
 import (
 	"bytes"
 	"encoding/csv"
-	"errors"
+
+	"github.com/pkg/errors"
 
 	"github.com/nlopes/slack"
 )
@@ -17,13 +18,13 @@ func DownloadAndReadCSV(userClient *slack.Client, urlPrivateDownload string) ([]
 	b := bytes.Buffer{}
 	err := userClient.GetFile(urlPrivateDownload, &b)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to download file")
 	}
 
 	r := csv.NewReader(&b)
 	rows, err := r.ReadAll()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "failed to read CSV")
 	}
 
 	if len(rows) == 0 {

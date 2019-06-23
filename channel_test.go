@@ -32,7 +32,7 @@ func TestCreateChannel(t *testing.T) {
 			inviteMembers:     []string{},
 			initMsg:           Msg{},
 			respChannelCreate: []byte(channelCreateErrResp),
-			wantErr:           "invalid_name_specials",
+			wantErr:           "failed to create new channel: invalid_name_specials",
 		},
 		{
 			description:       "successful channel creation including additional invites",
@@ -56,7 +56,7 @@ func TestCreateChannel(t *testing.T) {
 			initMsg:           Msg{},
 			respChannelCreate: []byte(channelCreateResp),
 			respInviteMembers: []byte(inviteMembersErrResp),
-			wantErr:           "cant_invite",
+			wantErr:           "failed to invite user to channel: cant_invite",
 		},
 		{
 			description:       "successful channel creation including additional invites, successful message post",
@@ -74,7 +74,7 @@ func TestCreateChannel(t *testing.T) {
 			respChannelCreate: []byte(channelCreateResp),
 			respInviteMembers: []byte(inviteMembersResp),
 			respPostMsg:       []byte(postMsgErrResp),
-			wantErr:           "too_many_attachments",
+			wantErr:           "failed to post message: too_many_attachments",
 		},
 	}
 
