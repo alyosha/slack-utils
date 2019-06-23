@@ -2,11 +2,11 @@
 Collection of utility methods I frequently use in slackbot projects/other slack scripts.
 
 ## Disclaimer
-At the moment this is still a personal utils library, so until major release version `1.0.0`, it is safe to expect some significant changes to existing functions.
+Until major release version `1.0.0`, it is safe to expect some significant changes to existing functions.
 
 ## Highlighted functionality
 ### Easy verification
-Easily verify incoming requests from slash commands or interactive component callbacks using one of the provided verification methods. 
+Easily verify incoming requests from slash commands/interactive callbacks using one of the provided verification methods. 
 
 Both methods expect the application's signing secret to be embedded in the request context. Set the secret as an environment variable and add it to the context in a manner similar to the following:
 ```
@@ -18,8 +18,6 @@ r.Use(func(h http.Handler) http.Handler {
 	})
 })
 ```
-
-Read more about signing secrets [here](https://api.slack.com/docs/verifying-requests-from-slack)
 
 **Slash command verification example**
 
@@ -76,7 +74,7 @@ channelHandler := &utils.Channel{
 }
 err := channel.LeaveChannels(channelIDs)
 ```
-User `ArchiveChannels` to archive channels instead (both require `UserClient` with `channels:write` scope)
+User `ArchiveChannels` to archive channels instead (both methods require `UserClient` with `channels:write` scope)
 
 **Invite multiple users to a channel**
 ```
@@ -96,6 +94,7 @@ users, err := utils.EmailsToSlackIDs(client, userEmails)
 Use `EmailsToSlackIDsInclusive` if you want to get back *both* the email and the Slack ID for each user
 
 ### Working with files
+**Read and download CSV files shared in Slack**
 ```
 client := slack.New(env.BotToken)
 rows, err := utils.DownloadAndReadCSV(h.client, urlPrivateDownload)
@@ -113,15 +112,16 @@ startDatePickerTxt := slack.NewTextBlockObject(
 	false,
 	false,
 )
-startDatePickerElem := utils.NewDatePickerWithOpts(startDatePickActionID, nil, time.Now())
+startDatePickerElem := utils.NewDatePickerWithOpts(startDatePickerActionID, nil, time.Now())
+
 startDatePickerSectionBlock := slack.NewSectionBlock(startDatePickerTxt, nil, nil)
 startDatePickerActionBlock := slack.NewActionBlock(
-    startDatePicerkBlockID, 
+    startDatePickerBlockID, 
     startDatePickerElem, 
     utils.CancelBtn,
 )
 
-startDatePicerkMsg = utils.Msg{
+startDatePickerMsg = utils.Msg{
 	Blocks: []slack.Block{startDatePickerSectionBlock, startDatePickerActionBlock},
 }
 	
@@ -133,7 +133,8 @@ In addition to `CancelBtn`, the library also provides a number of other pre-gene
 New functionality currently in the pipeline includes:
 - Get all users' Slack IDs
 - Get all users' emails
-- Get Slack IDs for every member of a user group
-- Get emails for every member of a user group
+- Get Slack IDs for every member of a usergroup
+- Get emails for every member of a usergroup
+- Investigate support for downloading/reading other files
  
 Suggestions or requests are always welcome
