@@ -18,16 +18,16 @@ const (
 var ErrNoUsersInWorkplace = errors.New("no users in workplace")
 
 // CreateChannel opens a new public channel and invites the provided list of member IDs, optionally posting an initial message
-func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Msg, postAsBot bool) (string, error) {
+func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Msg, postAsBot bool) error {
 	channel, err := c.UserClient.CreateChannel(channelName)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	for _, user := range userIDs {
 		_, err = c.UserClient.InviteUserToChannel(channel.ID, user)
 		if err != nil && err.Error() != errInviteSelfMsg {
-			return "", err
+			return err
 		}
 	}
 
@@ -45,11 +45,13 @@ func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Ms
 			slack.MsgOptionEnableLinkUnfurl(),
 		)
 		if err != nil {
-			return "", err
+			return err
 		}
 	}
 
-	return channel.ID, nil
+	c.ChannelID = channel.ID
+
+	return nil
 }
 
 func (c *Channel) InviteUsers(userIDs []string) error {
