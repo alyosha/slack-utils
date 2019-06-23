@@ -100,7 +100,7 @@ func TestCreateChannel(t *testing.T) {
 				BotClient:  nil,
 			}
 
-			id, err := channel.CreateChannel("general", tc.inviteMembers, tc.initMsg, false)
+			err := channel.CreateChannel("general", tc.inviteMembers, tc.initMsg, false)
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -118,8 +118,8 @@ func TestCreateChannel(t *testing.T) {
 				}
 			}
 
-			if id != tc.wantID {
-				t.Fatalf("expected channel id: %s, got: %s", tc.wantID, id)
+			if channel.ChannelID != tc.wantID {
+				t.Fatalf("expected channel id: %s, got: %s", tc.wantID, channel.ChannelID)
 			}
 		})
 	}
