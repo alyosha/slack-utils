@@ -11,11 +11,6 @@ var ErrNoSecret = errors.New("no signing secret found in context")
 
 type signingSecretKey struct{}
 
-// Slack is a general purpose struct used when only the client is required
-type Slack struct {
-	Client *slack.Client
-}
-
 // Channel is used in opening/interacting with a single Slack channel
 type Channel struct {
 	UserClient *slack.Client

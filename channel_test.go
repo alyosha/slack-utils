@@ -296,11 +296,8 @@ func TestGetChannelMemberEmails(t *testing.T) {
 			defer testServ.Close()
 
 			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
-			slackClient := Slack{
-				Client: client,
-			}
 
-			emails, err := slackClient.GetChannelMemberEmails("C1H9RESGL")
+			emails, err := GetChannelMemberEmails(client, "C1H9RESGL")
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -360,11 +357,8 @@ func TestLeaveChannels(t *testing.T) {
 			defer testServ.Close()
 
 			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
-			slackClient := Slack{
-				Client: client,
-			}
 
-			err := slackClient.LeaveChannels([]string{"C1H9RESGL"})
+			err := LeaveChannels(client, []string{"C1H9RESGL"})
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -416,11 +410,8 @@ func TestArchiveChannels(t *testing.T) {
 			defer testServ.Close()
 
 			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
-			slackClient := Slack{
-				Client: client,
-			}
 
-			err := slackClient.ArchiveChannels([]string{"C1H9RESGL"})
+			err := ArchiveChannels(client, []string{"C1H9RESGL"})
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)

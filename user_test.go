@@ -40,11 +40,8 @@ func TestEmailsToSlackIDs(t *testing.T) {
 			defer testServ.Close()
 
 			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
-			slackClient := Slack{
-				Client: client,
-			}
 
-			ids, err := slackClient.EmailsToSlackIDs(tc.emails)
+			ids, err := EmailsToSlackIDs(client, tc.emails)
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -107,11 +104,8 @@ func TestEmailsToSlackIDsInclusive(t *testing.T) {
 			defer testServ.Close()
 
 			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
-			slackClient := Slack{
-				Client: client,
-			}
 
-			idEmailPairs, err := slackClient.EmailsToSlackIDsInclusive(tc.emails)
+			idEmailPairs, err := EmailsToSlackIDsInclusive(client, tc.emails)
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)

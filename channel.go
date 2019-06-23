@@ -75,13 +75,13 @@ func (c *Channel) GetChannelMembers() ([]string, error) {
 }
 
 // GetChannelMemberEmails returns a list of emails for members of a given channel
-func (s *Slack) GetChannelMemberEmails(channelID string) ([]string, error) {
+func GetChannelMemberEmails(client *slack.Client, channelID string) ([]string, error) {
 	var eg errgroup.Group
 	var memberIDs []string
 	var allUsers []slack.User
 
 	eg.Go(func() error {
-		channel, err := s.Client.GetChannelInfo(channelID)
+		channel, err := client.GetChannelInfo(channelID)
 		if err == nil {
 			memberIDs = channel.Members
 		}
@@ -89,7 +89,7 @@ func (s *Slack) GetChannelMemberEmails(channelID string) ([]string, error) {
 	})
 
 	eg.Go(func() error {
-		users, err := s.getAll()
+		users, err := getAll(client)
 		if err == nil {
 			allUsers = users
 		}
@@ -108,9 +108,9 @@ func (s *Slack) GetChannelMemberEmails(channelID string) ([]string, error) {
 }
 
 // LeaveChannels allows the user whose token was used to create the API client to leave multiple channels
-func (s *Slack) LeaveChannels(channelIDs []string) error {
+func LeaveChannels(client *slack.Client, channelIDs []string) error {
 	for _, channelID := range channelIDs {
-		_, err := s.Client.LeaveChannel(channelID)
+		_, err := client.LeaveChannel(channelID)
 		if err != nil {
 			return err
 		}
@@ -119,9 +119,9 @@ func (s *Slack) LeaveChannels(channelIDs []string) error {
 }
 
 // ArchiveChannels allows the user whose token was used to create the API client to archive multiple channels
-func (s *Slack) ArchiveChannels(channelIDs []string) error {
+func ArchiveChannels(client *slack.Client, channelIDs []string) error {
 	for _, channelID := range channelIDs {
-		err := s.Client.ArchiveChannel(channelID)
+		err := client.ArchiveChannel(channelID)
 		if err != nil && err.Error() != errAlreadyArchivedMsg {
 			return err
 		}

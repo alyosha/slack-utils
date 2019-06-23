@@ -6,8 +6,8 @@ import (
 
 // EmailsToSlackIDs takes in an array of email addresses and finds the IDs of
 // any workplace members with those emails
-func (s *Slack) EmailsToSlackIDs(emails []string) ([]string, error) {
-	users, err := s.getAll()
+func EmailsToSlackIDs(client *slack.Client, emails []string) ([]string, error) {
+	users, err := getAll(client)
 	if err != nil {
 		return nil, err
 	}
@@ -21,8 +21,8 @@ func (s *Slack) EmailsToSlackIDs(emails []string) ([]string, error) {
 
 // EmailToSlackIDsInclusive takes in an array of email addresses, finds the IDs
 // of any workplace members with those emails, and returns both values
-func (s *Slack) EmailsToSlackIDsInclusive(emails []string) ([][]string, error) {
-	users, err := s.getAll()
+func EmailsToSlackIDsInclusive(client *slack.Client, emails []string) ([][]string, error) {
+	users, err := getAll(client)
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +73,8 @@ func toEmails(users []slack.User, userIDs []string) []string {
 	return emails
 }
 
-func (s *Slack) getAll() ([]slack.User, error) {
-	users, err := s.Client.GetUsers()
+func getAll(client *slack.Client) ([]slack.User, error) {
+	users, err := client.GetUsers()
 	if err != nil {
 		return nil, err
 	}
