@@ -18,6 +18,10 @@ var ErrNoUsersInWorkplace = errors.New("no users in workplace")
 
 // CreateChannel opens a new public channel and invites the provided list of member IDs, optionally posting an initial message
 func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Msg, postAsBot bool) error {
+	if c.UserClient == nil {
+		return errors.New("method requires user client")
+	}
+
 	channel, err := c.UserClient.CreateChannel(channelName)
 	if err != nil {
 		return errors.Wrapf(err, "failed to create new channel")
@@ -54,6 +58,10 @@ func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Ms
 }
 
 func (c *Channel) InviteUsers(userIDs []string) error {
+	if c.UserClient == nil {
+		return errors.New("method requires user client")
+	}
+
 	for _, user := range userIDs {
 		_, err := c.UserClient.InviteUserToChannel(c.ChannelID, user)
 		if err != nil && err.Error() != errInviteSelfMsg {
@@ -64,9 +72,39 @@ func (c *Channel) InviteUsers(userIDs []string) error {
 	return nil
 }
 
+// LeaveChannels allows the user whose token was used to create the API client to leave multiple channels
+func (c *Channel) LeaveChannels(channelIDs []string) error {
+	if c.UserClient == nil {
+		return errors.New("method requires user client")
+	}
+
+	for _, channelID := range channelIDs {
+		_, err := c.UserClient.LeaveChannel(channelID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ArchiveChannels allows the user whose token was used to create the API client to archive multiple channels
+func (c *Channel) ArchiveChannels(channelIDs []string) error {
+	if c.UserClient == nil {
+		return errors.New("method requires user client")
+	}
+
+	for _, channelID := range channelIDs {
+		err := c.UserClient.ArchiveChannel(channelID)
+		if err != nil && err.Error() != errAlreadyArchivedMsg {
+			return err
+		}
+	}
+	return nil
+}
+
 // GetChannelMembers returns a list of members for a given channel
-func (c *Channel) GetChannelMembers() ([]string, error) {
-	channel, err := c.UserClient.GetChannelInfo(c.ChannelID)
+func GetChannelMembers(client *slack.Client, channelID string) ([]string, error) {
+	channel, err := client.GetChannelInfo(channelID)
 	if err != nil {
 		return nil, err
 	}
@@ -75,13 +113,13 @@ func (c *Channel) GetChannelMembers() ([]string, error) {
 }
 
 // GetChannelMemberEmails returns a list of emails for members of a given channel
-func (s *Slack) GetChannelMemberEmails(channelID string) ([]string, error) {
+func GetChannelMemberEmails(client *slack.Client, channelID string) ([]string, error) {
 	var eg errgroup.Group
 	var memberIDs []string
 	var allUsers []slack.User
 
 	eg.Go(func() error {
-		channel, err := s.Client.GetChannelInfo(channelID)
+		channel, err := client.GetChannelInfo(channelID)
 		if err == nil {
 			memberIDs = channel.Members
 		}
@@ -89,7 +127,7 @@ func (s *Slack) GetChannelMemberEmails(channelID string) ([]string, error) {
 	})
 
 	eg.Go(func() error {
-		users, err := s.getAll()
+		users, err := getAll(client)
 		if err == nil {
 			allUsers = users
 		}
@@ -105,26 +143,4 @@ func (s *Slack) GetChannelMemberEmails(channelID string) ([]string, error) {
 	}
 
 	return toEmails(allUsers, memberIDs), nil
-}
-
-// LeaveChannels allows the user whose token was used to create the API client to leave multiple channels
-func (s *Slack) LeaveChannels(channelIDs []string) error {
-	for _, channelID := range channelIDs {
-		_, err := s.Client.LeaveChannel(channelID)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// ArchiveChannels allows the user whose token was used to create the API client to archive multiple channels
-func (s *Slack) ArchiveChannels(channelIDs []string) error {
-	for _, channelID := range channelIDs {
-		err := s.Client.ArchiveChannel(channelID)
-		if err != nil && err.Error() != errAlreadyArchivedMsg {
-			return err
-		}
-	}
-	return nil
 }
