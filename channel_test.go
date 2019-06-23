@@ -99,7 +99,7 @@ func TestCreateChannel(t *testing.T) {
 				UserClient: client,
 			}
 
-			err := channel.CreateChannel("general", tc.inviteMembers, tc.initMsg, false)
+			err := channel.CreateChannel("general", tc.inviteMembers, tc.initMsg)
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)

@@ -13,8 +13,7 @@ type Msg struct {
 	Blocks      []slack.Block
 	Attachments []slack.Attachment
 	AsUser      bool
-	Ephemeral   bool
-	UserID      string
+	UserID      string // Only set if you want to post ephemerally
 }
 
 // PostMsg sends the provided message to the channel designated by channelID
@@ -27,7 +26,7 @@ func PostMsg(client *slack.Client, msg Msg, channelID string) (string, string, e
 		slack.MsgOptionEnableLinkUnfurl(),
 	}
 
-	if msg.Ephemeral && msg.UserID != "" {
+	if msg.UserID != "" {
 		opts = append(opts, slack.MsgOptionPostEphemeral(msg.UserID))
 	}
 

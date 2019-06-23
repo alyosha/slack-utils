@@ -17,7 +17,7 @@ const (
 var ErrNoUsersInWorkplace = errors.New("no users in workplace")
 
 // CreateChannel opens a new public channel and invites the provided list of member IDs, optionally posting an initial message
-func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Msg, postAsBot bool) error {
+func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Msg) error {
 	if c.UserClient == nil {
 		return errors.New("method requires user client")
 	}
@@ -27,15 +27,12 @@ func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Ms
 		return errors.Wrapf(err, "failed to create new channel")
 	}
 
-	for _, user := range userIDs {
-		_, err = c.UserClient.InviteUserToChannel(channel.ID, user)
-		if err != nil && err.Error() != errInviteSelfMsg {
-			return errors.Wrapf(err, "failed to invite user to channel")
-		}
+	if err = c.InviteUsers(userIDs); err != nil {
+		return errors.Wrapf(err, "failed to invite user to channel")
 	}
 
 	client := c.UserClient
-	if postAsBot && c.BotClient != nil {
+	if c.BotClient != nil {
 		client = c.BotClient
 	}
 
