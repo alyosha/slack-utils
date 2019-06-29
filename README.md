@@ -9,7 +9,7 @@ Until major release version `1.0.0`, it is safe to expect some significant chang
 Easily verify incoming requests from slash commands/interactive callbacks using one of the provided verification methods. 
 
 Both methods expect the application's signing secret to be embedded in the request context. Set the secret as an environment variable and add it to the context in a manner similar to the following:
-```
+```go
 r := chi.NewRouter()
 r.Use(func(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +21,7 @@ r.Use(func(h http.Handler) http.Handler {
 
 **Slash command verification example**
 
-```
+```go
 cmd, err := utils.VerifySlashCmd(r)
 if err != nil {
   // handle error
@@ -33,7 +33,7 @@ if err = doSomethingWithArg(cmd.Text); err != nil {
 ```
 **Interactive callback verification example**
 
-```
+```go
 callback, err := utils.VerifyCallbackMsg(r)
 if err != nil {
   // handle error
@@ -51,7 +51,7 @@ case slack.InteractionTypeDialogSubmission:
 
 ### Working with channels
 **Create a new channel, invite users, and post an init message with a single command**
-```
+```go
 channelHandler := &utils.Channel{
 	UserClient: slack.New(env.UserToken),
 	BotClient: slack.New(env.BotToken),
@@ -61,14 +61,14 @@ err := channelHandler.CreateChannel(channelName, userIDs, utils.Msg{Body: initMs
 Requires `UserClient` with `channels:write` scope. Include the `BotClient` as well if you wish to post the init message as the bot user and not as the user associated with the `UserClient` token
 
 **Get all channel members' Slack IDs or emails**
-```
+```go
 client := slack.New(env.BotToken)
 emails, err := utils.GetChannelMemberEmails(client, env.ChannelID)
 ```
 Use `GetChannelMembers` for Slack IDs instead of emails
 
 **Leave or archive multiple channels**
-```
+```go
 channelHandler := &utils.Channel{
 	UserClient: slack.New(env.UserToken),
 }
@@ -77,7 +77,7 @@ err := channel.LeaveChannels(channelIDs)
 User `ArchiveChannels` to archive channels instead (both methods require `UserClient` with `channels:write` scope)
 
 **Invite multiple users to a channel**
-```
+```go
 channelHandler := &utils.Channel{
 	UserClient: slack.New(env.UserToken),
 }
@@ -87,7 +87,7 @@ Requires `UserClient` with `channels:write` scope
 
 ### Working with users
 **Convert emails to Slack IDs**
-```
+```go
 client := slack.New(env.BotToken)
 users, err := utils.EmailsToSlackIDs(client, userEmails)
 ```
@@ -95,7 +95,7 @@ Use `EmailsToSlackIDsInclusive` if you want to get back *both* the email and the
 
 ### Working with files
 **Read and download CSV files shared in Slack**
-```
+```go
 client := slack.New(env.BotToken)
 rows, err := utils.DownloadAndReadCSV(h.client, urlPrivateDownload)
 ```
@@ -103,7 +103,7 @@ Per Slack API restrictions, requires the `files:read` scope on the `UserClient` 
 
 ### Posting messages and using Blocks
 Below is a pseudo-code example of how to post an interactive block message to Slack using some of the utilities offered by the library
-```
+```go
 client := slack.New(env.BotToken)
 
 startDatePickerTxt := slack.NewTextBlockObject(
