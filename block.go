@@ -9,20 +9,30 @@ import (
 const (
 	datePickTimeFmt = "2006-01-02"
 
-	CancelActionID = "cancel_action"
-	AckActionID    = "acknowledge_action"
-	GoActionID     = "go_action"
+	CancelActionID   = "cancel_action"
+	AckActionID      = "acknowledge_action"
+	GoActionID       = "go_action"
+	ContinueActionID = "continue_action"
+
+	AckBlockID            = "ack_block"
+	GoCancelBlockID       = "go_cancel_block"
+	ContinueCancelBlockID = "go_continue_block"
 )
 
 var (
-	cancelBtnTxt = slack.NewTextBlockObject(slack.PlainTextType, "Cancel", false, false)
-	ackBtnTxt    = slack.NewTextBlockObject(slack.PlainTextType, "Got it", false, false)
-	goBtnTxt     = slack.NewTextBlockObject(slack.PlainTextType, "Go!", false, false)
-	CancelBtn    = NewButtonWithStyle(CancelActionID, "cancel", cancelBtnTxt, slack.StyleDanger)
-	AckBtn       = NewButtonWithStyle(AckActionID, "acknowledge", ackBtnTxt, slack.StylePrimary)
-	GoBtn        = NewButtonWithStyle(GoActionID, "go", goBtnTxt, slack.StylePrimary)
+	cancelBtnTxt   = slack.NewTextBlockObject(slack.PlainTextType, "Cancel", false, false)
+	ackBtnTxt      = slack.NewTextBlockObject(slack.PlainTextType, "Got it", false, false)
+	goBtnTxt       = slack.NewTextBlockObject(slack.PlainTextType, "Go!", false, false)
+	continueBtnTxt = slack.NewTextBlockObject(slack.PlainTextType, "Continue", false, false)
+	CancelBtn      = NewButtonWithStyle(CancelActionID, "cancel", cancelBtnTxt, slack.StyleDanger)
+	AckBtn         = NewButtonWithStyle(AckActionID, "acknowledge", ackBtnTxt, slack.StylePrimary)
+	GoBtn          = NewButtonWithStyle(GoActionID, "go", goBtnTxt, slack.StylePrimary)
+	ContinueBtn    = NewButtonWithStyle(ContinueActionID, "continue", continueBtnTxt, slack.StylePrimary)
 
-	DivBlock = slack.NewDividerBlock()
+	DivBlock            = slack.NewDividerBlock()
+	AckBlock            = slack.NewActionBlock(AckBlockID, AckBtn)
+	GoCancelBlock       = slack.NewActionBlock(GoCancelBlockID, GoBtn, CancelBtn)
+	ContinueCancelBlock = slack.NewActionBlock(ContinueCancelBlockID, ContinueBtn, CancelBtn)
 )
 
 // NewButtonWithStyle returns a new ButtonBlockElement set to the designated style
