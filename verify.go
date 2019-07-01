@@ -10,6 +10,12 @@ import (
 	"github.com/nlopes/slack"
 )
 
+// Convenience error string bases to avoid repetitive declaration
+const (
+	ErrBaseVerifyCallback = "failed to verify callback message"
+	ErrBaseVerifySlash    = "failed to verify slash command"
+)
+
 // VerifyCallbackMsg confirms the validity of the interaction callback via
 // the signing secret embedded in the context and returns the verified message body
 func VerifyCallbackMsg(r *http.Request) (verifiedBody *slack.InteractionCallback, err error) {
