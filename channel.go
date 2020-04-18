@@ -81,6 +81,7 @@ func (c *Channel) LeaveChannels(channelIDs []string) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -96,6 +97,7 @@ func (c *Channel) ArchiveChannels(channelIDs []string) error {
 			return err
 		}
 	}
+
 	return nil
 }
 

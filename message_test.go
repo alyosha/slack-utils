@@ -195,6 +195,7 @@ func TestUpdateMsg(t *testing.T) {
 		})
 	}
 }
+
 func TestSendResp(t *testing.T) {
 	var msg slack.Message
 	handler := func(w http.ResponseWriter, r *http.Request) {

@@ -14,6 +14,7 @@ type Msg struct {
 	Attachments []slack.Attachment
 	AsUser      bool
 	UserID      string // Only set if you want to post ephemerally
+	ResponseURL string // Only set if you want to delete an ephemeral message
 }
 
 // PostMsg sends the provided message to the channel designated by channelID
@@ -52,23 +53,27 @@ func PostThreadMsg(client *slack.Client, msg Msg, channelID string, threadTs str
 		slack.MsgOptionTS(threadTs),
 	)
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // UpdateMsg updates the provided message in the channel designated by channelID
 func UpdateMsg(client *slack.Client, msg Msg, channelID, timestamp string) (string, string, string, error) {
-	channelID, ts, text, err := client.UpdateMessage(
-		channelID,
-		timestamp,
+	opts := []slack.MsgOption{
 		slack.MsgOptionText(msg.Body, false),
 		slack.MsgOptionBlocks(msg.Blocks...),
 		slack.MsgOptionAttachments(msg.Attachments...),
 		slack.MsgOptionAsUser(msg.AsUser),
 		slack.MsgOptionEnableLinkUnfurl(),
+	}
+
+	if msg.ResponseURL != "" {
+		opts = []slack.MsgOption{slack.MsgOptionDeleteOriginal()}
+	}
+
+	channelID, ts, text, err := client.UpdateMessage(
+		channelID,
+		timestamp,
+		opts...,
 	)
 
 	if err != nil {
@@ -88,11 +93,7 @@ func SendEmptyOK(w http.ResponseWriter) {
 // NOTE: cannot be used in callback from block messages
 func SendResp(w http.ResponseWriter, msg slack.Message) error {
 	w.Header().Add("Content-type", "application/json")
-	err := json.NewEncoder(w).Encode(&msg)
-	if err != nil {
-		return err
-	}
-	return nil
+	return json.NewEncoder(w).Encode(&msg)
 }
 
 // ReplaceOriginal replaces the original message with the newly encoded one
@@ -101,11 +102,7 @@ func ReplaceOriginal(w http.ResponseWriter, msg slack.Message) error {
 	w.Header().Add("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	msg.ReplaceOriginal = true
-	err := json.NewEncoder(w).Encode(&msg)
-	if err != nil {
-		return err
-	}
-	return nil
+	return json.NewEncoder(w).Encode(&msg)
 }
 
 // SendOKAndDeleteOriginal responds with status 200 and deletes the original message
@@ -115,9 +112,5 @@ func SendOKAndDeleteOriginal(w http.ResponseWriter) error {
 	msg.DeleteOriginal = true
 	w.Header().Add("Content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	err := json.NewEncoder(w).Encode(&msg)
-	if err != nil {
-		return err
-	}
-	return nil
+	return json.NewEncoder(w).Encode(&msg)
 }
