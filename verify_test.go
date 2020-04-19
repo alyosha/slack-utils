@@ -33,7 +33,7 @@ func TestVerifyCallbackMsg(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			req := httptest.NewRequest("POST", "http://example.com/foo", nil)
 			ctx := WithSigningSecret(context.Background(), "e6b19c573432dcc6b075501d51b51bb8")
-			req = req.WithContext(ctx)
+			req = req.Clone(ctx)
 			req.Header.Set("X-Slack-Signature", "v0=adada4ed31709aef585c2580ca3267678c6a8eaeb7e0c1aca3ee57b656886b2c")
 			req.Header.Set("X-Slack-Request-Timestamp", tc.timestamp)
 
@@ -75,7 +75,7 @@ func TestVerifySlashCmd(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			req := httptest.NewRequest("POST", "http://example.com/foo", nil)
 			ctx := WithSigningSecret(context.Background(), "e6b19c573432dcc6b075501d51b51bb8")
-			req = req.WithContext(ctx)
+			req = req.Clone(ctx)
 			req.Header.Set("X-Slack-Signature", "v0=adada4ed31709aef585c2580ca3267678c6a8eaeb7e0c1aca3ee57b656886b2c")
 			req.Header.Set("X-Slack-Request-Timestamp", tc.timestamp)
 

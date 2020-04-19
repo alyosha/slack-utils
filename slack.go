@@ -7,8 +7,6 @@ import (
 	"github.com/nlopes/slack"
 )
 
-var ErrNoSecret = errors.New("no signing secret found in context")
-
 type signingSecretKey struct{}
 
 // Channel is used in opening/interacting with a single Slack channel
@@ -18,7 +16,10 @@ type Channel struct {
 	ChannelID  string
 }
 
-// WithSigningSecret embeds the signing secret value into to the request context
+var (
+	ErrNoSecret = errors.New("no signing secret found in context")
+)
+
 func WithSigningSecret(ctx context.Context, signingSecret string) context.Context {
 	return context.WithValue(ctx, signingSecretKey{}, signingSecret)
 }
