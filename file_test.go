@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/kylelemons/godebug/pretty"
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 const mockURL = "files-pri/T012345AB-F01234ABC/download/fake.csv"

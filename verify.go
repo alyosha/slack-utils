@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 // VerifyCallbackMsg confirms the validity of the interaction callback via

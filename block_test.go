@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/kylelemons/godebug/pretty"
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 const (

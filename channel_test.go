@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 func TestCreateChannel(t *testing.T) {
@@ -272,7 +272,7 @@ func TestGetChannelMemberEmails(t *testing.T) {
 			description:     "failure to retrieve user list",
 			respChannelInfo: []byte(channelInfoResp),
 			respUsersList:   []byte(usersListErrResp),
-			wantErr:         "no users in workplace",
+			wantErr:         "invalid_cursor",
 		},
 	}
 

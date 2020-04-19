@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 // Msg is an intermediary struct used for posting messages
@@ -67,7 +67,7 @@ func UpdateMsg(client *slack.Client, msg Msg, channelID, timestamp string) (stri
 	}
 
 	if msg.ResponseURL != "" {
-		opts = []slack.MsgOption{slack.MsgOptionDeleteOriginal()}
+		opts = []slack.MsgOption{slack.MsgOptionDeleteOriginal(msg.ResponseURL)}
 	}
 
 	channelID, ts, text, err := client.UpdateMessage(

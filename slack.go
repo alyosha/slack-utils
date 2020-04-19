@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 var ErrNoSecret = errors.New("no signing secret found in context")

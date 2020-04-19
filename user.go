@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 // EmailsToSlackIDs takes in an array of email addresses and finds the IDs of
