@@ -26,8 +26,9 @@ func newContextCopy(ctx context.Context) context.Context {
 func RespondAsync(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctxCopy := newContextCopy(r.Context())
+		reqCopy := r.Clone(ctxCopy)
 		go func() {
-			next.ServeHTTP(w, r.WithContext(ctxCopy))
+			next.ServeHTTP(w, reqCopy)
 		}()
 	})
 }
