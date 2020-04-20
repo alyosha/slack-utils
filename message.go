@@ -15,19 +15,21 @@ type Msg struct {
 	AsUser      bool
 }
 
-// PostMsg sends the provided message to the channel designated by channelID
-func PostMsg(client *slack.Client, msg Msg, channelID string) (string, error) {
-	opts := []slack.MsgOption{
+func getCommonOpts(msg Msg) []slack.MsgOption {
+	return []slack.MsgOption{
 		slack.MsgOptionText(msg.Body, false),
 		slack.MsgOptionBlocks(msg.Blocks...),
 		slack.MsgOptionAttachments(msg.Attachments...),
 		slack.MsgOptionAsUser(msg.AsUser),
 		slack.MsgOptionEnableLinkUnfurl(),
 	}
+}
 
+// PostMsg sends the provided message to the channel designated by channelID
+func PostMsg(client *slack.Client, msg Msg, channelID string) (string, error) {
 	_, ts, err := client.PostMessage(
 		channelID,
-		opts...,
+		getCommonOpts(msg)...,
 	)
 
 	if err != nil {
@@ -54,7 +56,7 @@ func PostThreadMsg(client *slack.Client, msg Msg, channelID string, threadTs str
 func PostEphemeralMsg(client *slack.Client, msg Msg, channelID, userID string) error {
 	_, _, err := client.PostMessage(
 		channelID,
-		slack.MsgOptionPostEphemeral(userID),
+		append(getCommonOpts(msg), slack.MsgOptionPostEphemeral(userID))...,
 	)
 
 	return err
@@ -62,18 +64,10 @@ func PostEphemeralMsg(client *slack.Client, msg Msg, channelID, userID string) e
 
 // UpdateMsg updates the provided message in the channel designated by channelID
 func UpdateMsg(client *slack.Client, msg Msg, channelID, timestamp string) error {
-	opts := []slack.MsgOption{
-		slack.MsgOptionText(msg.Body, false),
-		slack.MsgOptionBlocks(msg.Blocks...),
-		slack.MsgOptionAttachments(msg.Attachments...),
-		slack.MsgOptionAsUser(msg.AsUser),
-		slack.MsgOptionEnableLinkUnfurl(),
-	}
-
 	_, _, _, err := client.UpdateMessage(
 		channelID,
 		timestamp,
-		opts...,
+		getCommonOpts(msg)...,
 	)
 
 	return err
