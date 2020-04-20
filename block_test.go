@@ -116,7 +116,6 @@ func TestNewDateOptToTime(t *testing.T) {
 	expectedTime, err := time.Parse(datePickTimeFmt, dateOptStr)
 	if err != nil {
 		t.Fatalf("received unexpected error: %s", err)
-		return
 	}
 
 	testCases := []struct {
@@ -140,7 +139,6 @@ func TestNewDateOptToTime(t *testing.T) {
 			parsedTime, err := DateOptToTime(dateOptStr)
 			if err != nil && !tc.wantErr {
 				t.Fatalf("received unexpected error: %s", err)
-				return
 			}
 			if diff := pretty.Compare(parsedTime, expectedTime); diff != "" {
 				t.Fatalf("expected to receive time: %v, got: %v", expectedTime, parsedTime)

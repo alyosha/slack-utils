@@ -13,12 +13,10 @@ type Msg struct {
 	Blocks      []slack.Block
 	Attachments []slack.Attachment
 	AsUser      bool
-	UserID      string // Only set if you want to post ephemerally
-	ResponseURL string // Only set if you want to delete an ephemeral message
 }
 
 // PostMsg sends the provided message to the channel designated by channelID
-func PostMsg(client *slack.Client, msg Msg, channelID string) (string, string, error) {
+func PostMsg(client *slack.Client, msg Msg, channelID string) (string, error) {
 	opts := []slack.MsgOption{
 		slack.MsgOptionText(msg.Body, false),
 		slack.MsgOptionBlocks(msg.Blocks...),
@@ -27,20 +25,16 @@ func PostMsg(client *slack.Client, msg Msg, channelID string) (string, string, e
 		slack.MsgOptionEnableLinkUnfurl(),
 	}
 
-	if msg.UserID != "" {
-		opts = append(opts, slack.MsgOptionPostEphemeral(msg.UserID))
-	}
-
-	channelID, ts, err := client.PostMessage(
+	_, ts, err := client.PostMessage(
 		channelID,
 		opts...,
 	)
 
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 
-	return channelID, ts, nil
+	return ts, nil
 }
 
 // PostThreadMsg posts a message response into an existing thread
@@ -56,8 +50,18 @@ func PostThreadMsg(client *slack.Client, msg Msg, channelID string, threadTs str
 	return err
 }
 
+// PostEphemeralMsg sends an ephemeral message in the channel designated by channelID
+func PostEphemeralMsg(client *slack.Client, msg Msg, channelID, userID string) error {
+	_, _, err := client.PostMessage(
+		channelID,
+		slack.MsgOptionPostEphemeral(userID),
+	)
+
+	return err
+}
+
 // UpdateMsg updates the provided message in the channel designated by channelID
-func UpdateMsg(client *slack.Client, msg Msg, channelID, timestamp string) (string, string, string, error) {
+func UpdateMsg(client *slack.Client, msg Msg, channelID, timestamp string) error {
 	opts := []slack.MsgOption{
 		slack.MsgOptionText(msg.Body, false),
 		slack.MsgOptionBlocks(msg.Blocks...),
@@ -66,21 +70,24 @@ func UpdateMsg(client *slack.Client, msg Msg, channelID, timestamp string) (stri
 		slack.MsgOptionEnableLinkUnfurl(),
 	}
 
-	if msg.ResponseURL != "" {
-		opts = []slack.MsgOption{slack.MsgOptionDeleteOriginal(msg.ResponseURL)}
-	}
-
-	channelID, ts, text, err := client.UpdateMessage(
+	_, _, _, err := client.UpdateMessage(
 		channelID,
 		timestamp,
 		opts...,
 	)
 
-	if err != nil {
-		return "", "", "", err
-	}
+	return err
+}
 
-	return channelID, ts, text, nil
+// DeleteMsg deletes the provided message in the channel designated by channelID
+func DeleteMsg(client *slack.Client, channelID, timestamp, responseURL string) error {
+	_, _, _, err := client.UpdateMessage(
+		channelID,
+		timestamp,
+		slack.MsgOptionDeleteOriginal(responseURL),
+	)
+
+	return err
 }
 
 // SendEmptyOK responds with status 200

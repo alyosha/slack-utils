@@ -1,6 +1,6 @@
 package utils
 
-const channelCreateResp = `{
+const mockChannelCreateResp = `{
     "ok": true,
     "channel": {
         "id": "C0DEL09A5",
@@ -37,7 +37,7 @@ const channelCreateResp = `{
     }
 }`
 
-const inviteMembersResp = `{
+const mockInviteMembersResp = `{
     "ok": true,
     "channel": {
         "id": "C1H9RESGL",
@@ -81,7 +81,7 @@ const inviteMembersResp = `{
     }
 }`
 
-const postMsgResp = `{
+const mockPostMsgResp = `{
     "ok": true,
     "channel": "C1H9RESGL",
     "ts": "1503435956.000247",
@@ -102,7 +102,7 @@ const postMsgResp = `{
     }
 }`
 
-const updateMsgResp = `{
+const mockUpdateMsgResp = `{
     "ok": true,
     "channel": "C1H9RESGL",
     "ts": "1503435956.000400",
@@ -123,7 +123,7 @@ const updateMsgResp = `{
     }
 }`
 
-const channelInfoResp = `{
+const mockChannelInfoResp = `{
     "ok": true,
     "channel": {
         "id": "C1H9RESGL",
@@ -177,7 +177,7 @@ const channelInfoResp = `{
     }
 }`
 
-const usersListResp = `{
+const mockUsersListResp = `{
     "ok": true,
     "members": [
         {
@@ -264,11 +264,7 @@ const usersListResp = `{
     }
 }`
 
-const channelsLeaveResp = `{
-    "ok": true
-}`
-
-const channelsArchiveResp = `{
+const mockSuccessResp = `{
     "ok": true
 }`
 
@@ -277,48 +273,48 @@ hoge@email.com
 foo@email.com
 bar@email.com`
 
-const channelCreateErrResp = `{
+const mockChannelCreateErrResp = `{
     "ok": false,
     "error": "invalid_name_specials",
     "detail": "Value passed for 'name' contained unallowed special characters."
 }`
 
-const inviteMembersErrResp = `{
+const mockInviteMembersErrResp = `{
     "ok": false,
     "error": "cant_invite"
 }`
 
-const cantInviteSelfErrResp = `{
+const mockCantInviteSelfErrResp = `{
     "ok": false,
     "error": "cant_invite_self"
 }`
 
-const postMsgErrResp = `{
+const mockPostMsgErrResp = `{
     "ok": false,
     "error": "too_many_attachments"
 }`
 
-const channelInfoErrResp = `{
+const mockChannelInfoErrResp = `{
     "ok": false,
     "error": "channel_not_found"
 }`
 
-const usersListErrResp = `{
+const mockUsersListErrResp = `{
     "ok": false,
     "error": "invalid_cursor"
 }`
 
-const channelsLeaveErrResp = `{
+const mockChannelsLeaveErrResp = `{
     "ok": false,
     "error": "invalid_auth"
 }`
 
-const channelsArchiveErrResp = `{
+const mockChannelsArchiveErrResp = `{
     "ok": false,
     "error": "invalid_auth"
 }`
 
-const channelAlreadyArchivedErrResp = `{
+const mockChannelAlreadyArchivedErrResp = `{
     "ok": false,
     "error": "already_archived"
 }`

@@ -51,7 +51,6 @@ func TestDownloadAndReadCSV(t *testing.T) {
 
 		if diff := pretty.Compare(tc.wantRows, rows); diff != "" {
 			t.Fatalf("expected to receive rows: %v, got: %v", tc.wantRows, rows)
-			return
 		}
 
 		if diff := pretty.Compare(tc.wantErr, err); diff != "" {
