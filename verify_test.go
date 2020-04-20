@@ -41,7 +41,6 @@ func TestVerifyCallbackMsg(t *testing.T) {
 
 			if tc.wantErr != "" && err == nil {
 				t.Fatal("expected timestamp too old error, didn't receive one")
-				return
 			}
 
 			if err.Error() != tc.wantErr && !strings.Contains(err.Error(), tc.wantErr) {
@@ -83,7 +82,6 @@ func TestVerifySlashCmd(t *testing.T) {
 
 			if tc.wantErr != "" && err == nil {
 				t.Fatal("expected timestamp too old error, didn't receive one")
-				return
 			}
 
 			if err.Error() != tc.wantErr && !strings.Contains(err.Error(), tc.wantErr) {

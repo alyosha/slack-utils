@@ -24,56 +24,56 @@ func TestCreateChannel(t *testing.T) {
 			description:       "successful channel creation, no additional invites",
 			inviteMembers:     []string{},
 			initMsg:           Msg{},
-			respChannelCreate: []byte(channelCreateResp),
+			respChannelCreate: []byte(mockChannelCreateResp),
 			wantID:            "C0DEL09A5",
 		},
 		{
 			description:       "err creating channel",
 			inviteMembers:     []string{},
 			initMsg:           Msg{},
-			respChannelCreate: []byte(channelCreateErrResp),
+			respChannelCreate: []byte(mockChannelCreateErrResp),
 			wantErr:           "failed to create new channel: invalid_name_specials",
 		},
 		{
 			description:       "successful channel creation including additional invites",
 			inviteMembers:     []string{"UABC123EFG"},
 			initMsg:           Msg{},
-			respChannelCreate: []byte(channelCreateResp),
-			respInviteMembers: []byte(inviteMembersResp),
+			respChannelCreate: []byte(mockChannelCreateResp),
+			respInviteMembers: []byte(mockInviteMembersResp),
 			wantID:            "C0DEL09A5",
 		},
 		{
 			description:       "successful channel creation, inviting members including self but no error returned",
 			inviteMembers:     []string{"U0G9QF9C6"},
 			initMsg:           Msg{},
-			respChannelCreate: []byte(channelCreateResp),
-			respInviteMembers: []byte(cantInviteSelfErrResp),
+			respChannelCreate: []byte(mockChannelCreateResp),
+			respInviteMembers: []byte(mockCantInviteSelfErrResp),
 			wantID:            "C0DEL09A5",
 		},
 		{
 			description:       "err inviting members",
 			inviteMembers:     []string{"UABC123EFG"},
 			initMsg:           Msg{},
-			respChannelCreate: []byte(channelCreateResp),
-			respInviteMembers: []byte(inviteMembersErrResp),
+			respChannelCreate: []byte(mockChannelCreateResp),
+			respInviteMembers: []byte(mockInviteMembersErrResp),
 			wantErr:           "failed to invite user to channel: cant_invite",
 		},
 		{
 			description:       "successful channel creation including additional invites, successful message post",
 			inviteMembers:     []string{"UABC123EFG"},
 			initMsg:           Msg{Body: "Hey!"},
-			respChannelCreate: []byte(channelCreateResp),
-			respInviteMembers: []byte(inviteMembersResp),
-			respPostMsg:       []byte(postMsgResp),
+			respChannelCreate: []byte(mockChannelCreateResp),
+			respInviteMembers: []byte(mockInviteMembersResp),
+			respPostMsg:       []byte(mockPostMsgResp),
 			wantID:            "C0DEL09A5",
 		},
 		{
 			description:       "successful channel creation including additional invites, failure to post init message",
 			inviteMembers:     []string{"UABC123EFG"},
 			initMsg:           Msg{Body: "Hey!"},
-			respChannelCreate: []byte(channelCreateResp),
-			respInviteMembers: []byte(inviteMembersResp),
-			respPostMsg:       []byte(postMsgErrResp),
+			respChannelCreate: []byte(mockChannelCreateResp),
+			respInviteMembers: []byte(mockInviteMembersResp),
+			respPostMsg:       []byte(mockPostMsgErrResp),
 			wantErr:           "failed to post message: too_many_attachments",
 		},
 	}
@@ -103,17 +103,14 @@ func TestCreateChannel(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
-				return
 			}
 
 			if tc.wantErr != "" {
 				if err == nil {
 					t.Fatal("expected error but did not receive one")
-					return
 				}
 				if err.Error() != tc.wantErr {
 					t.Fatalf("expected to receive error: %s, got: %s", tc.wantErr, err)
-					return
 				}
 			}
 
@@ -134,17 +131,17 @@ func TestInviteUsers(t *testing.T) {
 		{
 			description:       "successful invite of users",
 			inviteMembers:     []string{"UABC123EFG"},
-			respInviteMembers: []byte(inviteMembersResp),
+			respInviteMembers: []byte(mockInviteMembersResp),
 		},
 		{
 			description:       "successful invite, no error returned for invite members resp",
 			inviteMembers:     []string{"UABC123EFG", "U0G9QF9C6"},
-			respInviteMembers: []byte(inviteMembersResp),
+			respInviteMembers: []byte(mockInviteMembersResp),
 		},
 		{
 			description:       "expect error",
 			inviteMembers:     []string{"UABC123EFG"},
-			respInviteMembers: []byte(inviteMembersErrResp),
+			respInviteMembers: []byte(mockInviteMembersErrResp),
 			wantErr:           "cant_invite",
 		},
 	}
@@ -169,13 +166,11 @@ func TestInviteUsers(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
-				return
 			}
 
 			if tc.wantErr != "" {
 				if err == nil {
 					t.Fatal("expected error but did not receive one")
-					return
 				}
 				if err.Error() != tc.wantErr {
 					t.Fatalf("expected to receive error: %s, got: %s", tc.wantErr, err)
@@ -194,12 +189,12 @@ func TestGetChannelMembers(t *testing.T) {
 	}{
 		{
 			description:     "successful retrieval of member IDs",
-			respChannelInfo: []byte(channelInfoResp),
+			respChannelInfo: []byte(mockChannelInfoResp),
 			wantIDs:         []string{"U0G9QF9C6", "U1QNSQB9U"},
 		},
 		{
 			description:     "failure to retrieve member IDs",
-			respChannelInfo: []byte(channelInfoErrResp),
+			respChannelInfo: []byte(mockChannelInfoErrResp),
 			wantErr:         "channel_not_found",
 		},
 	}
@@ -220,23 +215,19 @@ func TestGetChannelMembers(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
-				return
 			}
 
 			if tc.wantErr != "" {
 				if err == nil {
 					t.Fatal("expected error but did not receive one")
-					return
 				}
 				if err.Error() != tc.wantErr {
 					t.Fatalf("expected to receive error: %s, got: %s", tc.wantErr, err)
-					return
 				}
 			}
 
 			if len(members) != len(tc.wantIDs) {
 				t.Fatalf("expected to receive %v ids, got %v instead", len(tc.wantIDs), len(members))
-				return
 			}
 
 			for i, member := range members {
@@ -258,20 +249,20 @@ func TestGetChannelMemberEmails(t *testing.T) {
 	}{
 		{
 			description:     "successful retrieval of member emails",
-			respChannelInfo: []byte(channelInfoResp),
-			respUsersList:   []byte(usersListResp),
+			respChannelInfo: []byte(mockChannelInfoResp),
+			respUsersList:   []byte(mockUsersListResp),
 			wantEmails:      []string{"spengler@ghostbusters.example.com"},
 		},
 		{
 			description:     "failure to retrieve channel info",
-			respChannelInfo: []byte(channelInfoErrResp),
-			respUsersList:   []byte(usersListResp),
+			respChannelInfo: []byte(mockChannelInfoErrResp),
+			respUsersList:   []byte(mockUsersListResp),
 			wantErr:         "channel_not_found",
 		},
 		{
 			description:     "failure to retrieve user list",
-			respChannelInfo: []byte(channelInfoResp),
-			respUsersList:   []byte(usersListErrResp),
+			respChannelInfo: []byte(mockChannelInfoResp),
+			respUsersList:   []byte(mockUsersListErrResp),
 			wantErr:         "invalid_cursor",
 		},
 	}
@@ -295,23 +286,19 @@ func TestGetChannelMemberEmails(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
-				return
 			}
 
 			if tc.wantErr != "" {
 				if err == nil {
 					t.Fatal("expected error but did not receive one")
-					return
 				}
 				if err.Error() != tc.wantErr {
 					t.Fatalf("expected to receive error: %s, got: %s", tc.wantErr, err)
-					return
 				}
 			}
 
 			if len(emails) != len(tc.wantEmails) {
 				t.Fatalf("expected to receive %v emails, got %v instead", len(tc.wantEmails), len(emails))
-				return
 			}
 
 			for i, email := range emails {
@@ -331,11 +318,11 @@ func TestLeaveChannels(t *testing.T) {
 	}{
 		{
 			description:       "successfully left channels",
-			respLeaveChannels: []byte(channelsLeaveResp),
+			respLeaveChannels: []byte(mockSuccessResp),
 		},
 		{
 			description:       "failure to leave channels",
-			respLeaveChannels: []byte(channelsLeaveErrResp),
+			respLeaveChannels: []byte(mockChannelsLeaveErrResp),
 			wantErr:           "invalid_auth",
 		},
 	}
@@ -359,13 +346,11 @@ func TestLeaveChannels(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
-				return
 			}
 
 			if tc.wantErr != "" {
 				if err == nil {
 					t.Fatal("expected error but did not receive one")
-					return
 				}
 				if err.Error() != tc.wantErr {
 					t.Fatalf("expected to receive error: %s, got: %s", tc.wantErr, err)
@@ -383,15 +368,15 @@ func TestArchiveChannels(t *testing.T) {
 	}{
 		{
 			description:         "successfully archived channels",
-			respArchiveChannels: []byte(channelsArchiveResp),
+			respArchiveChannels: []byte(mockSuccessResp),
 		},
 		{
 			description:         "no error returned for already archived channel",
-			respArchiveChannels: []byte(channelAlreadyArchivedErrResp),
+			respArchiveChannels: []byte(mockChannelAlreadyArchivedErrResp),
 		},
 		{
 			description:         "failure to archive channels",
-			respArchiveChannels: []byte(channelsArchiveErrResp),
+			respArchiveChannels: []byte(mockChannelsArchiveErrResp),
 			wantErr:             "invalid_auth",
 		},
 	}
@@ -415,13 +400,11 @@ func TestArchiveChannels(t *testing.T) {
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
-				return
 			}
 
 			if tc.wantErr != "" {
 				if err == nil {
 					t.Fatal("expected error but did not receive one")
-					return
 				}
 				if err.Error() != tc.wantErr {
 					t.Fatalf("expected to receive error: %s, got: %s", tc.wantErr, err)
