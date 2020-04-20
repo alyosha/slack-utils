@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"github.com/nlopes/slack"
 	"github.com/pkg/errors"
+	"github.com/slack-go/slack"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -81,6 +81,7 @@ func (c *Channel) LeaveChannels(channelIDs []string) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -96,6 +97,7 @@ func (c *Channel) ArchiveChannels(channelIDs []string) error {
 			return err
 		}
 	}
+
 	return nil
 }
 

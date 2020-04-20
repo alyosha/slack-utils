@@ -3,7 +3,7 @@ package utils
 import (
 	"time"
 
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 const (
@@ -15,6 +15,7 @@ const (
 	ContinueActionID = "continue_action"
 
 	AckBlockID            = "ack_block"
+	CancelBlockID         = "cancel_block"
 	GoCancelBlockID       = "go_cancel_block"
 	ContinueCancelBlockID = "go_continue_block"
 )
@@ -31,6 +32,7 @@ var (
 
 	DivBlock            = slack.NewDividerBlock()
 	AckBlock            = slack.NewActionBlock(AckBlockID, AckBtn)
+	CancelBlock         = slack.NewActionBlock(CancelBlockID, CancelBtn)
 	GoCancelBlock       = slack.NewActionBlock(GoCancelBlockID, GoBtn, CancelBtn)
 	ContinueCancelBlock = slack.NewActionBlock(ContinueCancelBlockID, ContinueBtn, CancelBtn)
 )

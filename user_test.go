@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 func TestEmailsToSlackIDs(t *testing.T) {
@@ -26,7 +26,7 @@ func TestEmailsToSlackIDs(t *testing.T) {
 		{
 			description:   "failure to retrieve users list",
 			respUsersList: []byte(usersListErrResp),
-			wantErr:       "no users in workplace",
+			wantErr:       "invalid_cursor",
 		},
 	}
 	for _, tc := range testCases {
@@ -90,7 +90,7 @@ func TestEmailsToSlackIDsInclusive(t *testing.T) {
 		{
 			description:   "failure to retrieve users list",
 			respUsersList: []byte(usersListErrResp),
-			wantErr:       "no users in workplace",
+			wantErr:       "invalid_cursor",
 		},
 	}
 	for _, tc := range testCases {

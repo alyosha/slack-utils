@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 func TestPostMsg(t *testing.T) {
@@ -195,6 +195,7 @@ func TestUpdateMsg(t *testing.T) {
 		})
 	}
 }
+
 func TestSendResp(t *testing.T) {
 	var msg slack.Message
 	handler := func(w http.ResponseWriter, r *http.Request) {

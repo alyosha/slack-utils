@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/nlopes/slack"
+	"github.com/slack-go/slack"
 )
 
 var ErrInvalidCSV = errors.New("received invalid/empty CSV file")
