@@ -49,6 +49,40 @@ case slack.InteractionTypeDialogSubmission:
 }
 ```
 
+### Posting messages and using Blocks
+Below is a pseudo-code example of how to post an interactive block message to Slack using some of the utilities offered by the library
+```go
+client := slack.New(env.BotToken)
+
+startDatePickerTxt := slack.NewTextBlockObject(
+	slack.MarkdownType,
+	"Please choose a *start date* for the new survey",
+	false,
+	false,
+)
+startDatePickerElem := utils.NewDatePickerWithOpts(startDatePickerActionID, nil, time.Now())
+
+startDatePickerSectionBlock := slack.NewSectionBlock(startDatePickerTxt, nil, nil)
+startDatePickerActionBlock := slack.NewActionBlock(
+    startDatePickerBlockID, 
+    startDatePickerElem, 
+    utils.CancelBtn,
+)
+
+startDatePickerMsg = utils.Msg{
+	Blocks: []slack.Block{startDatePickerSectionBlock, startDatePickerActionBlock},
+}
+	
+_, err := utils.PostMsg(client, startDatePickerMsg, channelID)
+```
+
+To post ephemerally, use `PostEphemeralMsg` and include the target user's ID.
+ 
+Delete normal/ephemeral messages alike in the following manner:
+```go
+utils.DeleteMsg(client, channelID, ts, responseURL)
+``` 
+
 ### Working with channels
 **Create a new channel, invite users, and post an init message with a single command**
 ```go
@@ -72,7 +106,7 @@ Use `GetChannelMembers` for Slack IDs instead of emails
 channelHandler := &utils.Channel{
 	UserClient: slack.New(env.UserToken),
 }
-err := channel.LeaveChannels(channelIDs)
+err := channelHandler.LeaveChannels(channelIDs)
 ```
 User `ArchiveChannels` to archive channels instead (both methods require `UserClient` with `channels:write` scope)
 
@@ -101,40 +135,6 @@ rows, err := utils.DownloadAndReadCSV(h.client, urlPrivateDownload)
 ```
 Per Slack API restrictions, requires the `files:read` scope on the `UserClient` and the user associated with the token must have access to the file
 
-### Posting messages and using Blocks
-Below is a pseudo-code example of how to post an interactive block message to Slack using some of the utilities offered by the library
-```go
-client := slack.New(env.BotToken)
 
-startDatePickerTxt := slack.NewTextBlockObject(
-	slack.MarkdownType,
-	"Please choose a *start date* for the new survey",
-	false,
-	false,
-)
-startDatePickerElem := utils.NewDatePickerWithOpts(startDatePickerActionID, nil, time.Now())
-
-startDatePickerSectionBlock := slack.NewSectionBlock(startDatePickerTxt, nil, nil)
-startDatePickerActionBlock := slack.NewActionBlock(
-    startDatePickerBlockID, 
-    startDatePickerElem, 
-    utils.CancelBtn,
-)
-
-startDatePickerMsg = utils.Msg{
-	Blocks: []slack.Block{startDatePickerSectionBlock, startDatePickerActionBlock},
-}
-	
-_, _, err := utils.PostMsg(client, startDatePickerMsg, channelID)
-```
-In addition to `CancelBtn`, the library also provides a number of other pre-generated block elements including the `GoBtn` and `AckBtn`. Create a new button with a pre-set style using `NewButtonWithStyle` and create a fully-loaded datepicker with `NewDatePickerWithOpts`. You can also use `DateOptToTime` to parse the selected opt back to datetime for any callbacks from a datepicker created by this method, 
-
-## WIP
-New functionality currently in the pipeline includes:
-- Get all users' Slack IDs
-- Get all users' emails
-- Get Slack IDs for every member of a usergroup
-- Get emails for every member of a usergroup
-- Investigate support for downloading/reading other files
- 
-Suggestions or requests are always welcome
+---
+Suggestions/requests for new functionality are always welcome
