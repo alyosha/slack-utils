@@ -30,7 +30,9 @@ func NewTextBlock(body string, accessory *slack.Accessory) *slack.SectionBlock {
 func NewButton(actionID, value string, text string, style slack.Style) *slack.ButtonBlockElement {
 	btnText := slack.NewTextBlockObject(slack.PlainTextType, text, false, false)
 	btn := slack.NewButtonBlockElement(actionID, value, btnText)
-	btn.WithStyle(style)
+	if style != slack.StyleDefault {
+		btn.WithStyle(style)
+	}
 	return btn
 }
 
