@@ -29,14 +29,13 @@ func TestNewButton(t *testing.T) {
 		wantButton  *slack.ButtonBlockElement
 	}{
 		{
-			description: "returns default style button",
+			description: "ignores default style",
 			style:       slack.StyleDefault,
 			wantButton: &slack.ButtonBlockElement{
 				Type:     slack.METButton,
 				ActionID: mockActionID,
 				Text:     mockTextObj,
 				Value:    mockValue,
-				Style:    slack.StyleDefault,
 			},
 		},
 		{
@@ -185,7 +184,6 @@ func TestTextBlock(t *testing.T) {
 						ActionID: mockActionID,
 						Text:     mockTextObj,
 						Value:    mockValue,
-						Style:    slack.StyleDefault,
 					},
 				},
 			},
