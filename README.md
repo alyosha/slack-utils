@@ -54,15 +54,10 @@ Below is a pseudo-code example of how to post an interactive block message to Sl
 ```go
 client := slack.New(env.BotToken)
 
-startDatePickerTxt := slack.NewTextBlockObject(
-	slack.MarkdownType,
-	"Please choose a *start date* for the new survey",
-	false,
-	false,
-)
+startDatePickerSectionBlock := utils.NewTextBlock("Please choose a *start date* for the new survey", nil)
+
 startDatePickerElem := utils.NewDatePickerWithOpts(startDatePickerActionID, nil, time.Now())
 
-startDatePickerSectionBlock := slack.NewSectionBlock(startDatePickerTxt, nil, nil)
 startDatePickerActionBlock := slack.NewActionBlock(
     startDatePickerBlockID, 
     startDatePickerElem, 
