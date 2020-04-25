@@ -6,40 +6,30 @@ import (
 	"github.com/slack-go/slack"
 )
 
+const datePickTimeFmt = "2006-01-02"
+
 const (
-	datePickTimeFmt = "2006-01-02"
-
-	CancelActionID   = "cancel_action"
-	AckActionID      = "acknowledge_action"
-	GoActionID       = "go_action"
-	ContinueActionID = "continue_action"
-
-	AckBlockID            = "ack_block"
-	CancelBlockID         = "cancel_block"
-	GoCancelBlockID       = "go_cancel_block"
-	ContinueCancelBlockID = "go_continue_block"
+	CancelActionID = "cancel_action"
+	CancelBlockID  = "cancel_block"
 )
 
 var (
-	cancelBtnTxt   = slack.NewTextBlockObject(slack.PlainTextType, "Cancel", false, false)
-	ackBtnTxt      = slack.NewTextBlockObject(slack.PlainTextType, "Got it", false, false)
-	goBtnTxt       = slack.NewTextBlockObject(slack.PlainTextType, "Go!", false, false)
-	continueBtnTxt = slack.NewTextBlockObject(slack.PlainTextType, "Continue", false, false)
-	CancelBtn      = NewButtonWithStyle(CancelActionID, "cancel", cancelBtnTxt, slack.StyleDanger)
-	AckBtn         = NewButtonWithStyle(AckActionID, "acknowledge", ackBtnTxt, slack.StylePrimary)
-	GoBtn          = NewButtonWithStyle(GoActionID, "go", goBtnTxt, slack.StylePrimary)
-	ContinueBtn    = NewButtonWithStyle(ContinueActionID, "continue", continueBtnTxt, slack.StylePrimary)
-
-	DivBlock            = slack.NewDividerBlock()
-	AckBlock            = slack.NewActionBlock(AckBlockID, AckBtn)
-	CancelBlock         = slack.NewActionBlock(CancelBlockID, CancelBtn)
-	GoCancelBlock       = slack.NewActionBlock(GoCancelBlockID, GoBtn, CancelBtn)
-	ContinueCancelBlock = slack.NewActionBlock(ContinueCancelBlockID, ContinueBtn, CancelBtn)
+	DoneBtn   = NewButton(CancelActionID, "done", "Done", slack.StylePrimary)
+	CancelBtn = NewButton(CancelActionID, "cancel", "Cancel", slack.StyleDanger)
 )
 
-// NewButtonWithStyle returns a new ButtonBlockElement set to the designated style
-func NewButtonWithStyle(actionID, value string, textObj *slack.TextBlockObject, style slack.Style) *slack.ButtonBlockElement {
-	btn := slack.NewButtonBlockElement(actionID, value, textObj)
+var DivBlock = slack.NewDividerBlock()
+
+// NewTextBlock returns a section block of common configuration.
+func NewTextBlock(body string, accessory *slack.Accessory) *slack.SectionBlock {
+	text := slack.NewTextBlockObject(slack.MarkdownType, body, false, false)
+	return slack.NewSectionBlock(text, nil, accessory)
+}
+
+// NewButton returns a new ButtonBlockElement set to the designated style
+func NewButton(actionID, value string, text string, style slack.Style) *slack.ButtonBlockElement {
+	btnText := slack.NewTextBlockObject(slack.PlainTextType, text, false, false)
+	btn := slack.NewButtonBlockElement(actionID, value, btnText)
 	btn.WithStyle(style)
 	return btn
 }

@@ -49,12 +49,12 @@ func TestDownloadAndReadCSV(t *testing.T) {
 
 		rows, err := DownloadAndReadCSV(client, fmt.Sprintf("%v/%v", testServ.URL, mockURL))
 
-		if diff := pretty.Compare(tc.wantRows, rows); diff != "" {
-			t.Fatalf("expected to receive rows: %v, got: %v", tc.wantRows, rows)
+		if diff := pretty.Compare(rows, tc.wantRows); diff != "" {
+			t.Fatalf("+got -want %s\n", diff)
 		}
 
 		if diff := pretty.Compare(tc.wantErr, err); diff != "" {
-			t.Fatalf("wantErr does not match received err: %v, got: %v", tc.wantErr, err)
+			t.Fatalf("+got -want %s\n", diff)
 		}
 	}
 }
