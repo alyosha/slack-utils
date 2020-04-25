@@ -11,6 +11,7 @@ import (
 const (
 	mockActionID             = "fAkE123"
 	mockValue                = "click_me_btn"
+	mockText                 = "Do something"
 	fakeStyle    slack.Style = "fake"
 )
 
@@ -21,7 +22,7 @@ var mockTextObj = &slack.TextBlockObject{
 	Verbatim: false,
 }
 
-func TestNewButtonWithStyle(t *testing.T) {
+func TestNewButton(t *testing.T) {
 	testCases := []struct {
 		description string
 		style       slack.Style
@@ -63,9 +64,9 @@ func TestNewButtonWithStyle(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			btn := NewButtonWithStyle(mockActionID, mockValue, mockTextObj, tc.style)
+			btn := NewButton(mockActionID, mockValue, mockText, tc.style)
 			if diff := pretty.Compare(btn, tc.wantButton); diff != "" {
-				t.Fatalf("expected to receive button: %v, got: %v", tc.wantButton, btn)
+				t.Fatalf("-got +want %s\n", diff)
 			}
 		})
 	}
@@ -102,7 +103,7 @@ func TestNewDatePickerAtTime(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			picker := NewDatePickerWithOpts(mockActionID, tc.placeholder, now)
 			if diff := pretty.Compare(picker, tc.wantDatePicker); diff != "" {
-				t.Fatalf("expected to receive datepicker: %v, got: %v", tc.wantDatePicker, picker)
+				t.Fatalf("+got -want %s\n", diff)
 			}
 		})
 	}
@@ -141,7 +142,62 @@ func TestNewDateOptToTime(t *testing.T) {
 				t.Fatalf("received unexpected error: %s", err)
 			}
 			if diff := pretty.Compare(parsedTime, expectedTime); diff != "" {
-				t.Fatalf("expected to receive time: %v, got: %v", expectedTime, parsedTime)
+				t.Fatalf("+got -want %s\n", diff)
+			}
+		})
+	}
+}
+
+func TestTextBlock(t *testing.T) {
+	testCases := []struct {
+		description string
+		text        string
+		accessory   *slack.Accessory
+		wantBlock   *slack.SectionBlock
+	}{
+		{
+			description: "returns expected text-only section block",
+			text:        "Basic message",
+			wantBlock: &slack.SectionBlock{
+				Type: slack.MBTSection,
+				Text: &slack.TextBlockObject{
+					Type:     slack.MarkdownType,
+					Text:     "Basic message",
+					Emoji:    false,
+					Verbatim: false,
+				},
+			},
+		},
+		{
+			description: "returns text block with accessory",
+			text:        "Basic message",
+			wantBlock: &slack.SectionBlock{
+				Type: slack.MBTSection,
+				Text: &slack.TextBlockObject{
+					Type:     slack.MarkdownType,
+					Text:     "Basic message",
+					Emoji:    false,
+					Verbatim: false,
+				},
+				Accessory: &slack.Accessory{
+					ButtonElement: &slack.ButtonBlockElement{
+						Type:     slack.METButton,
+						ActionID: mockActionID,
+						Text:     mockTextObj,
+						Value:    mockValue,
+						Style:    slack.StyleDefault,
+					},
+				},
+			},
+			accessory: slack.NewAccessory(NewButton(mockActionID, mockValue, mockText, slack.StyleDefault)),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			block := NewTextBlock(tc.text, tc.accessory)
+			if diff := pretty.Compare(block, tc.wantBlock); diff != "" {
+				t.Fatalf("-got +want %s\n", diff)
 			}
 		})
 	}
