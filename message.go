@@ -13,6 +13,7 @@ type Msg struct {
 	Blocks      []slack.Block
 	Attachments []slack.Attachment
 	AsUser      bool
+	IconURL     string // Incompatible with AsUser option
 }
 
 func getCommonOpts(msg Msg) []slack.MsgOption {
@@ -22,6 +23,7 @@ func getCommonOpts(msg Msg) []slack.MsgOption {
 		slack.MsgOptionAttachments(msg.Attachments...),
 		slack.MsgOptionAsUser(msg.AsUser),
 		slack.MsgOptionEnableLinkUnfurl(),
+		slack.MsgOptionIconURL(msg.IconURL),
 	}
 }
 
