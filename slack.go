@@ -7,28 +7,40 @@ import (
 	"github.com/slack-go/slack"
 )
 
-var ErrNoSecret = errors.New("no signing secret found in context")
+var (
+	errSlashCommandNotFound        = errors.New("no slash command found in context")
+	errInteractionCallbackNotFound = errors.New("no callback found in context")
+)
 
-type signingSecretKey struct{}
+type slashCommandKey struct{}
+type interactionCallbackKey struct{}
 
-// Channel is used in opening/interacting with a single Slack channel
-type Channel struct {
-	UserClient *slack.Client
-	BotClient  *slack.Client
-	ChannelID  string
-}
-
-// WithSigningSecret embeds the signing secret value into to the request context
-func WithSigningSecret(ctx context.Context, signingSecret string) context.Context {
-	return context.WithValue(ctx, signingSecretKey{}, signingSecret)
-}
-
-func getSigningSecret(ctx context.Context) (string, error) {
-	val := ctx.Value(signingSecretKey{})
-	secret, ok := val.(string)
+// SlashCommand retrieves the verified slash command from the context. To
+// utilize this functionality, you must use the VerifySlashCommand middleware.
+func SlashCommand(ctx context.Context) (*slack.SlashCommand, error) {
+	val := ctx.Value(slashCommandKey{})
+	cmd, ok := val.(*slack.SlashCommand)
 	if !ok {
-		return "", ErrNoSecret
+		return nil, errSlashCommandNotFound
 	}
+	return cmd, nil
+}
 
-	return secret, nil
+// InteractionCallback retrieves the verified interaction callback from the context.
+// To utilize this functionality, you must use the VerifyInteractionCallback middleware.
+func InteractionCallback(ctx context.Context) (*slack.InteractionCallback, error) {
+	val := ctx.Value(interactionCallbackKey{})
+	callback, ok := val.(*slack.InteractionCallback)
+	if !ok {
+		return nil, errInteractionCallbackNotFound
+	}
+	return callback, nil
+}
+
+func withSlashCommand(ctx context.Context, cmd *slack.SlashCommand) context.Context {
+	return context.WithValue(ctx, slashCommandKey{}, cmd)
+}
+
+func withInteractionCallback(ctx context.Context, cmd *slack.InteractionCallback) context.Context {
+	return context.WithValue(ctx, interactionCallbackKey{}, cmd)
 }
