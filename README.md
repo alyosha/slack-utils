@@ -1,51 +1,57 @@
 # slack-utils 
-Collection of utility methods I frequently use in slackbot projects/other slack scripts.
+Collection of utility methods/middleware I frequently use in slackbot projects.
 
 ## Disclaimer
 Until major release version `1.0.0`, it is safe to expect some significant changes to existing functions.
 
 ## Highlighted functionality
 ### Easy verification
-Easily verify incoming requests from slash commands/interactive callbacks using one of the provided verification methods. 
+Easily verify incoming requests from slash commands/interactive callbacks using the provided verification middleware. 
 
-Both methods expect the application's signing secret to be embedded in the request context. Set the secret as an environment variable and add it to the context in a manner similar to the following:
+The simplest way to enable request verification is as follows:
 ```go
 r := chi.NewRouter()
-r.Use(func(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := utils.WithSigningSecret(r.Context(), env.SigningSecret)
-		h.ServeHTTP(w, r.WithContext(ctx))
-	})
-})
+r.Use(utils.VerifySlashCommand(env.SigningSecret, nil, nil))
+r.Use(utils.VerifyInteractionCallback(env.SigningSecret, nil, nil))
 ```
 
-**Slash command verification example**
+The above will verify the authenticity of all incoming requests using your
+signing secret and embed the verified/unmarshalled request object into the
+context on success. Optionally configure additional actions to be taken on
+success/failure (e.g. logging) by passing in corresponding callback methods.
 
+Retrieve the request from the context and use it in the following manner:
+
+**Slash command example**
 ```go
-cmd, err := utils.VerifySlashCmd(r)
-if err != nil {
-  // handle error
-}
+func Foo(w http.ResponseWriter, r *http.Request) {
+  cmd, err := utils.SlashCommand(r.Context())
+  if err != nil {
+    // handle error
+  }
 
-if err = doSomethingWithArg(cmd.Text); err != nil {
-  // handle error
+  if err = doSomething(cmd.Text); err != nil {
+    // handle error
+  }
 }
 ```
-**Interactive callback verification example**
 
+**Interactive callback example**
 ```go
-callback, err := utils.VerifyCallbackMsg(r)
-if err != nil {
-  // handle error
-}
+func Callback(w http.ResponseWriter, r *http.Request) {
+  callback, err := utils.InteractionCallback(r.Context())
+  if err != nil {
+   // handle error
+  }
 
-switch callback.Type {
-case slack.InteractionTypeBlockActions:
-  // handle block action callback
-case slack.InteractionTypeMessageAction:
-  // handle message action callback
-case slack.InteractionTypeDialogSubmission:
-  // handle dialog submission callback
+  switch callback.Type {
+  case slack.InteractionTypeBlockActions:
+    // handle block action callback
+  case slack.InteractionTypeMessageAction:
+    // handle message action callback
+  case slack.InteractionTypeDialogSubmission:
+    // handle dialog submission callback
+  }
 }
 ```
 
