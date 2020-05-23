@@ -6,43 +6,94 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/slack-go/slack"
 )
 
-// VerifyCallbackMsg confirms the validity of the interaction callback via
-// the signing secret embedded in the context and returns the verified message body
-func VerifyCallbackMsg(r *http.Request) (verifiedBody *slack.InteractionCallback, err error) {
+type (
+	verifySucceedSlash    func(w http.ResponseWriter, r *http.Request, cmd *slack.SlashCommand)
+	verifySucceedCallback func(w http.ResponseWriter, r *http.Request, cmd *slack.InteractionCallback)
+	verifyFail            func(w http.ResponseWriter, r *http.Request, err error)
+)
+
+// VerifySlashCommand is a middleware that will automatically verify the
+// authenticity of the incoming request and embed the unmarshalled SlashCommand
+// in the context on success. Use the optional succeed/fail parameters to
+// configure additional behavior on sucess/failure, or simply provide nil if
+// no further action is required.
+func VerifySlashCommand(signingSecret string, succeed verifySucceedSlash, fail verifyFail) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			cmd, err := verifySlashCommand(r, signingSecret)
+			if err != nil {
+				if fail != nil {
+					fail(w, r, err)
+				}
+				return
+			}
+			ctx := withSlashCommand(r.Context(), cmd)
+			if succeed != nil {
+				succeed(w, r, cmd)
+			}
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+// VerifyInteractionCallback is a middleware that will automatically verify
+// the authenticity of the incoming request and embed the unmarshalled
+// InteractionCallback in the context on success. Use the optional succeed/fail
+// parameters to configure additional behavior on sucess/failure, or simply
+// provide nil if no further action is required.
+func VerifyInteractionCallback(signingSecret string, succeed verifySucceedCallback, fail verifyFail) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			callback, err := verifyInteractionCallback(r, signingSecret)
+			if err != nil {
+				if fail != nil {
+					fail(w, r, err)
+				}
+				return
+			}
+			ctx := withInteractionCallback(r.Context(), callback)
+			if succeed != nil {
+				succeed(w, r, callback)
+			}
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+func verifyInteractionCallback(r *http.Request, signingSecret string) (verifiedBody *slack.InteractionCallback, err error) {
 	if r.Method != http.MethodPost {
 		return nil, err
 	}
 
-	buf, err := checkSecretAndWriteBody(r)
+	buf, err := checkSecretAndWriteBody(r, signingSecret)
 	if err != nil {
 		return nil, err
 	}
 
-	jsonBody, err := url.QueryUnescape(buf.String()[8:])
+	jsonBody, err := url.QueryUnescape(strings.Replace(buf.String(), "payload=", "", 1))
 	if err != nil {
 		return
 	}
 
-	var msg *slack.InteractionCallback
-	if err := json.Unmarshal([]byte(jsonBody), &msg); err != nil {
+	msg := &slack.InteractionCallback{}
+	if err := json.Unmarshal([]byte(jsonBody), msg); err != nil {
 		return nil, err
 	}
 
 	return msg, nil
 }
 
-// VerifySlashCmd confirms the validity of the slash command message via
-// the signing secret embedded in the context and returns the verified message body
-func VerifySlashCmd(r *http.Request) (verifiedBody *slack.SlashCommand, err error) {
+func verifySlashCommand(r *http.Request, signingSecret string) (verifiedBody *slack.SlashCommand, err error) {
 	if r.Method != http.MethodPost {
 		return nil, err
 	}
 
-	buf, err := checkSecretAndWriteBody(r)
+	buf, err := checkSecretAndWriteBody(r, signingSecret)
 	if err != nil {
 		return nil, err
 	}
@@ -57,12 +108,8 @@ func VerifySlashCmd(r *http.Request) (verifiedBody *slack.SlashCommand, err erro
 	return &msg, nil
 }
 
-func checkSecretAndWriteBody(r *http.Request) (bytes.Buffer, error) {
+func checkSecretAndWriteBody(r *http.Request, signingSecret string) (bytes.Buffer, error) {
 	var buf bytes.Buffer
-	signingSecret, err := getSigningSecret(r.Context())
-	if err != nil {
-		return buf, err
-	}
 
 	sv, err := slack.NewSecretsVerifier(r.Header, signingSecret)
 	if err != nil {

@@ -14,6 +14,13 @@ const (
 	errAlreadyArchivedMsg = "already_archived"
 )
 
+// Channel is used in opening/interacting with a single Slack channel
+type Channel struct {
+	UserClient *slack.Client
+	BotClient  *slack.Client
+	ChannelID  string
+}
+
 var ErrNoUsersInWorkplace = errors.New("no users in workplace")
 
 // CreateChannel opens a new public channel and invites the provided list of member IDs, optionally posting an initial message
