@@ -11,6 +11,8 @@ import (
 	"github.com/slack-go/slack"
 )
 
+// The following func types are used to configure custom additional actions on
+// verify middleware success/failure (e.g. logging, etc.)
 type (
 	VerifySucceedSlash    func(w http.ResponseWriter, r *http.Request, cmd *slack.SlashCommand)
 	VerifySucceedCallback func(w http.ResponseWriter, r *http.Request, cmd *slack.InteractionCallback)
