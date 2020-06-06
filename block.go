@@ -6,16 +6,11 @@ import (
 	"github.com/slack-go/slack"
 )
 
-const datePickTimeFmt = "2006-01-02"
-
 const (
-	CancelActionID = "cancel_action"
+	DeleteActionID = "delete_action"
 )
 
-var (
-	DoneBtn   = NewButton(CancelActionID, "done", "Done", slack.StylePrimary)
-	CancelBtn = NewButton(CancelActionID, "cancel", "Cancel", slack.StyleDanger)
-)
+const datePickTimeFmt = "2006-01-02"
 
 var DivBlock = slack.NewDividerBlock()
 
@@ -35,22 +30,35 @@ func NewButton(actionID, value string, text string, style slack.Style) *slack.Bu
 	return btn
 }
 
+// NewDoneBtn returns a new primary button which will callback to
+// DeleteActionID on select. Configure the button title via param.
+func NewDoneButton(text string) *slack.ButtonBlockElement {
+	return NewButton(DeleteActionID, "done", text, slack.StylePrimary)
+}
+
+// NewCancelBtn returns a new danger button which will callback to
+// DeleteActionID on select. Configure the button title via param.
+func NewCancelButton(text string) *slack.ButtonBlockElement {
+	return NewButton(DeleteActionID, "cancel", text, slack.StyleDanger)
+}
+
 // NewDatePickerWithOpts returns a new DatePickerBlockElement initialized with
-// its date/placeholder text set as specified by one of the two parameters
-func NewDatePickerWithOpts(actionID string, placeholder *slack.TextBlockObject, initialDate time.Time) *slack.DatePickerBlockElement {
+// its date/placeholder text set to either placeholder text or an initial date.
+func NewDatePickerWithPlaceholder(actionID string, placeholder interface{}) *slack.DatePickerBlockElement {
 	picker := slack.NewDatePickerBlockElement(actionID)
-	if placeholder != nil {
-		picker.Placeholder = placeholder
-		return picker
+
+	switch placeholder.(type) {
+	case string:
+		picker.Placeholder = slack.NewTextBlockObject(slack.PlainTextType, placeholder.(string), false, false)
+	case time.Time:
+		picker.InitialDate = placeholder.(time.Time).Format(datePickTimeFmt)
 	}
-	dateStr := initialDate.Format(datePickTimeFmt)
-	picker.InitialDate = dateStr
+
 	return picker
 }
 
 // DateOptToTime parses the selected date opt back to time.Time, but owing to
-// its format will always initialize to zero time for everything more
-// granular than a day. Add time.Duration as needed in downstream packages
+// its format always resolve anything more granular than a day to zero.
 func DateOptToTime(opt string) (time.Time, error) {
 	return time.Parse(datePickTimeFmt, opt)
 }
