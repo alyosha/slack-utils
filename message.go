@@ -12,21 +12,11 @@ type Msg struct {
 	IconURL string // Incompatible with AsUser option
 }
 
-func getCommonOpts(msg Msg) []slack.MsgOption {
-	return []slack.MsgOption{
-		slack.MsgOptionText(msg.Body, false),
-		slack.MsgOptionBlocks(msg.Blocks...),
-		slack.MsgOptionAsUser(msg.AsUser),
-		slack.MsgOptionEnableLinkUnfurl(),
-		slack.MsgOptionIconURL(msg.IconURL),
-	}
-}
-
 // PostMsg sends the provided message to the conversation designated by conversationID
 func (c *Client) PostMsg(msg Msg, conversationID string) (string, error) {
 	_, ts, err := c.Client.PostMessage(
 		conversationID,
-		getCommonOpts(msg)...,
+		msg.getCommonOpts()...,
 	)
 
 	if err != nil {
@@ -40,7 +30,7 @@ func (c *Client) PostMsg(msg Msg, conversationID string) (string, error) {
 func (c *Client) PostThreadMsg(msg Msg, conversationID string, threadTs string) error {
 	_, _, err := c.Client.PostMessage(
 		conversationID,
-		append(getCommonOpts(msg), slack.MsgOptionTS(threadTs))...,
+		append(msg.getCommonOpts(), slack.MsgOptionTS(threadTs))...,
 	)
 
 	return err
@@ -50,7 +40,7 @@ func (c *Client) PostThreadMsg(msg Msg, conversationID string, threadTs string) 
 func (c *Client) PostEphemeralMsg(msg Msg, conversationID, userID string) error {
 	_, _, err := c.Client.PostMessage(
 		conversationID,
-		append(getCommonOpts(msg), slack.MsgOptionPostEphemeral(userID))...,
+		append(msg.getCommonOpts(), slack.MsgOptionPostEphemeral(userID))...,
 	)
 
 	return err
@@ -61,7 +51,7 @@ func (c *Client) UpdateMsg(msg Msg, conversationID, timestamp string) error {
 	_, _, _, err := c.Client.UpdateMessage(
 		conversationID,
 		timestamp,
-		getCommonOpts(msg)...,
+		msg.getCommonOpts()...,
 	)
 
 	return err
@@ -76,4 +66,14 @@ func (c *Client) DeleteMsg(conversationID, timestamp, responseURL string) error 
 	)
 
 	return err
+}
+
+func (msg Msg) getCommonOpts() []slack.MsgOption {
+	return []slack.MsgOption{
+		slack.MsgOptionText(msg.Body, false),
+		slack.MsgOptionBlocks(msg.Blocks...),
+		slack.MsgOptionAsUser(msg.AsUser),
+		slack.MsgOptionEnableLinkUnfurl(),
+		slack.MsgOptionIconURL(msg.IconURL),
+	}
 }

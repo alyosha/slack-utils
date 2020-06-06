@@ -30,7 +30,7 @@ func (c *Client) CreateConversation(conversationName string, isPrivate bool, use
 	if initMsg.Body != "" || initMsg.Blocks != nil {
 		_, _, err := c.Client.PostMessage(
 			conversation.ID,
-			getCommonOpts(initMsg)...,
+			initMsg.getCommonOpts()...,
 		)
 		if err != nil {
 			return conversation.ID, fmt.Errorf("c.Client.PostMessage() > %w", err)
