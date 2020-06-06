@@ -36,6 +36,7 @@ func TestVerifySlashCommand(t *testing.T) {
 		secret              string
 		ts                  string
 		invalidHex          bool
+		logConfig           RequestLoggingConfig
 		failFunc            VerifyFail
 		succeedFunc         VerifySucceedSlash
 		wantErr             error
@@ -47,6 +48,13 @@ func TestVerifySlashCommand(t *testing.T) {
 			useMiddleware: true,
 			secret:        testSecret1,
 			ts:            testReqTsValid,
+		},
+		{
+			description:   "same success case as above with request logging",
+			useMiddleware: true,
+			secret:        testSecret1,
+			ts:            testReqTsValid,
+			logConfig:     RequestLoggingConfig{Enabled: true},
 		},
 		{
 			description:   "using middleware and valid signing signature, expected extra success response received",
@@ -137,8 +145,25 @@ func TestVerifySlashCommand(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			r := chi.NewRouter()
 
+			mux := http.NewServeMux()
+
+			var logReqReceived bool
+
+			mux.HandleFunc("/chat.postMessage", func(w http.ResponseWriter, r *http.Request) {
+				logReqReceived = true
+				_, _ = w.Write([]byte("ok"))
+			})
+
+			testServSlack := httptest.NewServer(mux)
+			defer testServSlack.Close()
+
+			client := &Client{
+				Client:     slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServSlack.URL))),
+				logChannel: "C1H9RESGL",
+			}
+
 			if tc.useMiddleware {
-				r.Use(VerifySlashCommand(testSecret1, tc.succeedFunc, tc.failFunc))
+				r.Use(client.VerifySlash(testSecret1, tc.logConfig, tc.succeedFunc, tc.failFunc))
 			}
 
 			signingSig := getSigningSig(t, tc.ts, tc.secret, []byte(encodedBody))
@@ -174,6 +199,10 @@ func TestVerifySlashCommand(t *testing.T) {
 			if respBodyString != tc.wantRespBody {
 				t.Fatalf("expected resp body: %s, got: %s", tc.wantRespBody, respBodyString)
 			}
+
+			if tc.logConfig.Enabled && !logReqReceived {
+				t.Fatal("expected log request call did not come")
+			}
 		})
 	}
 }
@@ -185,6 +214,7 @@ func TestVerifyInteractionCallback(t *testing.T) {
 		secret              string
 		ts                  string
 		invalidHex          bool
+		logConfig           RequestLoggingConfig
 		failFunc            VerifyFail
 		succeedFunc         VerifySucceedCallback
 		wantErr             error
@@ -196,6 +226,13 @@ func TestVerifyInteractionCallback(t *testing.T) {
 			useMiddleware: true,
 			secret:        testSecret1,
 			ts:            testReqTsValid,
+		},
+		{
+			description:   "same success case as above, with request logging",
+			useMiddleware: true,
+			secret:        testSecret1,
+			ts:            testReqTsValid,
+			logConfig:     RequestLoggingConfig{Enabled: true},
 		},
 		{
 			description:   "using middleware and valid signing signature, expected extra success response received",
@@ -297,8 +334,24 @@ func TestVerifyInteractionCallback(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			r := chi.NewRouter()
 
+			var logReqReceived bool
+
+			mux := http.NewServeMux()
+			mux.HandleFunc("/chat.postMessage", func(w http.ResponseWriter, r *http.Request) {
+				logReqReceived = true
+				_, _ = w.Write([]byte("ok"))
+			})
+
+			testServSlack := httptest.NewServer(mux)
+			defer testServSlack.Close()
+
+			client := &Client{
+				Client:     slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServSlack.URL))),
+				logChannel: "C1H9RESGL",
+			}
+
 			if tc.useMiddleware {
-				r.Use(VerifyInteractionCallback(testSecret1, tc.succeedFunc, tc.failFunc))
+				r.Use(client.VerifyCallback(testSecret1, tc.logConfig, tc.succeedFunc, tc.failFunc))
 			}
 
 			signingSig := getSigningSig(t, tc.ts, tc.secret, []byte(testCallbackRaw))
@@ -333,6 +386,10 @@ func TestVerifyInteractionCallback(t *testing.T) {
 
 			if respBodyString != tc.wantRespBody {
 				t.Fatalf("expected resp body: %s, got: %s", tc.wantRespBody, respBodyString)
+			}
+
+			if tc.logConfig.Enabled != logReqReceived {
+				t.Fatalf("log request enabled: %v, log received: %v", tc.logConfig.Enabled, logReqReceived)
 			}
 		})
 	}

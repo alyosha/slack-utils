@@ -23,20 +23,18 @@ type (
 
 // Client wraps the slack Client for additional utility
 type Client struct {
-	Client           *slack.Client
-	adminID          string
-	logChannelID     string
-	errChannelID     string
-	logAdminRequests bool
+	Client     *slack.Client
+	adminID    string
+	logChannel string
+	errChannel string
 }
 
 // ClientConfig is used to configure a new Client
 type ClientConfig struct {
-	BotToken         string
-	AdminID          string
-	LogChannelID     string
-	ErrChannelID     string
-	LogAdminRequests bool
+	BotToken     string
+	AdminID      string
+	LogChannelID string
+	ErrChannelID string
 }
 
 // NewClient returns a new client based on provided config
@@ -50,11 +48,10 @@ func NewClient(cfg ClientConfig, opt ...slack.Option) (*Client, error) {
 	}
 
 	c := &Client{
-		Client:           slack.New(cfg.BotToken, opt...),
-		adminID:          cfg.AdminID,
-		logChannelID:     cfg.LogChannelID,
-		errChannelID:     cfg.ErrChannelID,
-		logAdminRequests: cfg.LogAdminRequests,
+		Client:     slack.New(cfg.BotToken, opt...),
+		adminID:    cfg.AdminID,
+		logChannel: cfg.LogChannelID,
+		errChannel: cfg.ErrChannelID,
 	}
 
 	var eg errgroup.Group

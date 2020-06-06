@@ -61,11 +61,10 @@ func TestNewClient(t *testing.T) {
 		{
 			description: "success - fully loaded client",
 			cfg: ClientConfig{
-				AdminID:          "U1234",
-				BotToken:         "B1234",
-				LogChannelID:     "C1234",
-				ErrChannelID:     "C2345",
-				LogAdminRequests: true,
+				AdminID:      "U1234",
+				BotToken:     "B1234",
+				LogChannelID: "C1234",
+				ErrChannelID: "C2345",
 			},
 			respConversationInfo: []byte(mockSuccessResp),
 			respUserInfo:         []byte(mockSuccessResp),

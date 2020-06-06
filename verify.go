@@ -11,59 +11,104 @@ import (
 	"github.com/slack-go/slack"
 )
 
+const (
+	verifyActionTypeSucceedSlash    = "succeed_slash"
+	verifyActionTypeSucceedCallback = "succeed_callback"
+	verifyActionTypeFail            = "fail"
+	verifyActionTypeMalformed       = "malformed"
+)
+
 // The following func types are used to configure custom additional actions on
 // verify middleware success/failure (e.g. logging, etc.)
 type (
+	VerifyAction interface {
+		verifyActionType() string
+	}
+
 	VerifySucceedSlash    func(w http.ResponseWriter, r *http.Request, cmd *slack.SlashCommand)
 	VerifySucceedCallback func(w http.ResponseWriter, r *http.Request, cmd *slack.InteractionCallback)
 	VerifyFail            func(w http.ResponseWriter, r *http.Request, err error)
 )
 
-// VerifySlashCommand is a middleware that will automatically verify the
+func (v VerifySucceedSlash) verifyActionType() string {
+	if v == nil {
+		return verifyActionTypeMalformed
+	}
+	return verifyActionTypeSucceedSlash
+}
+
+func (v VerifySucceedCallback) verifyActionType() string {
+	if v == nil {
+		return verifyActionTypeMalformed
+	}
+	return verifyActionTypeSucceedCallback
+}
+
+func (v VerifyFail) verifyActionType() string {
+	if v == nil {
+		return verifyActionTypeMalformed
+	}
+	return verifyActionTypeFail
+}
+
+// VerifySlash is a middleware that will automatically verify the
 // authenticity of the incoming request and embed the unmarshalled SlashCommand
 // in the context on success. Use the optional succeed/fail parameters to
 // configure additional behavior on sucess/failure, or simply provide nil if
 // no further action is required.
-func VerifySlashCommand(signingSecret string, succeed VerifySucceedSlash, fail VerifyFail) func(next http.Handler) http.Handler {
+func (c *Client) VerifySlash(signingSecret string, logConfig RequestLoggingConfig, verifyActions ...VerifyAction) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cmd, err := verifySlashCommand(r, signingSecret)
 			if err != nil {
-				if fail != nil {
-					fail(w, r, err)
-				}
+				fail(w, r, err, verifyActions...)
 				return
 			}
 			ctx := withSlashCommand(r.Context(), cmd)
-			if succeed != nil {
-				succeed(w, r, cmd)
+			for _, action := range verifyActions {
+				if action.verifyActionType() == verifyActionTypeSucceedSlash {
+					action.(VerifySucceedSlash)(w, r, cmd)
+				}
 			}
+			c.logRequest(logConfig, r.URL.Path, cmd.UserID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
 
-// VerifyInteractionCallback is a middleware that will automatically verify
+// VerifyCallback is a middleware that will automatically verify
 // the authenticity of the incoming request and embed the unmarshalled
 // InteractionCallback in the context on success. Use the optional succeed/fail
 // parameters to configure additional behavior on sucess/failure, or simply
 // provide nil if no further action is required.
-func VerifyInteractionCallback(signingSecret string, succeed VerifySucceedCallback, fail VerifyFail) func(next http.Handler) http.Handler {
+func (c *Client) VerifyCallback(signingSecret string, logConfig RequestLoggingConfig, verifyActions ...VerifyAction) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			callback, err := verifyInteractionCallback(r, signingSecret)
 			if err != nil {
-				if fail != nil {
-					fail(w, r, err)
-				}
+				fail(w, r, err, verifyActions...)
 				return
 			}
 			ctx := withInteractionCallback(r.Context(), callback)
-			if succeed != nil {
-				succeed(w, r, callback)
+			for _, action := range verifyActions {
+				if action.verifyActionType() == verifyActionTypeSucceedCallback {
+					action.(VerifySucceedCallback)(w, r, callback)
+				}
 			}
+			c.logRequest(logConfig, r.URL.Path, callback.User.ID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
+	}
+}
+
+func fail(w http.ResponseWriter, r *http.Request, err error, verifyActions ...VerifyAction) {
+	for _, action := range verifyActions {
+		if action == nil {
+			continue
+		}
+		if action.verifyActionType() == verifyActionTypeFail {
+			action.(VerifyFail)(w, r, err)
+		}
 	}
 }
 
