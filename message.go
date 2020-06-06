@@ -24,7 +24,7 @@ func getCommonOpts(msg Msg) []slack.MsgOption {
 
 // PostMsg sends the provided message to the conversation designated by conversationID
 func (c *Client) PostMsg(msg Msg, conversationID string) (string, error) {
-	_, ts, err := c.client.PostMessage(
+	_, ts, err := c.Client.PostMessage(
 		conversationID,
 		getCommonOpts(msg)...,
 	)
@@ -38,7 +38,7 @@ func (c *Client) PostMsg(msg Msg, conversationID string) (string, error) {
 
 // PostThreadMsg posts a message response into an existing thread
 func (c *Client) PostThreadMsg(msg Msg, conversationID string, threadTs string) error {
-	_, _, err := c.client.PostMessage(
+	_, _, err := c.Client.PostMessage(
 		conversationID,
 		append(getCommonOpts(msg), slack.MsgOptionTS(threadTs))...,
 	)
@@ -48,7 +48,7 @@ func (c *Client) PostThreadMsg(msg Msg, conversationID string, threadTs string) 
 
 // PostEphemeralMsg sends an ephemeral message in the conversation designated by conversationID
 func (c *Client) PostEphemeralMsg(msg Msg, conversationID, userID string) error {
-	_, _, err := c.client.PostMessage(
+	_, _, err := c.Client.PostMessage(
 		conversationID,
 		append(getCommonOpts(msg), slack.MsgOptionPostEphemeral(userID))...,
 	)
@@ -58,7 +58,7 @@ func (c *Client) PostEphemeralMsg(msg Msg, conversationID, userID string) error 
 
 // UpdateMsg updates the provided message in the conversation designated by conversationID
 func (c *Client) UpdateMsg(msg Msg, conversationID, timestamp string) error {
-	_, _, _, err := c.client.UpdateMessage(
+	_, _, _, err := c.Client.UpdateMessage(
 		conversationID,
 		timestamp,
 		getCommonOpts(msg)...,
@@ -69,7 +69,7 @@ func (c *Client) UpdateMsg(msg Msg, conversationID, timestamp string) error {
 
 // DeleteMsg deletes the provided message in the conversation designated by conversationID
 func (c *Client) DeleteMsg(conversationID, timestamp, responseURL string) error {
-	_, _, _, err := c.client.UpdateMessage(
+	_, _, _, err := c.Client.UpdateMessage(
 		conversationID,
 		timestamp,
 		slack.MsgOptionDeleteOriginal(responseURL),

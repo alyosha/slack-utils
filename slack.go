@@ -50,7 +50,7 @@ func NewClient(cfg ClientConfig, opt ...slack.Option) (*Client, error) {
 	}
 
 	c := &Client{
-		client:           slack.New(cfg.BotToken, opt...),
+		Client:           slack.New(cfg.BotToken, opt...),
 		adminID:          cfg.AdminID,
 		logChannelID:     cfg.LogChannelID,
 		errChannelID:     cfg.ErrChannelID,
@@ -60,16 +60,16 @@ func NewClient(cfg ClientConfig, opt ...slack.Option) (*Client, error) {
 	var eg errgroup.Group
 
 	eg.Go(func() error {
-		if _, err := c.client.GetUserInfo(cfg.AdminID); err != nil {
-			return fmt.Errorf("c.client.GetUserInfo() > %w", err)
+		if _, err := c.Client.GetUserInfo(cfg.AdminID); err != nil {
+			return fmt.Errorf("c.Client.GetUserInfo() > %w", err)
 		}
 		return nil
 	})
 
 	eg.Go(func() error {
 		if cfg.LogChannelID != "" {
-			if _, err := c.client.GetConversationInfo(cfg.LogChannelID, false); err != nil {
-				return fmt.Errorf("c.client.GetConversationInfo() > %w", err)
+			if _, err := c.Client.GetConversationInfo(cfg.LogChannelID, false); err != nil {
+				return fmt.Errorf("c.Client.GetConversationInfo() > %w", err)
 			}
 		}
 		return nil
@@ -77,8 +77,8 @@ func NewClient(cfg ClientConfig, opt ...slack.Option) (*Client, error) {
 
 	eg.Go(func() error {
 		if cfg.ErrChannelID != "" {
-			if _, err := c.client.GetConversationInfo(cfg.ErrChannelID, false); err != nil {
-				return fmt.Errorf("c.client.GetConversationInfo() > %w", err)
+			if _, err := c.Client.GetConversationInfo(cfg.ErrChannelID, false); err != nil {
+				return fmt.Errorf("c.Client.GetConversationInfo() > %w", err)
 			}
 		}
 		return nil
