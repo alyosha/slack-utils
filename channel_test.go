@@ -180,20 +180,20 @@ func TestInviteUsers(t *testing.T) {
 
 func TestGetConversationMembers(t *testing.T) {
 	testCases := []struct {
-		description     string
-		respChannelInfo []byte
-		wantErr         string
-		wantIDs         []string
+		description          string
+		respConversationInfo []byte
+		wantErr              string
+		wantIDs              []string
 	}{
 		{
-			description:     "successful retrieval of member IDs",
-			respChannelInfo: []byte(mockChannelInfoResp),
-			wantIDs:         []string{"U0G9QF9C6", "U1QNSQB9U"},
+			description:          "successful retrieval of member IDs",
+			respConversationInfo: []byte(mockChannelInfoResp),
+			wantIDs:              []string{"U0G9QF9C6", "U1QNSQB9U"},
 		},
 		{
-			description:     "failure to retrieve member IDs",
-			respChannelInfo: []byte(mockChannelInfoErrResp),
-			wantErr:         "c.client.GetConversationInfo() > channel_not_found",
+			description:          "failure to retrieve member IDs",
+			respConversationInfo: []byte(mockChannelInfoErrResp),
+			wantErr:              "c.client.GetConversationInfo() > channel_not_found",
 		},
 	}
 
@@ -201,7 +201,7 @@ func TestGetConversationMembers(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			mux := http.NewServeMux()
 			mux.HandleFunc("/conversations.info", func(w http.ResponseWriter, r *http.Request) {
-				_, _ = w.Write(tc.respChannelInfo)
+				_, _ = w.Write(tc.respConversationInfo)
 			})
 
 			testServ := httptest.NewServer(mux)
@@ -241,29 +241,29 @@ func TestGetConversationMembers(t *testing.T) {
 
 func TestGetConversationMemberEmails(t *testing.T) {
 	testCases := []struct {
-		description     string
-		respChannelInfo []byte
-		respUsersList   []byte
-		wantErr         string
-		wantEmails      []string
+		description          string
+		respConversationInfo []byte
+		respUsersList        []byte
+		wantErr              string
+		wantEmails           []string
 	}{
 		{
-			description:     "successful retrieval of member emails",
-			respChannelInfo: []byte(mockChannelInfoResp),
-			respUsersList:   []byte(mockUsersListResp),
-			wantEmails:      []string{"spengler@ghostbusters.example.com"},
+			description:          "successful retrieval of member emails",
+			respConversationInfo: []byte(mockChannelInfoResp),
+			respUsersList:        []byte(mockUsersListResp),
+			wantEmails:           []string{"spengler@ghostbusters.example.com"},
 		},
 		{
-			description:     "failure to retrieve conversation info",
-			respChannelInfo: []byte(mockChannelInfoErrResp),
-			respUsersList:   []byte(mockUsersListResp),
-			wantErr:         "c.client.GetConversationInfo() > channel_not_found",
+			description:          "failure to retrieve conversation info",
+			respConversationInfo: []byte(mockChannelInfoErrResp),
+			respUsersList:        []byte(mockUsersListResp),
+			wantErr:              "c.client.GetConversationInfo() > channel_not_found",
 		},
 		{
-			description:     "failure to retrieve user list",
-			respChannelInfo: []byte(mockChannelInfoResp),
-			respUsersList:   []byte(mockUsersListErrResp),
-			wantErr:         "c.getAll() > c.client.GetUsers() > invalid_cursor",
+			description:          "failure to retrieve user list",
+			respConversationInfo: []byte(mockChannelInfoResp),
+			respUsersList:        []byte(mockUsersListErrResp),
+			wantErr:              "c.getAll() > c.client.GetUsers() > invalid_cursor",
 		},
 	}
 
@@ -271,7 +271,7 @@ func TestGetConversationMemberEmails(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			mux := http.NewServeMux()
 			mux.HandleFunc("/conversations.info", func(w http.ResponseWriter, r *http.Request) {
-				_, _ = w.Write(tc.respChannelInfo)
+				_, _ = w.Write(tc.respConversationInfo)
 			})
 			mux.HandleFunc("/users.list", func(w http.ResponseWriter, r *http.Request) {
 				_, _ = w.Write(tc.respUsersList)

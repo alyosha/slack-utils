@@ -23,7 +23,7 @@ type (
 
 // Client wraps the slack Client for additional utility
 type Client struct {
-	client           *slack.Client
+	Client           *slack.Client
 	adminID          string
 	logChannelID     string
 	errChannelID     string
@@ -40,7 +40,7 @@ type ClientConfig struct {
 }
 
 // NewClient returns a new client based on provided config
-func NewClient(cfg ClientConfig) (*Client, error) {
+func NewClient(cfg ClientConfig, opt ...slack.Option) (*Client, error) {
 	if cfg.BotToken == "" {
 		return nil, errMissingBotToken
 	}
@@ -50,7 +50,7 @@ func NewClient(cfg ClientConfig) (*Client, error) {
 	}
 
 	c := &Client{
-		client:           slack.New(cfg.BotToken),
+		client:           slack.New(cfg.BotToken, opt...),
 		adminID:          cfg.AdminID,
 		logChannelID:     cfg.LogChannelID,
 		errChannelID:     cfg.ErrChannelID,

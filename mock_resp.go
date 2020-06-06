@@ -299,6 +299,11 @@ const mockChannelInfoErrResp = `{
     "error": "channel_not_found"
 }`
 
+const mockUserInfoErrResp = `{
+    "ok": false,
+    "error": "user_not_found"
+}`
+
 const mockUsersListErrResp = `{
     "ok": false,
     "error": "invalid_cursor"
