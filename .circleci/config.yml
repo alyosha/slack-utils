@@ -7,8 +7,6 @@ executors:
         type: string
     docker:
       - image: circleci/golang:<< parameters.go-version >>
-        environment:
-          GO111MODULE: "on"
     working_directory: /go/src/github.com/alyosha/slack-utils
 
 commands:
@@ -59,5 +57,5 @@ workflows:
   golang-workflow:
     jobs:
       - build:
-          go-version: "1.12"
+          go-version: "1.14"
           golangci-lint-version: "1.16.0"
