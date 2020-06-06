@@ -74,7 +74,7 @@ func TestCreateConversation(t *testing.T) {
 			respChannelCreate: []byte(mockChannelCreateResp),
 			respInviteMembers: []byte(mockInviteMembersResp),
 			respPostMsg:       []byte(mockPostMsgErrResp),
-			wantErr:           "c.client.PostMessage() > too_many_attachments",
+			wantErr:           "c.client.PostMessage() > invalid_blocks",
 		},
 	}
 

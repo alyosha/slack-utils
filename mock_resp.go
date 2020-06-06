@@ -291,7 +291,7 @@ const mockCantInviteSelfErrResp = `{
 
 const mockPostMsgErrResp = `{
     "ok": false,
-    "error": "too_many_attachments"
+    "error": "invalid_blocks"
 }`
 
 const mockChannelInfoErrResp = `{

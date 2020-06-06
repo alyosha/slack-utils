@@ -1,26 +1,21 @@
 package utils
 
 import (
-	"encoding/json"
-	"net/http"
-
 	"github.com/slack-go/slack"
 )
 
 // Msg is an intermediary struct used for posting messages
 type Msg struct {
-	Body        string
-	Blocks      []slack.Block
-	Attachments []slack.Attachment
-	AsUser      bool
-	IconURL     string // Incompatible with AsUser option
+	Body    string
+	Blocks  []slack.Block
+	AsUser  bool
+	IconURL string // Incompatible with AsUser option
 }
 
 func getCommonOpts(msg Msg) []slack.MsgOption {
 	return []slack.MsgOption{
 		slack.MsgOptionText(msg.Body, false),
 		slack.MsgOptionBlocks(msg.Blocks...),
-		slack.MsgOptionAttachments(msg.Attachments...),
 		slack.MsgOptionAsUser(msg.AsUser),
 		slack.MsgOptionEnableLinkUnfurl(),
 		slack.MsgOptionIconURL(msg.IconURL),
@@ -81,36 +76,4 @@ func (c *Client) DeleteMsg(conversationID, timestamp, responseURL string) error 
 	)
 
 	return err
-}
-
-// SendEmptyOK responds with status 200
-func SendEmptyOK(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusOK)
-	return
-}
-
-// SendResp can be used to send simple callback responses
-// NOTE: cannot be used in callback from block messages
-func SendResp(w http.ResponseWriter, msg slack.Message) error {
-	w.Header().Add("Content-type", "application/json")
-	return json.NewEncoder(w).Encode(&msg)
-}
-
-// ReplaceOriginal replaces the original message with the newly encoded one
-// NOTE: cannot be used in callback from block messages
-func ReplaceOriginal(w http.ResponseWriter, msg slack.Message) error {
-	w.Header().Add("Content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	msg.ReplaceOriginal = true
-	return json.NewEncoder(w).Encode(&msg)
-}
-
-// SendOKAndDeleteOriginal responds with status 200 and deletes the original message
-// NOTE: cannot be used in callback from block messages
-func SendOKAndDeleteOriginal(w http.ResponseWriter) error {
-	var msg slack.Message
-	msg.DeleteOriginal = true
-	w.Header().Add("Content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	return json.NewEncoder(w).Encode(&msg)
 }

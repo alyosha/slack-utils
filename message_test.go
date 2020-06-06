@@ -31,7 +31,7 @@ func TestPostMsg(t *testing.T) {
 			description: "failure to post message",
 			msg:         Msg{Body: "Hey!"},
 			respPostMsg: []byte(mockPostMsgErrResp),
-			wantErr:     "too_many_attachments",
+			wantErr:     "invalid_blocks",
 		},
 	}
 
@@ -85,7 +85,7 @@ func TestPostThreadMsg(t *testing.T) {
 			description: "failure to post message",
 			msg:         Msg{Body: "Hey!"},
 			respPostMsg: []byte(mockPostMsgErrResp),
-			wantErr:     "too_many_attachments",
+			wantErr:     "invalid_blocks",
 		},
 	}
 
@@ -139,7 +139,7 @@ func TestPostEphemeralMsg(t *testing.T) {
 			description: "failure to post ephemeral message",
 			msg:         Msg{Body: "Hey!"},
 			respPostMsg: []byte(mockPostMsgErrResp),
-			wantErr:     "too_many_attachments",
+			wantErr:     "invalid_blocks",
 		},
 	}
 
@@ -189,7 +189,7 @@ func TestUpdateMsg(t *testing.T) {
 			description:   "failure to post message",
 			msg:           Msg{Body: "Hey!"},
 			respUpdateMsg: []byte(mockPostMsgErrResp),
-			wantErr:       "too_many_attachments",
+			wantErr:       "invalid_blocks",
 		},
 	}
 
@@ -236,7 +236,7 @@ func TestDeleteMsg(t *testing.T) {
 		{
 			description:   "failure to post message",
 			respDeleteMsg: []byte(mockPostMsgErrResp),
-			wantErr:       "too_many_attachments",
+			wantErr:       "invalid_blocks",
 		},
 	}
 
