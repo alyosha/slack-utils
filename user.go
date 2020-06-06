@@ -7,6 +7,8 @@ import (
 	"github.com/slack-go/slack"
 )
 
+// ErrNoUsersInWorkplace is returned when there was no error calling Slack, but
+// the requested method cannot continue given there are no returned users.
 var ErrNoUsersInWorkplace = errors.New("no users in workplace")
 
 // EmailsToSlackIDs takes in an array of email addresses and finds the IDs of
@@ -46,6 +48,7 @@ func (c *Client) getAll() ([]slack.User, error) {
 
 func toSlackIDs(users []slack.User, emails []string) []string {
 	var ids []string
+
 	for _, email := range emails {
 		for _, user := range users {
 			if user.Profile.Email == email {
@@ -59,6 +62,7 @@ func toSlackIDs(users []slack.User, emails []string) []string {
 
 func toSlackIDsInclusive(users []slack.User, emails []string) [][]string {
 	var emailIDPairs [][]string
+
 	for _, email := range emails {
 		for _, user := range users {
 			if user.Profile.Email == email {
@@ -72,6 +76,7 @@ func toSlackIDsInclusive(users []slack.User, emails []string) [][]string {
 
 func toEmails(users []slack.User, userIDs []string) []string {
 	var emails []string
+
 	for _, id := range userIDs {
 		for _, user := range users {
 			if user.ID == id && user.Profile.Email != "" {

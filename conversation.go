@@ -16,7 +16,7 @@ const (
 )
 
 // CreateConversation opens a new public/private channel and invites the provided
-// members, optionally posting an initial message.
+// members, optionally posting an initial message
 func (c *Client) CreateConversation(conversationName string, isPrivate bool, userIDs []string, initMsg Msg) (string, error) {
 	conversation, err := c.Client.CreateConversation(conversationName, isPrivate)
 	if err != nil {

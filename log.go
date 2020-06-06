@@ -100,5 +100,6 @@ func (c *Client) skipAdminLog(excludeAdmin bool, userID string) bool {
 	if excludeAdmin && c.adminID == userID {
 		return true
 	}
+
 	return false
 }

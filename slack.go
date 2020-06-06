@@ -92,10 +92,12 @@ func NewClient(cfg ClientConfig, opts ...slack.Option) (*Client, error) {
 // utilize this functionality, you must use the VerifySlashCommand middleware.
 func SlashCommand(ctx context.Context) (*slack.SlashCommand, error) {
 	val := ctx.Value(slashCommandKey{})
+
 	cmd, ok := val.(*slack.SlashCommand)
 	if !ok {
 		return nil, errSlashCommandNotFound
 	}
+
 	return cmd, nil
 }
 
@@ -103,10 +105,12 @@ func SlashCommand(ctx context.Context) (*slack.SlashCommand, error) {
 // To utilize this functionality, you must use the VerifyInteractionCallback middleware.
 func InteractionCallback(ctx context.Context) (*slack.InteractionCallback, error) {
 	val := ctx.Value(interactionCallbackKey{})
+
 	callback, ok := val.(*slack.InteractionCallback)
 	if !ok {
 		return nil, errInteractionCallbackNotFound
 	}
+
 	return callback, nil
 }
 
