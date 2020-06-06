@@ -11,10 +11,12 @@ import (
 	"github.com/slack-go/slack"
 )
 
+// The following func types are used to configure custom additional actions on
+// verify middleware success/failure (e.g. logging, etc.)
 type (
-	verifySucceedSlash    func(w http.ResponseWriter, r *http.Request, cmd *slack.SlashCommand)
-	verifySucceedCallback func(w http.ResponseWriter, r *http.Request, cmd *slack.InteractionCallback)
-	verifyFail            func(w http.ResponseWriter, r *http.Request, err error)
+	VerifySucceedSlash    func(w http.ResponseWriter, r *http.Request, cmd *slack.SlashCommand)
+	VerifySucceedCallback func(w http.ResponseWriter, r *http.Request, cmd *slack.InteractionCallback)
+	VerifyFail            func(w http.ResponseWriter, r *http.Request, err error)
 )
 
 // VerifySlashCommand is a middleware that will automatically verify the
@@ -22,7 +24,7 @@ type (
 // in the context on success. Use the optional succeed/fail parameters to
 // configure additional behavior on sucess/failure, or simply provide nil if
 // no further action is required.
-func VerifySlashCommand(signingSecret string, succeed verifySucceedSlash, fail verifyFail) func(next http.Handler) http.Handler {
+func VerifySlashCommand(signingSecret string, succeed VerifySucceedSlash, fail VerifyFail) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cmd, err := verifySlashCommand(r, signingSecret)
@@ -46,7 +48,7 @@ func VerifySlashCommand(signingSecret string, succeed verifySucceedSlash, fail v
 // InteractionCallback in the context on success. Use the optional succeed/fail
 // parameters to configure additional behavior on sucess/failure, or simply
 // provide nil if no further action is required.
-func VerifyInteractionCallback(signingSecret string, succeed verifySucceedCallback, fail verifyFail) func(next http.Handler) http.Handler {
+func VerifyInteractionCallback(signingSecret string, succeed VerifySucceedCallback, fail VerifyFail) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			callback, err := verifyInteractionCallback(r, signingSecret)

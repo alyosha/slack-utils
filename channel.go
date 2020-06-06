@@ -61,6 +61,7 @@ func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Ms
 	return nil
 }
 
+// InviteUsers invites multiple users to the channel
 func (c *Channel) InviteUsers(userIDs []string) error {
 	if c.UserClient == nil {
 		return errors.New("method requires user client")

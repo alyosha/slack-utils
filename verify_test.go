@@ -36,8 +36,8 @@ func TestVerifySlashCommand(t *testing.T) {
 		secret              string
 		ts                  string
 		invalidHex          bool
-		failFunc            verifyFail
-		succeedFunc         verifySucceedSlash
+		failFunc            VerifyFail
+		succeedFunc         VerifySucceedSlash
 		wantErr             error
 		wantRespBody        string
 		containsRespPattern string
@@ -185,8 +185,8 @@ func TestVerifyInteractionCallback(t *testing.T) {
 		secret              string
 		ts                  string
 		invalidHex          bool
-		failFunc            verifyFail
-		succeedFunc         verifySucceedCallback
+		failFunc            VerifyFail
+		succeedFunc         VerifySucceedCallback
 		wantErr             error
 		wantRespBody        string
 		containsRespPattern string

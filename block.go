@@ -10,7 +10,6 @@ const datePickTimeFmt = "2006-01-02"
 
 const (
 	CancelActionID = "cancel_action"
-	CancelBlockID  = "cancel_block"
 )
 
 var (
