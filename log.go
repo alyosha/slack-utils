@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"runtime/debug"
 	"time"
@@ -8,15 +9,29 @@ import (
 	"github.com/slack-go/slack"
 )
 
+var errLogChannelNotConfigured = errors.New("associated channel field in Client not configured")
+
+// SendToLogChannel sends the provided message to the log channel
 func (c *Client) SendToLogChannel(msg Msg) error {
+	if c.logChannel == "" {
+		return errLogChannelNotConfigured
+	}
+
 	_, err := c.PostMsg(msg, c.logChannel)
 	if err != nil {
 		return fmt.Errorf("c.PostMsg() > %w", err)
 	}
+
 	return nil
 }
 
+// SendToLogChannel creates an error message based on the provided
+// message/error and also posts the error stack in the thread.
 func (c *Client) SendToErrChannel(msgStr string, err error) error {
+	if c.errChannel == "" {
+		return errLogChannelNotConfigured
+	}
+
 	var errMsgBody string
 
 	if msgStr == "" {

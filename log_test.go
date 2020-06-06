@@ -12,15 +12,23 @@ import (
 
 func TestSendToLogChannel(t *testing.T) {
 	testCases := []struct {
-		description string
-		msg         Msg
-		respPostMsg []byte
-		wantErr     string
+		description       string
+		msg               Msg
+		respPostMsg       []byte
+		missingLogChannel bool
+		wantErr           string
 	}{
 		{
 			description: "successfully posted message",
 			msg:         Msg{Body: "Hey!"},
 			respPostMsg: []byte(mockPostMsgResp),
+		},
+		{
+			description:       "failure because log channel not configured",
+			msg:               Msg{Body: "Hey!"},
+			respPostMsg:       []byte(mockPostMsgErrResp),
+			missingLogChannel: true,
+			wantErr:           errLogChannelNotConfigured.Error(),
 		},
 		{
 			description: "failure to post error message",
@@ -41,8 +49,11 @@ func TestSendToLogChannel(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client:     slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
-				logChannel: "C1H9RESGL",
+				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+			}
+
+			if !tc.missingLogChannel {
+				client.logChannel = "C1234"
 			}
 
 			err := client.SendToLogChannel(Msg{})
@@ -70,11 +81,21 @@ func TestSendToErrChannel(t *testing.T) {
 		respPostMsg       []byte
 		respPostThreadMsg []byte
 		wantErr           string
+		missingErrChannel bool
+		client            *Client
 	}{
 		{
 			description: "successfully posted message",
 			msg:         Msg{Body: "Hey!"},
 			respPostMsg: []byte(mockPostMsgResp),
+		},
+		{
+			description:       "failure because err channel not confired",
+			msg:               Msg{Body: "Hey!"},
+			respPostMsg:       []byte(mockPostMsgErrResp),
+			respPostThreadMsg: []byte(mockPostMsgResp),
+			missingErrChannel: true,
+			wantErr:           errLogChannelNotConfigured.Error(),
 		},
 		{
 			description:       "failure to post message",
@@ -109,8 +130,11 @@ func TestSendToErrChannel(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client:     slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
-				logChannel: "C1H9RESGL",
+				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+			}
+
+			if !tc.missingErrChannel {
+				client.errChannel = "C1234"
 			}
 
 			err := client.SendToErrChannel("", errors.New(""))
