@@ -1,7 +1,8 @@
 package utils
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
+
 	"github.com/slack-go/slack"
 	"golang.org/x/sync/errgroup"
 )
@@ -14,139 +15,91 @@ const (
 	errAlreadyArchivedMsg = "already_archived"
 )
 
-// Channel is used in opening/interacting with a single Slack channel
-type Channel struct {
-	UserClient *slack.Client
-	BotClient  *slack.Client
-	ChannelID  string
-}
-
-var ErrNoUsersInWorkplace = errors.New("no users in workplace")
-
-// CreateChannel opens a new public channel and invites the provided list of member IDs, optionally posting an initial message
-func (c *Channel) CreateChannel(channelName string, userIDs []string, initMsg Msg) error {
-	if c.UserClient == nil {
-		return errors.New("method requires user client")
-	}
-
-	channel, err := c.UserClient.CreateChannel(channelName)
+// CreateConversation opens a new public/private channel and invites the provided
+// members, optionally posting an initial message.
+func (c *Client) CreateConversation(conversationName string, isPrivate bool, userIDs []string, initMsg Msg) (string, error) {
+	conversation, err := c.client.CreateConversation(conversationName, isPrivate)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create new channel")
+		return "", fmt.Errorf("c.client.CreateConversation() > %w", err)
 	}
 
-	if err = c.InviteUsers(userIDs); err != nil {
-		return errors.Wrapf(err, "failed to invite user to channel")
+	if err = c.InviteUsers(conversation.ID, userIDs); err != nil {
+		return conversation.ID, fmt.Errorf("c.InviteUsers() > %w", err)
 	}
 
-	client := c.UserClient
-	if c.BotClient != nil {
-		client = c.BotClient
-	}
-
-	if initMsg.Body != "" {
-		_, _, err := client.PostMessage(
-			channel.ID,
-			slack.MsgOptionText(initMsg.Body, false),
-			slack.MsgOptionAttachments(initMsg.Attachments...),
-			slack.MsgOptionBlocks(initMsg.Blocks...),
-			slack.MsgOptionEnableLinkUnfurl(),
+	if initMsg.Body != "" || initMsg.Blocks != nil {
+		_, _, err := c.client.PostMessage(
+			conversation.ID,
+			getCommonOpts(initMsg)...,
 		)
 		if err != nil {
-			return errors.Wrapf(err, "failed to post message")
+			return conversation.ID, fmt.Errorf("c.client.PostMessage() > %w", err)
 		}
 	}
 
-	c.ChannelID = channel.ID
-
-	return nil
+	return conversation.ID, nil
 }
 
-// InviteUsers invites multiple users to the channel
-func (c *Channel) InviteUsers(userIDs []string) error {
-	if c.UserClient == nil {
-		return errors.New("method requires user client")
-	}
-
+// InviteUsers invites multiple users to a conversation
+func (c *Client) InviteUsers(conversationID string, userIDs []string) error {
 	for _, user := range userIDs {
-		_, err := c.UserClient.InviteUserToChannel(c.ChannelID, user)
+		_, err := c.client.InviteUsersToConversation(conversationID, user)
 		if err != nil && err.Error() != errInviteSelfMsg {
-			return err
+			return fmt.Errorf("c.client.InviteUsersToConversation() > %w", err)
 		}
 	}
 
 	return nil
 }
 
-// LeaveChannels allows the user whose token was used to create the API client to leave multiple channels
-func (c *Channel) LeaveChannels(channelIDs []string) error {
-	if c.UserClient == nil {
-		return errors.New("method requires user client")
-	}
-
-	for _, channelID := range channelIDs {
-		_, err := c.UserClient.LeaveChannel(channelID)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// ArchiveChannels allows the user whose token was used to create the API client to archive multiple channels
-func (c *Channel) ArchiveChannels(channelIDs []string) error {
-	if c.UserClient == nil {
-		return errors.New("method requires user client")
-	}
-
-	for _, channelID := range channelIDs {
-		err := c.UserClient.ArchiveChannel(channelID)
+// ArchiveConversations allows archives multiple conversations
+func (c *Client) ArchiveConversations(conversationIDs []string) error {
+	for _, conversationID := range conversationIDs {
+		err := c.client.ArchiveConversation(conversationID)
 		if err != nil && err.Error() != errAlreadyArchivedMsg {
-			return err
+			return fmt.Errorf("c.client.ArchiveConversation() > %w", err)
 		}
 	}
 
 	return nil
 }
 
-// GetChannelMembers returns a list of members for a given channel
-func GetChannelMembers(client *slack.Client, channelID string) ([]string, error) {
-	channel, err := client.GetChannelInfo(channelID)
+// GetConversationMembers returns a list of members for a given conversation
+func (c *Client) GetConversationMembers(conversationID string) ([]string, error) {
+	conversation, err := c.client.GetConversationInfo(conversationID, false)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("c.client.GetConversationInfo() > %w", err)
 	}
 
-	return channel.Members, nil
+	return conversation.Members, nil
 }
 
-// GetChannelMemberEmails returns a list of emails for members of a given channel
-func GetChannelMemberEmails(client *slack.Client, channelID string) ([]string, error) {
+// GetConversationMemberEmails returns a list of emails for members of a given conversation
+func (c *Client) GetConversationMemberEmails(conversationID string) ([]string, error) {
 	var eg errgroup.Group
 	var memberIDs []string
 	var allUsers []slack.User
 
 	eg.Go(func() error {
-		channel, err := client.GetChannelInfo(channelID)
-		if err == nil {
-			memberIDs = channel.Members
+		conversation, err := c.client.GetConversationInfo(conversationID, false)
+		if err != nil {
+			return fmt.Errorf("c.client.GetConversationInfo() > %w", err)
 		}
-		return err
+		memberIDs = conversation.Members
+		return nil
 	})
 
 	eg.Go(func() error {
-		users, err := getAll(client)
-		if err == nil {
-			allUsers = users
+		users, err := c.getAll()
+		if err != nil {
+			return fmt.Errorf("c.getAll() > %w", err)
 		}
-		return err
+		allUsers = users
+		return nil
 	})
 
 	if err := eg.Wait(); err != nil {
 		return nil, err
-	}
-
-	if len(allUsers) == 0 {
-		return nil, ErrNoUsersInWorkplace
 	}
 
 	return toEmails(allUsers, memberIDs), nil

@@ -26,7 +26,7 @@ func TestEmailsToSlackIDs(t *testing.T) {
 		{
 			description:   "failure to retrieve users list",
 			respUsersList: []byte(mockUsersListErrResp),
-			wantErr:       "invalid_cursor",
+			wantErr:       "c.getAll() > c.client.GetUsers() > invalid_cursor",
 		},
 	}
 	for _, tc := range testCases {
@@ -39,9 +39,11 @@ func TestEmailsToSlackIDs(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
+			client := &Client{
+				client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+			}
 
-			ids, err := EmailsToSlackIDs(client, tc.emails)
+			ids, err := client.EmailsToSlackIDs(tc.emails)
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -86,7 +88,7 @@ func TestEmailsToSlackIDsInclusive(t *testing.T) {
 		{
 			description:   "failure to retrieve users list",
 			respUsersList: []byte(mockUsersListErrResp),
-			wantErr:       "invalid_cursor",
+			wantErr:       "c.getAll() > c.client.GetUsers() > invalid_cursor",
 		},
 	}
 	for _, tc := range testCases {
@@ -99,9 +101,11 @@ func TestEmailsToSlackIDsInclusive(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
+			client := &Client{
+				client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+			}
 
-			idEmailPairs, err := EmailsToSlackIDsInclusive(client, tc.emails)
+			idEmailPairs, err := client.EmailsToSlackIDsInclusive(tc.emails)
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)

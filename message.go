@@ -27,10 +27,10 @@ func getCommonOpts(msg Msg) []slack.MsgOption {
 	}
 }
 
-// PostMsg sends the provided message to the channel designated by channelID
-func PostMsg(client *slack.Client, msg Msg, channelID string) (string, error) {
-	_, ts, err := client.PostMessage(
-		channelID,
+// PostMsg sends the provided message to the conversation designated by conversationID
+func (c *Client) PostMsg(msg Msg, conversationID string) (string, error) {
+	_, ts, err := c.client.PostMessage(
+		conversationID,
 		getCommonOpts(msg)...,
 	)
 
@@ -42,32 +42,29 @@ func PostMsg(client *slack.Client, msg Msg, channelID string) (string, error) {
 }
 
 // PostThreadMsg posts a message response into an existing thread
-func PostThreadMsg(client *slack.Client, msg Msg, channelID string, threadTs string) error {
-	_, _, err := client.PostMessage(
-		channelID,
-		slack.MsgOptionText(msg.Body, false),
-		slack.MsgOptionAttachments(msg.Attachments...),
-		slack.MsgOptionEnableLinkUnfurl(),
-		slack.MsgOptionTS(threadTs),
+func (c *Client) PostThreadMsg(msg Msg, conversationID string, threadTs string) error {
+	_, _, err := c.client.PostMessage(
+		conversationID,
+		append(getCommonOpts(msg), slack.MsgOptionTS(threadTs))...,
 	)
 
 	return err
 }
 
-// PostEphemeralMsg sends an ephemeral message in the channel designated by channelID
-func PostEphemeralMsg(client *slack.Client, msg Msg, channelID, userID string) error {
-	_, _, err := client.PostMessage(
-		channelID,
+// PostEphemeralMsg sends an ephemeral message in the conversation designated by conversationID
+func (c *Client) PostEphemeralMsg(msg Msg, conversationID, userID string) error {
+	_, _, err := c.client.PostMessage(
+		conversationID,
 		append(getCommonOpts(msg), slack.MsgOptionPostEphemeral(userID))...,
 	)
 
 	return err
 }
 
-// UpdateMsg updates the provided message in the channel designated by channelID
-func UpdateMsg(client *slack.Client, msg Msg, channelID, timestamp string) error {
-	_, _, _, err := client.UpdateMessage(
-		channelID,
+// UpdateMsg updates the provided message in the conversation designated by conversationID
+func (c *Client) UpdateMsg(msg Msg, conversationID, timestamp string) error {
+	_, _, _, err := c.client.UpdateMessage(
+		conversationID,
 		timestamp,
 		getCommonOpts(msg)...,
 	)
@@ -75,10 +72,10 @@ func UpdateMsg(client *slack.Client, msg Msg, channelID, timestamp string) error
 	return err
 }
 
-// DeleteMsg deletes the provided message in the channel designated by channelID
-func DeleteMsg(client *slack.Client, channelID, timestamp, responseURL string) error {
-	_, _, _, err := client.UpdateMessage(
-		channelID,
+// DeleteMsg deletes the provided message in the conversation designated by conversationID
+func (c *Client) DeleteMsg(conversationID, timestamp, responseURL string) error {
+	_, _, _, err := c.client.UpdateMessage(
+		conversationID,
 		timestamp,
 		slack.MsgOptionDeleteOriginal(responseURL),
 	)

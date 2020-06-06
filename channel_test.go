@@ -9,7 +9,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-func TestCreateChannel(t *testing.T) {
+func TestCreateConversation(t *testing.T) {
 	testCases := []struct {
 		description       string
 		inviteMembers     []string
@@ -21,21 +21,21 @@ func TestCreateChannel(t *testing.T) {
 		wantErr           string
 	}{
 		{
-			description:       "successful channel creation, no additional invites",
+			description:       "successful conversation creation, no additional invites",
 			inviteMembers:     []string{},
 			initMsg:           Msg{},
 			respChannelCreate: []byte(mockChannelCreateResp),
 			wantID:            "C0DEL09A5",
 		},
 		{
-			description:       "err creating channel",
+			description:       "err creating conversation",
 			inviteMembers:     []string{},
 			initMsg:           Msg{},
 			respChannelCreate: []byte(mockChannelCreateErrResp),
-			wantErr:           "failed to create new channel: invalid_name_specials",
+			wantErr:           "c.client.CreateConversation() > invalid_name_specials",
 		},
 		{
-			description:       "successful channel creation including additional invites",
+			description:       "successful conversation creation including additional invites",
 			inviteMembers:     []string{"UABC123EFG"},
 			initMsg:           Msg{},
 			respChannelCreate: []byte(mockChannelCreateResp),
@@ -43,7 +43,7 @@ func TestCreateChannel(t *testing.T) {
 			wantID:            "C0DEL09A5",
 		},
 		{
-			description:       "successful channel creation, inviting members including self but no error returned",
+			description:       "successful conversation creation, inviting members including self but no error returned",
 			inviteMembers:     []string{"U0G9QF9C6"},
 			initMsg:           Msg{},
 			respChannelCreate: []byte(mockChannelCreateResp),
@@ -56,10 +56,10 @@ func TestCreateChannel(t *testing.T) {
 			initMsg:           Msg{},
 			respChannelCreate: []byte(mockChannelCreateResp),
 			respInviteMembers: []byte(mockInviteMembersErrResp),
-			wantErr:           "failed to invite user to channel: cant_invite",
+			wantErr:           "c.InviteUsers() > c.client.InviteUsersToConversation() > cant_invite",
 		},
 		{
-			description:       "successful channel creation including additional invites, successful message post",
+			description:       "successful conversation creation including additional invites, successful message post",
 			inviteMembers:     []string{"UABC123EFG"},
 			initMsg:           Msg{Body: "Hey!"},
 			respChannelCreate: []byte(mockChannelCreateResp),
@@ -68,23 +68,23 @@ func TestCreateChannel(t *testing.T) {
 			wantID:            "C0DEL09A5",
 		},
 		{
-			description:       "successful channel creation including additional invites, failure to post init message",
+			description:       "successful conversation creation including additional invites, failure to post init message",
 			inviteMembers:     []string{"UABC123EFG"},
 			initMsg:           Msg{Body: "Hey!"},
 			respChannelCreate: []byte(mockChannelCreateResp),
 			respInviteMembers: []byte(mockInviteMembersResp),
 			respPostMsg:       []byte(mockPostMsgErrResp),
-			wantErr:           "failed to post message: too_many_attachments",
+			wantErr:           "c.client.PostMessage() > too_many_attachments",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			mux := http.NewServeMux()
-			mux.HandleFunc("/channels.create", func(w http.ResponseWriter, r *http.Request) {
+			mux.HandleFunc("/conversations.create", func(w http.ResponseWriter, r *http.Request) {
 				_, _ = w.Write(tc.respChannelCreate)
 			})
-			mux.HandleFunc("/channels.invite", func(w http.ResponseWriter, r *http.Request) {
+			mux.HandleFunc("/conversations.invite", func(w http.ResponseWriter, r *http.Request) {
 				_, _ = w.Write(tc.respInviteMembers)
 			})
 			mux.HandleFunc("/chat.postMessage", func(w http.ResponseWriter, r *http.Request) {
@@ -94,12 +94,11 @@ func TestCreateChannel(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
-			channel := Channel{
-				UserClient: client,
+			client := &Client{
+				client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
-			err := channel.CreateChannel("general", tc.inviteMembers, tc.initMsg)
+			conversationID, err := client.CreateConversation("general", false, tc.inviteMembers, tc.initMsg)
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -112,10 +111,11 @@ func TestCreateChannel(t *testing.T) {
 				if err.Error() != tc.wantErr {
 					t.Fatalf("expected to receive error: %s, got: %s", tc.wantErr, err)
 				}
+				return
 			}
 
-			if channel.ChannelID != tc.wantID {
-				t.Fatalf("expected channel id: %s, got: %s", tc.wantID, channel.ChannelID)
+			if conversationID != tc.wantID {
+				t.Fatalf("expected conversation id: %s, got: %s", tc.wantID, conversationID)
 			}
 		})
 	}
@@ -142,27 +142,25 @@ func TestInviteUsers(t *testing.T) {
 			description:       "expect error",
 			inviteMembers:     []string{"UABC123EFG"},
 			respInviteMembers: []byte(mockInviteMembersErrResp),
-			wantErr:           "cant_invite",
+			wantErr:           "c.client.InviteUsersToConversation() > cant_invite",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			mux := http.NewServeMux()
-			mux.HandleFunc("/channels.invite", func(w http.ResponseWriter, r *http.Request) {
+			mux.HandleFunc("/conversations.invite", func(w http.ResponseWriter, r *http.Request) {
 				_, _ = w.Write(tc.respInviteMembers)
 			})
 
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
-			channel := Channel{
-				UserClient: client,
-				ChannelID:  "C1H9RESGL",
+			client := &Client{
+				client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
-			err := channel.InviteUsers(tc.inviteMembers)
+			err := client.InviteUsers("C1H9RESGL", tc.inviteMembers)
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -180,7 +178,7 @@ func TestInviteUsers(t *testing.T) {
 	}
 }
 
-func TestGetChannelMembers(t *testing.T) {
+func TestGetConversationMembers(t *testing.T) {
 	testCases := []struct {
 		description     string
 		respChannelInfo []byte
@@ -195,23 +193,25 @@ func TestGetChannelMembers(t *testing.T) {
 		{
 			description:     "failure to retrieve member IDs",
 			respChannelInfo: []byte(mockChannelInfoErrResp),
-			wantErr:         "channel_not_found",
+			wantErr:         "c.client.GetConversationInfo() > channel_not_found",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			mux := http.NewServeMux()
-			mux.HandleFunc("/channels.info", func(w http.ResponseWriter, r *http.Request) {
+			mux.HandleFunc("/conversations.info", func(w http.ResponseWriter, r *http.Request) {
 				_, _ = w.Write(tc.respChannelInfo)
 			})
 
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
+			client := &Client{
+				client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+			}
 
-			members, err := GetChannelMembers(client, "C1H9RESGL")
+			members, err := client.GetConversationMembers("C1H9RESGL")
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -239,7 +239,7 @@ func TestGetChannelMembers(t *testing.T) {
 	}
 }
 
-func TestGetChannelMemberEmails(t *testing.T) {
+func TestGetConversationMemberEmails(t *testing.T) {
 	testCases := []struct {
 		description     string
 		respChannelInfo []byte
@@ -254,23 +254,23 @@ func TestGetChannelMemberEmails(t *testing.T) {
 			wantEmails:      []string{"spengler@ghostbusters.example.com"},
 		},
 		{
-			description:     "failure to retrieve channel info",
+			description:     "failure to retrieve conversation info",
 			respChannelInfo: []byte(mockChannelInfoErrResp),
 			respUsersList:   []byte(mockUsersListResp),
-			wantErr:         "channel_not_found",
+			wantErr:         "c.client.GetConversationInfo() > channel_not_found",
 		},
 		{
 			description:     "failure to retrieve user list",
 			respChannelInfo: []byte(mockChannelInfoResp),
 			respUsersList:   []byte(mockUsersListErrResp),
-			wantErr:         "invalid_cursor",
+			wantErr:         "c.getAll() > c.client.GetUsers() > invalid_cursor",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			mux := http.NewServeMux()
-			mux.HandleFunc("/channels.info", func(w http.ResponseWriter, r *http.Request) {
+			mux.HandleFunc("/conversations.info", func(w http.ResponseWriter, r *http.Request) {
 				_, _ = w.Write(tc.respChannelInfo)
 			})
 			mux.HandleFunc("/users.list", func(w http.ResponseWriter, r *http.Request) {
@@ -280,9 +280,11 @@ func TestGetChannelMemberEmails(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
+			client := &Client{
+				client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+			}
 
-			emails, err := GetChannelMemberEmails(client, "C1H9RESGL")
+			emails, err := client.GetConversationMemberEmails("C1H9RESGL")
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -310,93 +312,42 @@ func TestGetChannelMemberEmails(t *testing.T) {
 	}
 }
 
-func TestLeaveChannels(t *testing.T) {
-	testCases := []struct {
-		description       string
-		respLeaveChannels []byte
-		wantErr           string
-	}{
-		{
-			description:       "successfully left channels",
-			respLeaveChannels: []byte(mockSuccessResp),
-		},
-		{
-			description:       "failure to leave channels",
-			respLeaveChannels: []byte(mockChannelsLeaveErrResp),
-			wantErr:           "invalid_auth",
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			mux := http.NewServeMux()
-			mux.HandleFunc("/channels.leave", func(w http.ResponseWriter, r *http.Request) {
-				_, _ = w.Write(tc.respLeaveChannels)
-			})
-
-			testServ := httptest.NewServer(mux)
-			defer testServ.Close()
-
-			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
-			channel := Channel{
-				UserClient: client,
-			}
-
-			err := channel.LeaveChannels([]string{"C1H9RESGL"})
-
-			if tc.wantErr == "" && err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-
-			if tc.wantErr != "" {
-				if err == nil {
-					t.Fatal("expected error but did not receive one")
-				}
-				if err.Error() != tc.wantErr {
-					t.Fatalf("expected to receive error: %s, got: %s", tc.wantErr, err)
-				}
-			}
-		})
-	}
-}
-
-func TestArchiveChannels(t *testing.T) {
+func TestArchiveConversations(t *testing.T) {
 	testCases := []struct {
 		description         string
 		respArchiveChannels []byte
 		wantErr             string
 	}{
 		{
-			description:         "successfully archived channels",
+			description:         "successfully archived conversations",
 			respArchiveChannels: []byte(mockSuccessResp),
 		},
 		{
-			description:         "no error returned for already archived channel",
+			description:         "no error returned for already archived conversation",
 			respArchiveChannels: []byte(mockChannelAlreadyArchivedErrResp),
 		},
 		{
-			description:         "failure to archive channels",
+			description:         "failure to archive conversations",
 			respArchiveChannels: []byte(mockChannelsArchiveErrResp),
-			wantErr:             "invalid_auth",
+			wantErr:             "c.client.ArchiveConversation() > invalid_auth",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			mux := http.NewServeMux()
-			mux.HandleFunc("/channels.archive", func(w http.ResponseWriter, r *http.Request) {
+			mux.HandleFunc("/conversations.archive", func(w http.ResponseWriter, r *http.Request) {
 				_, _ = w.Write(tc.respArchiveChannels)
 			})
 
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			client := slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL)))
-			channel := Channel{
-				UserClient: client,
+			client := &Client{
+				client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
-			err := channel.ArchiveChannels([]string{"C1H9RESGL"})
+			err := client.ArchiveConversations([]string{"C1H9RESGL"})
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)

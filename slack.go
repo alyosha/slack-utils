@@ -3,17 +3,77 @@ package utils
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/slack-go/slack"
 )
 
 var (
+	errMissingBotToken             = errors.New("must provide bot token")
+	errMissingAdminID              = errors.New("must provide admin ID")
 	errSlashCommandNotFound        = errors.New("no slash command found in context")
 	errInteractionCallbackNotFound = errors.New("no callback found in context")
 )
 
-type slashCommandKey struct{}
-type interactionCallbackKey struct{}
+type (
+	slashCommandKey        struct{}
+	interactionCallbackKey struct{}
+)
+
+// Client wraps the slack Client for additional utility
+type Client struct {
+	client           *slack.Client
+	adminID          string
+	logChannelID     string
+	errChannelID     string
+	logAdminRequests bool
+}
+
+// ClientConfig is used to configure a new Client
+type ClientConfig struct {
+	BotToken         string
+	AdminID          string
+	LogChannelID     string
+	ErrChannelID     string
+	LogAdminRequests bool
+}
+
+// NewClient returns a new client based on provided config
+func NewClient(cfg ClientConfig) (*Client, error) {
+	if cfg.BotToken == "" {
+		return nil, errMissingBotToken
+	}
+
+	if cfg.AdminID == "" {
+		return nil, errMissingAdminID
+	}
+
+	c := &Client{
+		client:           slack.New(cfg.BotToken),
+		adminID:          cfg.AdminID,
+		logChannelID:     cfg.LogChannelID,
+		errChannelID:     cfg.ErrChannelID,
+		logAdminRequests: cfg.LogAdminRequests,
+	}
+
+	if _, err := c.client.GetUserInfo(cfg.AdminID); err != nil {
+		return nil, fmt.Errorf("c.client.GetUserInfo() > %w", err)
+	}
+
+	if cfg.LogChannelID != "" {
+		if _, err := c.client.GetConversationInfo(cfg.LogChannelID, false); err != nil {
+			return nil, fmt.Errorf("c.client.GetConversationInfo() > %w", err)
+		}
+	}
+
+	if cfg.ErrChannelID != "" {
+		if _, err := c.client.GetConversationInfo(cfg.ErrChannelID, false); err != nil {
+			return nil, fmt.Errorf("c.client.GetConversationInfo() > %w", err)
+		}
+	}
+
+	return c, nil
+}
 
 // SlashCommand retrieves the verified slash command from the context. To
 // utilize this functionality, you must use the VerifySlashCommand middleware.
