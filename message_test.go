@@ -43,11 +43,11 @@ func TestPostMsg(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			Client := &Client{
+			client := &Client{
 				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
-			ts, err := Client.PostMsg(Msg{}, "C1H9RESGL")
+			ts, err := client.PostMsg(Msg{}, "C1H9RESGL")
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -99,11 +99,11 @@ func TestPostThreadMsg(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			Client := &Client{
+			client := &Client{
 				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
-			err := Client.PostThreadMsg(Msg{}, "C1H9RESGL", "1503435956.000247")
+			err := client.PostThreadMsg(Msg{}, "C1H9RESGL", "1503435956.000247")
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -155,11 +155,11 @@ func TestPostEphemeralMsg(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			Client := &Client{
+			client := &Client{
 				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
-			err := Client.PostEphemeralMsg(Msg{}, "C1H9RESGL", "U12345")
+			err := client.PostEphemeralMsg(Msg{}, "C1H9RESGL", "U12345")
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -207,11 +207,11 @@ func TestUpdateMsg(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			Client := &Client{
+			client := &Client{
 				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
-			err := Client.UpdateMsg(Msg{}, "C1H9RESGL", "1503435957.000237")
+			err := client.UpdateMsg(Msg{}, "C1H9RESGL", "1503435957.000237")
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -258,11 +258,11 @@ func TestDeleteMsg(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			Client := &Client{
+			client := &Client{
 				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
-			err := Client.DeleteMsg("C1H9RESGL", "1503435957.000237", fmt.Sprintf("%s%s", testServ.URL, responseURLPath))
+			err := client.DeleteMsg("C1H9RESGL", "1503435957.000237", fmt.Sprintf("%s%s", testServ.URL, responseURLPath))
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)

@@ -94,11 +94,11 @@ func TestCreateConversation(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			Client := &Client{
+			client := &Client{
 				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
-			conversationID, err := Client.CreateConversation("general", false, tc.inviteMembers, tc.initMsg)
+			conversationID, err := client.CreateConversation("general", false, tc.inviteMembers, tc.initMsg)
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -156,11 +156,11 @@ func TestInviteUsers(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			Client := &Client{
+			client := &Client{
 				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
-			err := Client.InviteUsers("C1H9RESGL", tc.inviteMembers)
+			err := client.InviteUsers("C1H9RESGL", tc.inviteMembers)
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -207,11 +207,11 @@ func TestGetConversationMembers(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			Client := &Client{
+			client := &Client{
 				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
-			members, err := Client.GetConversationMembers("C1H9RESGL")
+			members, err := client.GetConversationMembers("C1H9RESGL")
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -280,11 +280,11 @@ func TestGetConversationMemberEmails(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			Client := &Client{
+			client := &Client{
 				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
-			emails, err := Client.GetConversationMemberEmails("C1H9RESGL")
+			emails, err := client.GetConversationMemberEmails("C1H9RESGL")
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
@@ -343,11 +343,11 @@ func TestArchiveConversations(t *testing.T) {
 			testServ := httptest.NewServer(mux)
 			defer testServ.Close()
 
-			Client := &Client{
+			client := &Client{
 				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
-			err := Client.ArchiveConversations([]string{"C1H9RESGL"})
+			err := client.ArchiveConversations([]string{"C1H9RESGL"})
 
 			if tc.wantErr == "" && err != nil {
 				t.Fatalf("unexpected error: %v", err)
