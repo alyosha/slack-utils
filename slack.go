@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/slack-go/slack"
+	"golang.org/x/sync/errgroup"
 )
 
 var (
@@ -56,20 +57,35 @@ func NewClient(cfg ClientConfig) (*Client, error) {
 		logAdminRequests: cfg.LogAdminRequests,
 	}
 
-	if _, err := c.client.GetUserInfo(cfg.AdminID); err != nil {
-		return nil, fmt.Errorf("c.client.GetUserInfo() > %w", err)
-	}
+	var eg errgroup.Group
 
-	if cfg.LogChannelID != "" {
-		if _, err := c.client.GetConversationInfo(cfg.LogChannelID, false); err != nil {
-			return nil, fmt.Errorf("c.client.GetConversationInfo() > %w", err)
+	eg.Go(func() error {
+		if _, err := c.client.GetUserInfo(cfg.AdminID); err != nil {
+			return fmt.Errorf("c.client.GetUserInfo() > %w", err)
 		}
-	}
+		return nil
+	})
 
-	if cfg.ErrChannelID != "" {
-		if _, err := c.client.GetConversationInfo(cfg.ErrChannelID, false); err != nil {
-			return nil, fmt.Errorf("c.client.GetConversationInfo() > %w", err)
+	eg.Go(func() error {
+		if cfg.LogChannelID != "" {
+			if _, err := c.client.GetConversationInfo(cfg.LogChannelID, false); err != nil {
+				return fmt.Errorf("c.client.GetConversationInfo() > %w", err)
+			}
 		}
+		return nil
+	})
+
+	eg.Go(func() error {
+		if cfg.ErrChannelID != "" {
+			if _, err := c.client.GetConversationInfo(cfg.ErrChannelID, false); err != nil {
+				return fmt.Errorf("c.client.GetConversationInfo() > %w", err)
+			}
+		}
+		return nil
+	})
+
+	if err := eg.Wait(); err != nil {
+		return nil, err
 	}
 
 	return c, nil
