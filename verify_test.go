@@ -164,7 +164,7 @@ func TestVerifySlashCommand(t *testing.T) {
 			}
 
 			if tc.useMiddleware {
-				r.Use(client.VerifySlash(testSecret1, tc.logConfig, tc.succeedFunc, tc.failFunc))
+				r.Use(client.VerifySlashCommand(testSecret1, tc.logConfig, tc.succeedFunc, tc.failFunc))
 			}
 
 			signingSig := getSigningSig(t, tc.ts, tc.secret, []byte(encodedBody))
@@ -352,7 +352,7 @@ func TestVerifyInteractionCallback(t *testing.T) {
 			}
 
 			if tc.useMiddleware {
-				r.Use(client.VerifyCallback(testSecret1, tc.logConfig, tc.succeedFunc, tc.failFunc))
+				r.Use(client.VerifyInteractionCallback(testSecret1, tc.logConfig, tc.succeedFunc, tc.failFunc))
 			}
 
 			signingSig := getSigningSig(t, tc.ts, tc.secret, []byte(testCallbackRaw))

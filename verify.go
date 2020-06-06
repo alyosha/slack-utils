@@ -60,11 +60,11 @@ func (v VerifyFail) verifyOptType() string {
 	return verifyOptTypeFail
 }
 
-// VerifySlash is a middleware that will automatically verify the authenticity
+// VerifySlashCommand is a middleware that will automatically verify the authenticity
 // of the incoming request and embed the unmarshalled SlashCommand in the
 // context on success. Include VerifyAction methods if you need to configure
 // additional behavior on sucess/failure or would like to enable request logging.
-func (c *Client) VerifySlash(signingSecret string, verifyOpts ...VerifyOpt) func(next http.Handler) http.Handler {
+func (c *Client) VerifySlashCommand(signingSecret string, verifyOpts ...VerifyOpt) func(next http.Handler) http.Handler {
 	var logConfig RequestLoggingConfig
 	var successActions []VerifySucceedSlash
 	var failActions []VerifyFail
@@ -99,11 +99,11 @@ func (c *Client) VerifySlash(signingSecret string, verifyOpts ...VerifyOpt) func
 	}
 }
 
-// VerifyCallback is a middleware that will automatically verify the authenticity
+// VerifyCallbackInteraction is a middleware that will automatically verify the authenticity
 // of the incoming request and embed the unmarshalled InteractionCallback in the
 // context on success. Include VerifyAction methods if you need to configure
 // additional behavior on sucess/failure or would like to enable request logging.
-func (c *Client) VerifyCallback(signingSecret string, verifyOpts ...VerifyOpt) func(next http.Handler) http.Handler {
+func (c *Client) VerifyInteractionCallback(signingSecret string, verifyOpts ...VerifyOpt) func(next http.Handler) http.Handler {
 	var logConfig RequestLoggingConfig
 	var successActions []VerifySucceedCallback
 	var failActions []VerifyFail

@@ -38,7 +38,7 @@ type ClientConfig struct {
 }
 
 // NewClient returns a new client based on provided config
-func NewClient(cfg ClientConfig, opt ...slack.Option) (*Client, error) {
+func NewClient(cfg ClientConfig, opts ...slack.Option) (*Client, error) {
 	if cfg.BotToken == "" {
 		return nil, errMissingBotToken
 	}
@@ -48,7 +48,7 @@ func NewClient(cfg ClientConfig, opt ...slack.Option) (*Client, error) {
 	}
 
 	c := &Client{
-		Client:     slack.New(cfg.BotToken, opt...),
+		Client:     slack.New(cfg.BotToken, opts...),
 		adminID:    cfg.AdminID,
 		logChannel: cfg.LogChannelID,
 		errChannel: cfg.ErrChannelID,
