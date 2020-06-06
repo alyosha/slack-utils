@@ -8,14 +8,6 @@ import (
 	"github.com/slack-go/slack"
 )
 
-// RequestLoggingConfig is used to configure a number of
-// behavioral characteristics for request logging.
-type RequestLoggingConfig struct {
-	Enabled      bool
-	MaskUserID   bool
-	ExcludeAdmin bool
-}
-
 func (c *Client) SendToLogChannel(msg Msg) error {
 	_, err := c.PostMsg(msg, c.logChannel)
 	if err != nil {

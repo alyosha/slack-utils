@@ -12,17 +12,22 @@ import (
 )
 
 const (
-	verifyActionTypeSucceedSlash    = "succeed_slash"
-	verifyActionTypeSucceedCallback = "succeed_callback"
-	verifyActionTypeFail            = "fail"
-	verifyActionTypeMalformed       = "malformed"
+	verifyOptTypeSucceedSlash         = "succeed_slash_action"
+	verifyOptTypeSucceedCallback      = "succeed_callback_action"
+	verifyOptTypeFail                 = "fail_action"
+	verifyOptTypeRequestLoggingConfig = "request_logging_config"
+	verifyOptTypeMalformed            = "malformed"
 )
 
-// The following func types are used to configure custom additional actions on
-// verify middleware success/failure (e.g. logging, etc.)
 type (
-	VerifyAction interface {
-		verifyActionType() string
+	VerifyOpt interface {
+		verifyOptType() string
+	}
+
+	RequestLoggingConfig struct {
+		Enabled      bool
+		MaskUserID   bool
+		ExcludeAdmin bool
 	}
 
 	VerifySucceedSlash    func(w http.ResponseWriter, r *http.Request, cmd *slack.SlashCommand)
@@ -30,85 +35,106 @@ type (
 	VerifyFail            func(w http.ResponseWriter, r *http.Request, err error)
 )
 
-func (v VerifySucceedSlash) verifyActionType() string {
-	if v == nil {
-		return verifyActionTypeMalformed
-	}
-	return verifyActionTypeSucceedSlash
+func (cfg RequestLoggingConfig) verifyOptType() string {
+	return verifyOptTypeRequestLoggingConfig
 }
 
-func (v VerifySucceedCallback) verifyActionType() string {
+func (v VerifySucceedSlash) verifyOptType() string {
 	if v == nil {
-		return verifyActionTypeMalformed
+		return verifyOptTypeMalformed
 	}
-	return verifyActionTypeSucceedCallback
+	return verifyOptTypeSucceedSlash
 }
 
-func (v VerifyFail) verifyActionType() string {
+func (v VerifySucceedCallback) verifyOptType() string {
 	if v == nil {
-		return verifyActionTypeMalformed
+		return verifyOptTypeMalformed
 	}
-	return verifyActionTypeFail
+	return verifyOptTypeSucceedCallback
 }
 
-// VerifySlash is a middleware that will automatically verify the
-// authenticity of the incoming request and embed the unmarshalled SlashCommand
-// in the context on success. Use the optional succeed/fail parameters to
-// configure additional behavior on sucess/failure, or simply provide nil if
-// no further action is required.
-func (c *Client) VerifySlash(signingSecret string, logConfig RequestLoggingConfig, verifyActions ...VerifyAction) func(next http.Handler) http.Handler {
+func (v VerifyFail) verifyOptType() string {
+	if v == nil {
+		return verifyOptTypeMalformed
+	}
+	return verifyOptTypeFail
+}
+
+// VerifySlash is a middleware that will automatically verify the authenticity
+// of the incoming request and embed the unmarshalled SlashCommand in the
+// context on success. Include VerifyAction methods if you need to configure
+// additional behavior on sucess/failure or would like to enable request logging.
+func (c *Client) VerifySlash(signingSecret string, verifyOpts ...VerifyOpt) func(next http.Handler) http.Handler {
+	var logConfig RequestLoggingConfig
+	var successActions []VerifySucceedSlash
+	var failActions []VerifyFail
+
+	for _, action := range verifyOpts {
+		switch action.verifyOptType() {
+		case verifyOptTypeRequestLoggingConfig:
+			logConfig = action.(RequestLoggingConfig)
+		case verifyOptTypeSucceedSlash:
+			successActions = append(successActions, action.(VerifySucceedSlash))
+		case verifyOptTypeFail:
+			failActions = append(failActions, action.(VerifyFail))
+		}
+	}
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cmd, err := verifySlashCommand(r, signingSecret)
 			if err != nil {
-				fail(w, r, err, verifyActions...)
+				for _, fail := range failActions {
+					fail(w, r, err)
+				}
 				return
 			}
 			ctx := withSlashCommand(r.Context(), cmd)
-			for _, action := range verifyActions {
-				if action.verifyActionType() == verifyActionTypeSucceedSlash {
-					action.(VerifySucceedSlash)(w, r, cmd)
-				}
-			}
 			c.logRequest(logConfig, r.URL.Path, cmd.UserID)
+			for _, succeed := range successActions {
+				succeed(w, r, cmd)
+			}
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
 
-// VerifyCallback is a middleware that will automatically verify
-// the authenticity of the incoming request and embed the unmarshalled
-// InteractionCallback in the context on success. Use the optional succeed/fail
-// parameters to configure additional behavior on sucess/failure, or simply
-// provide nil if no further action is required.
-func (c *Client) VerifyCallback(signingSecret string, logConfig RequestLoggingConfig, verifyActions ...VerifyAction) func(next http.Handler) http.Handler {
+// VerifyCallback is a middleware that will automatically verify the authenticity
+// of the incoming request and embed the unmarshalled InteractionCallback in the
+// context on success. Include VerifyAction methods if you need to configure
+// additional behavior on sucess/failure or would like to enable request logging.
+func (c *Client) VerifyCallback(signingSecret string, verifyOpts ...VerifyOpt) func(next http.Handler) http.Handler {
+	var logConfig RequestLoggingConfig
+	var successActions []VerifySucceedCallback
+	var failActions []VerifyFail
+
+	for _, action := range verifyOpts {
+		switch action.verifyOptType() {
+		case verifyOptTypeRequestLoggingConfig:
+			logConfig = action.(RequestLoggingConfig)
+		case verifyOptTypeSucceedCallback:
+			successActions = append(successActions, action.(VerifySucceedCallback))
+		case verifyOptTypeFail:
+			failActions = append(failActions, action.(VerifyFail))
+		}
+	}
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			callback, err := verifyInteractionCallback(r, signingSecret)
 			if err != nil {
-				fail(w, r, err, verifyActions...)
+				for _, fail := range failActions {
+					fail(w, r, err)
+				}
 				return
 			}
 			ctx := withInteractionCallback(r.Context(), callback)
-			for _, action := range verifyActions {
-				if action.verifyActionType() == verifyActionTypeSucceedCallback {
-					action.(VerifySucceedCallback)(w, r, callback)
-				}
-			}
 			c.logRequest(logConfig, r.URL.Path, callback.User.ID)
+			for _, succeed := range successActions {
+				succeed(w, r, callback)
+			}
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
-	}
-}
-
-func fail(w http.ResponseWriter, r *http.Request, err error, verifyActions ...VerifyAction) {
-	for _, action := range verifyActions {
-		if action == nil {
-			continue
-		}
-		if action.verifyActionType() == verifyActionTypeFail {
-			action.(VerifyFail)(w, r, err)
-		}
 	}
 }
 

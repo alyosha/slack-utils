@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi"
 	"github.com/kylelemons/godebug/pretty"
 	"github.com/slack-go/slack"
@@ -379,6 +380,7 @@ func TestVerifyInteractionCallback(t *testing.T) {
 
 			if tc.containsRespPattern != "" {
 				if !strings.Contains(respBodyString, tc.containsRespPattern) {
+					spew.Dump(tc)
 					t.Fatalf("expected resp to contain pattern: %s, got: %s", tc.containsRespPattern, respBodyString)
 				}
 				return
