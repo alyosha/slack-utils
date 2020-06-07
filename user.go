@@ -7,6 +7,13 @@ import (
 	"github.com/slack-go/slack"
 )
 
+type userInfoMapKind string
+
+const (
+	mapKindIDEmail userInfoMapKind = "id_email"
+	mapKindEmailID userInfoMapKind = "email_id"
+)
+
 // ErrNoUsersInWorkplace is returned when there was no error calling Slack, but
 // the requested method cannot continue given there are no returned users.
 var ErrNoUsersInWorkplace = errors.New("no users in workplace")
@@ -49,11 +56,11 @@ func (c *Client) getAll() ([]slack.User, error) {
 func toSlackIDs(users []slack.User, emails []string) []string {
 	var ids []string
 
+	userEmailMap := getUserInfoMap(users, mapKindEmailID)
+
 	for _, email := range emails {
-		for _, user := range users {
-			if user.Profile.Email == email {
-				ids = append(ids, user.ID)
-			}
+		if userID, ok := userEmailMap[email]; ok {
+			ids = append(ids, userID)
 		}
 	}
 
@@ -63,11 +70,11 @@ func toSlackIDs(users []slack.User, emails []string) []string {
 func toSlackIDsInclusive(users []slack.User, emails []string) [][]string {
 	var emailIDPairs [][]string
 
+	userEmailMap := getUserInfoMap(users, mapKindEmailID)
+
 	for _, email := range emails {
-		for _, user := range users {
-			if user.Profile.Email == email {
-				emailIDPairs = append(emailIDPairs, []string{email, user.ID})
-			}
+		if userID, ok := userEmailMap[email]; ok {
+			emailIDPairs = append(emailIDPairs, []string{email, userID})
 		}
 	}
 
@@ -77,13 +84,30 @@ func toSlackIDsInclusive(users []slack.User, emails []string) [][]string {
 func toEmails(users []slack.User, userIDs []string) []string {
 	var emails []string
 
+	userEmailMap := getUserInfoMap(users, mapKindIDEmail)
+
 	for _, id := range userIDs {
-		for _, user := range users {
-			if user.ID == id && user.Profile.Email != "" {
-				emails = append(emails, user.Profile.Email)
+		if email, ok := userEmailMap[id]; ok {
+			if email != "" {
+				emails = append(emails, email)
 			}
 		}
 	}
 
 	return emails
+}
+
+func getUserInfoMap(users []slack.User, mapKind userInfoMapKind) map[string]string {
+	userInfoMap := make(map[string]string)
+
+	for _, user := range users {
+		switch mapKind {
+		case mapKindIDEmail:
+			userInfoMap[user.ID] = user.Profile.Email
+		case mapKindEmailID:
+			userInfoMap[user.Profile.Email] = user.ID
+		}
+	}
+
+	return userInfoMap
 }
