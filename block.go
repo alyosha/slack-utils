@@ -14,7 +14,7 @@ const datePickTimeFmt = "2006-01-02"
 
 var DivBlock = slack.NewDividerBlock()
 
-// NewTextBlock returns a section block of common configuration.
+// NewTextBlock returns a section block of common configuration
 func NewTextBlock(body string, accessory *slack.Accessory) *slack.SectionBlock {
 	text := slack.NewTextBlockObject(slack.MarkdownType, body, false, false)
 	return slack.NewSectionBlock(text, nil, accessory)
@@ -31,19 +31,19 @@ func NewButton(actionID, value string, text string, style slack.Style) *slack.Bu
 }
 
 // NewDoneBtn returns a new primary button which will callback to
-// DeleteActionID on select. Configure the button title via param.
+// DeleteActionID on select. Configure the button title via param
 func NewDoneButton(text string) *slack.ButtonBlockElement {
 	return NewButton(DeleteActionID, "done", text, slack.StylePrimary)
 }
 
 // NewCancelBtn returns a new danger button which will callback to
-// DeleteActionID on select. Configure the button title via param.
+// DeleteActionID on select. Configure the button title via param
 func NewCancelButton(text string) *slack.ButtonBlockElement {
 	return NewButton(DeleteActionID, "cancel", text, slack.StyleDanger)
 }
 
 // NewDatePickerWithOpts returns a new DatePickerBlockElement initialized with
-// its date/placeholder text set to either placeholder text or an initial date.
+// its date/placeholder text set to either placeholder text or an initial date
 func NewDatePickerWithPlaceholder(actionID string, placeholder interface{}) *slack.DatePickerBlockElement {
 	picker := slack.NewDatePickerBlockElement(actionID)
 
@@ -58,7 +58,7 @@ func NewDatePickerWithPlaceholder(actionID string, placeholder interface{}) *sla
 }
 
 // DateOptToTime parses the selected date opt back to time.Time, but owing to
-// its format always resolve anything more granular than a day to zero.
+// its format always resolve anything more granular than a day to zero
 func DateOptToTime(opt string) (time.Time, error) {
 	return time.Parse(datePickTimeFmt, opt)
 }

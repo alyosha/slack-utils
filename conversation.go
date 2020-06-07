@@ -52,7 +52,7 @@ func (c *Client) InviteUsers(conversationID string, userIDs []string) error {
 	return nil
 }
 
-// ArchiveConversations allows archives multiple conversations
+// ArchiveConversations archives multiple conversations
 func (c *Client) ArchiveConversations(conversationIDs []string) error {
 	for _, conversationID := range conversationIDs {
 		err := c.Client.ArchiveConversation(conversationID)
