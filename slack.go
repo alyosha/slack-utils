@@ -21,20 +21,24 @@ type (
 	interactionCallbackKey struct{}
 )
 
-// Client wraps the slack Client for additional utility
+// Client wraps the slack client for additional utility
 type Client struct {
-	Client     *slack.Client
-	adminID    string
-	logChannel string
-	errChannel string
+	Client                 *slack.Client
+	adminID                string
+	logChannel             string
+	errChannel             string
+	slashResponseConfig    ResponseConfig
+	callbackResponseConfig ResponseConfig
 }
 
 // ClientConfig is used to configure a new Client
 type ClientConfig struct {
-	BotToken     string
-	AdminID      string
-	LogChannelID string
-	ErrChannelID string
+	BotToken               string
+	AdminID                string
+	LogChannelID           string         // Optional
+	ErrChannelID           string         // Optional
+	SlashResponseConfig    ResponseConfig // Defaults to standard config
+	CallbackResponseConfig ResponseConfig // Defaults to standard config
 }
 
 // NewClient returns a new client based on provided config
@@ -48,10 +52,12 @@ func NewClient(cfg ClientConfig, opts ...slack.Option) (*Client, error) {
 	}
 
 	c := &Client{
-		Client:     slack.New(cfg.BotToken, opts...),
-		adminID:    cfg.AdminID,
-		logChannel: cfg.LogChannelID,
-		errChannel: cfg.ErrChannelID,
+		Client:                 slack.New(cfg.BotToken, opts...),
+		adminID:                cfg.AdminID,
+		logChannel:             cfg.LogChannelID,
+		errChannel:             cfg.ErrChannelID,
+		slashResponseConfig:    cfg.SlashResponseConfig,
+		callbackResponseConfig: cfg.CallbackResponseConfig,
 	}
 
 	var eg errgroup.Group

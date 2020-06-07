@@ -3,7 +3,7 @@ module github.com/alyosha/slack-utils
 go 1.14
 
 require (
-	github.com/davecgh/go-spew v1.1.1
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-chi/chi v4.1.1+incompatible
 	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/kylelemons/godebug v1.1.0

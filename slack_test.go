@@ -10,6 +10,8 @@ import (
 )
 
 func TestNewClient(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		description          string
 		cfg                  ClientConfig

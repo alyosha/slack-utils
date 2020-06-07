@@ -11,6 +11,8 @@ import (
 )
 
 func TestSendToLogChannel(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		description       string
 		msg               Msg
@@ -75,6 +77,8 @@ func TestSendToLogChannel(t *testing.T) {
 }
 
 func TestSendToErrChannel(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		description       string
 		msg               Msg

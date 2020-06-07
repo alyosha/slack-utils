@@ -12,52 +12,57 @@ import (
 )
 
 const (
-	verifyOptTypeSucceedSlash         = "succeed_slash_action"
-	verifyOptTypeSucceedCallback      = "succeed_callback_action"
-	verifyOptTypeFail                 = "fail_action"
-	verifyOptTypeRequestLoggingConfig = "request_logging_config"
-	verifyOptTypeMalformed            = "malformed"
+	verifyOptTypeSucceedSlashAction    verifyOptType = "succeed_slash_action_verify_opt"
+	verifyOptTypeSucceedCallbackAction verifyOptType = "succeed_callback_action_verify_opt"
+	verifyOptTypeFailAction            verifyOptType = "fail_action_verify_opt"
+	verifyOptTypeRequestLoggingConfig  verifyOptType = "request_logging_config_verify_opt"
+	verifyOptTypeMalformed             verifyOptType = "malformed_verify_opt"
 )
 
 type (
+	verifyOptType string
+
 	VerifyOpt interface {
-		verifyOptType() string
+		optType() verifyOptType
 	}
 
+	// RequestLoggingConfig is used to configure request logging behavior
 	RequestLoggingConfig struct {
-		Enabled      bool
-		MaskUserID   bool
-		ExcludeAdmin bool
+		Enabled      bool // Global toggle for logging messages
+		MaskUserID   bool // Whether or not to conceal the user ID in log messages
+		ExcludeAdmin bool // Whether or not to exclude the admin from log messages
 	}
 
+	// The verify action types below are used to configure additional actions
+	// upon success/failure of the request verification
 	VerifySucceedSlash    func(w http.ResponseWriter, r *http.Request, cmd *slack.SlashCommand)
 	VerifySucceedCallback func(w http.ResponseWriter, r *http.Request, cmd *slack.InteractionCallback)
 	VerifyFail            func(w http.ResponseWriter, r *http.Request, err error)
 )
 
-func (cfg RequestLoggingConfig) verifyOptType() string {
+func (cfg RequestLoggingConfig) optType() verifyOptType {
 	return verifyOptTypeRequestLoggingConfig
 }
 
-func (v VerifySucceedSlash) verifyOptType() string {
+func (v VerifySucceedSlash) optType() verifyOptType {
 	if v == nil {
 		return verifyOptTypeMalformed
 	}
-	return verifyOptTypeSucceedSlash
+	return verifyOptTypeSucceedSlashAction
 }
 
-func (v VerifySucceedCallback) verifyOptType() string {
+func (v VerifySucceedCallback) optType() verifyOptType {
 	if v == nil {
 		return verifyOptTypeMalformed
 	}
-	return verifyOptTypeSucceedCallback
+	return verifyOptTypeSucceedCallbackAction
 }
 
-func (v VerifyFail) verifyOptType() string {
+func (v VerifyFail) optType() verifyOptType {
 	if v == nil {
 		return verifyOptTypeMalformed
 	}
-	return verifyOptTypeFail
+	return verifyOptTypeFailAction
 }
 
 // VerifySlashCommand is a middleware that will automatically verify the
@@ -69,14 +74,14 @@ func (c *Client) VerifySlashCommand(signingSecret string, verifyOpts ...VerifyOp
 	var successActions []VerifySucceedSlash
 	var failActions []VerifyFail
 
-	for _, action := range verifyOpts {
-		switch action.verifyOptType() {
+	for _, opt := range verifyOpts {
+		switch opt.optType() {
 		case verifyOptTypeRequestLoggingConfig:
-			logConfig = action.(RequestLoggingConfig)
-		case verifyOptTypeSucceedSlash:
-			successActions = append(successActions, action.(VerifySucceedSlash))
-		case verifyOptTypeFail:
-			failActions = append(failActions, action.(VerifyFail))
+			logConfig = opt.(RequestLoggingConfig)
+		case verifyOptTypeSucceedSlashAction:
+			successActions = append(successActions, opt.(VerifySucceedSlash))
+		case verifyOptTypeFailAction:
+			failActions = append(failActions, opt.(VerifyFail))
 		}
 	}
 
@@ -102,21 +107,21 @@ func (c *Client) VerifySlashCommand(signingSecret string, verifyOpts ...VerifyOp
 
 // VerifyInteractionCallback is a middleware that will automatically verify the
 // authenticity of the incoming request and embed the unmarshalled InteractionCallback
-// in the context on success. Include VerifyOpts if you need to configure
-// additional behavior on sucess/failure or would like to enable request logging
+// in the context on success. Include VerifyOpts if you need to configure additional
+// behavior on sucess/failure or would like to enable request logging
 func (c *Client) VerifyInteractionCallback(signingSecret string, verifyOpts ...VerifyOpt) func(next http.Handler) http.Handler {
 	var logConfig RequestLoggingConfig
 	var successActions []VerifySucceedCallback
 	var failActions []VerifyFail
 
-	for _, action := range verifyOpts {
-		switch action.verifyOptType() {
+	for _, opt := range verifyOpts {
+		switch opt.optType() {
 		case verifyOptTypeRequestLoggingConfig:
-			logConfig = action.(RequestLoggingConfig)
-		case verifyOptTypeSucceedCallback:
-			successActions = append(successActions, action.(VerifySucceedCallback))
-		case verifyOptTypeFail:
-			failActions = append(failActions, action.(VerifyFail))
+			logConfig = opt.(RequestLoggingConfig)
+		case verifyOptTypeSucceedCallbackAction:
+			successActions = append(successActions, opt.(VerifySucceedCallback))
+		case verifyOptTypeFailAction:
+			failActions = append(failActions, opt.(VerifyFail))
 		}
 	}
 

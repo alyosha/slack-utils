@@ -23,6 +23,8 @@ var mockTextObj = &slack.TextBlockObject{
 }
 
 func TestNewButton(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		description string
 		style       slack.Style
@@ -72,6 +74,8 @@ func TestNewButton(t *testing.T) {
 }
 
 func TestNewDatePickerAtTime(t *testing.T) {
+	t.Parallel()
+
 	now := time.Now()
 	expectedStr := now.Format("2006-01-02")
 
@@ -111,6 +115,8 @@ func TestNewDatePickerAtTime(t *testing.T) {
 }
 
 func TestNewDateOptToTime(t *testing.T) {
+	t.Parallel()
+
 	now := time.Now()
 	dateOptStr := now.Format(datePickTimeFmt)
 	unrecognizedLayoutOptStr := now.Format(time.ANSIC)
@@ -149,6 +155,8 @@ func TestNewDateOptToTime(t *testing.T) {
 }
 
 func TestTextBlock(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		description string
 		text        string

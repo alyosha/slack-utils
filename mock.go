@@ -1,5 +1,53 @@
 package utils
 
+import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+)
+
+func executeTestReq(t *testing.T, testServ *httptest.Server, signingSig, ts, path string, encodedBody string) string {
+	req, err := http.NewRequest(http.MethodPost, testServ.URL+path, strings.NewReader(encodedBody))
+	if err != nil {
+		t.Fatal("failed to create new http request", err)
+	}
+
+	req.Header.Set("X-Slack-Signature", signingSig)
+	req.Header.Set("X-Slack-Request-Timestamp", ts)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal("failed to execute http request", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal("failed to read http response body", err)
+	}
+
+	return string(respBody)
+}
+
+func getTestSigningSig(t *testing.T, timestamp, secret string, reqBody []byte) string {
+	hash := hmac.New(sha256.New, []byte(secret))
+	if _, err := hash.Write([]byte(fmt.Sprintf("v0:%s:", timestamp))); err != nil {
+		t.Fatal("failed writing test hash", err)
+	}
+
+	if _, err := hash.Write(reqBody); err != nil {
+		t.Fatal("failed writing test hash", err)
+	}
+
+	return fmt.Sprintf("v0=%s", hex.EncodeToString(hash.Sum(nil)))
+}
+
 const mockChannelCreateResp = `{
     "ok": true,
     "channel": {
@@ -323,3 +371,5 @@ const mockChannelAlreadyArchivedErrResp = `{
     "ok": false,
     "error": "already_archived"
 }`
+
+const mockCallbackRaw = `payload=%7B%22type%22%3A%22block_actions%22%2C%22user%22%3A%7B%22id%22%3A%22U12345678%22%2C%22username%22%3A%22fakenameyo%22%2C%22name%22%3A%22fakenameyo%22%2C%22team_id%22%3A%22T0000000%22%7D%2C%22api_app_id%22%3A%22A00000000%22%2C%22token%22%3A%22faketoken%22%2C%22container%22%3A%7B%22type%22%3A%22message%22%2C%22message_ts%22%3A%221589970639.001400%22%2C%22channel_id%22%3A%22G0000000%22%2C%22is_ephemeral%22%3Atrue%7D%2C%22trigger_id%22%3A%220000000000.1111111111.222222222222aaaaaaaaaaaaaa%22%2C%22team%22%3A%7B%22id%22%3A%22T0000000%22%2C%22domain%22%3A%22domain%22%7D%2C%22channel%22%3A%7B%22id%22%3A%22G0000000%22%2C%22name%22%3A%22privategroup%22%7D%2C%22response_url%22%3A%22https%3A%5C%2F%5C%2Fhooks.slack.com%5C%2Factions%5C%2FT0000000F%5C%2F000000000%5C%2FYYYYYYYYYYY%22%2C%22actions%22%3A%5B%7B%22action_id%22%3A%22cancel_action%22%2C%22block_id%22%3A%22channel_id_block%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Done%22%2C%22emoji%22%3Atrue%7D%2C%22value%22%3A%22done%22%2C%22style%22%3A%22primary%22%2C%22type%22%3A%22button%22%2C%22action_ts%22%3A%221589971722.911477%22%7D%5D%7D`

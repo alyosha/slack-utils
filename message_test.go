@@ -10,6 +10,8 @@ import (
 )
 
 func TestPostMsg(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		description   string
 		msg           Msg
@@ -70,6 +72,8 @@ func TestPostMsg(t *testing.T) {
 }
 
 func TestPostThreadMsg(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		description string
 		msg         Msg
@@ -122,6 +126,8 @@ func TestPostThreadMsg(t *testing.T) {
 }
 
 func TestPostEphemeralMsg(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		description   string
 		msg           Msg
@@ -178,6 +184,8 @@ func TestPostEphemeralMsg(t *testing.T) {
 }
 
 func TestUpdateMsg(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		description   string
 		msg           Msg
@@ -230,6 +238,8 @@ func TestUpdateMsg(t *testing.T) {
 }
 
 func TestDeleteMsg(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		description   string
 		respDeleteMsg []byte

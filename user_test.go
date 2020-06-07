@@ -10,6 +10,8 @@ import (
 )
 
 func TestEmailsToSlackIDs(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		description   string
 		respUsersList []byte
@@ -72,6 +74,8 @@ func TestEmailsToSlackIDs(t *testing.T) {
 }
 
 func TestEmailsToSlackIDsInclusive(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		description   string
 		respUsersList []byte
