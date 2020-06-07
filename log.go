@@ -70,17 +70,13 @@ func (c *Client) logRequest(cfg RequestLoggingConfig, endpoint, userID string) {
 	var logMsgBody string
 
 	if cfg.MaskUserID {
-		logMsgBody = fmt.Sprintf(
-			"*endpoint:* `%s`\n*timestamp:* `%s`",
-			endpoint,
-			fmt.Sprintf("%d", time.Now().Unix()),
-		)
+		logMsgBody = getBasicLogMsg(endpoint)
 	} else {
 		logMsgBody = fmt.Sprintf(
-			"*endpoint:* `%s`\n*user:* <@%s>\n*timestamp:* `%s`",
+			"*endpoint:* `%s`\n*user:* <@%s>\n*timestamp:* `%d`",
 			endpoint,
 			userID,
-			fmt.Sprintf("%d", time.Now().Unix()),
+			time.Now().Unix(),
 		)
 	}
 
@@ -96,10 +92,26 @@ func (c *Client) logRequest(cfg RequestLoggingConfig, endpoint, userID string) {
 	}
 }
 
+func (c *Client) logVerifyFail(endpoint string, err error) {
+	if c.errChannel == "" {
+		return
+	}
+
+	c.SendToErrChannel(getBasicLogMsg(endpoint), err)
+}
+
 func (c *Client) skipAdminLog(excludeAdmin bool, userID string) bool {
 	if excludeAdmin && c.adminID == userID {
 		return true
 	}
 
 	return false
+}
+
+func getBasicLogMsg(endpoint string) string {
+	return fmt.Sprintf(
+		"*endpoint:* `%s`\n*timestamp:* `%d`",
+		endpoint,
+		time.Now().Unix(),
+	)
 }

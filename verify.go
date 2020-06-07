@@ -85,6 +85,7 @@ func (c *Client) VerifySlashCommand(signingSecret string, verifyOpts ...VerifyOp
 			cmd, err := verifySlashCommand(r, signingSecret)
 			if err != nil {
 				for _, fail := range failActions {
+					c.logVerifyFail(r.URL.Path, err)
 					fail(w, r, err)
 				}
 				return
@@ -124,6 +125,7 @@ func (c *Client) VerifyInteractionCallback(signingSecret string, verifyOpts ...V
 			callback, err := verifyInteractionCallback(r, signingSecret)
 			if err != nil {
 				for _, fail := range failActions {
+					c.logVerifyFail(r.URL.Path, err)
 					fail(w, r, err)
 				}
 				return
