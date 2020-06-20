@@ -50,7 +50,7 @@ func TestRespondSlash(t *testing.T) {
 				GlobalResponseTimeout: 5 * time.Millisecond,
 			},
 			wantTimeout: true,
-			executeTime: 10 * time.Millisecond,
+			executeTime: 100 * time.Millisecond,
 		},
 		{
 			description: "response execution takes longer than configured global timeout, log message sent",
@@ -59,7 +59,7 @@ func TestRespondSlash(t *testing.T) {
 				WarnDeadlineExceeded:  true,
 			},
 			wantTimeout: true,
-			executeTime: 10 * time.Millisecond,
+			executeTime: 100 * time.Millisecond,
 		},
 		{
 			description: "response execution takes longer than configured global timeout, but overwritten by timeout map so no timeout",
@@ -74,27 +74,27 @@ func TestRespondSlash(t *testing.T) {
 		{
 			description: "global timeout would cover execution time, but overwritten by timeout map so timeout occurs",
 			responseCfg: ResponseConfig{
-				GlobalResponseTimeout: 30 * time.Millisecond,
+				GlobalResponseTimeout: 2 * time.Second,
 				ResponseTimeoutMap: map[string]time.Duration{
-					"/send_message": 5 * time.Millisecond,
+					"/send_message": 10 * time.Millisecond,
 				},
 			},
 			wantTimeout: true,
-			executeTime: 10 * time.Millisecond,
+			executeTime: 100 * time.Millisecond,
 		},
 	}
 
 	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			tc := tc
-			t.Parallel()
+		tc := tc
+		t.Run(tc.description, func(st *testing.T) {
+			st.Parallel()
 
-			logReceivedCh := make(chan struct{})
+			logReceivedCh := make(chan struct{}, 1)
 
 			mux := http.NewServeMux()
 			mux.HandleFunc("/chat.postMessage", func(w http.ResponseWriter, r *http.Request) {
 				logReceivedCh <- struct{}{}
-				_, _ = w.Write([]byte("ok"))
+				_, _ = w.Write([]byte(mockSuccessResp))
 			})
 
 			testServSlack := httptest.NewServer(mux)
@@ -112,20 +112,17 @@ func TestRespondSlash(t *testing.T) {
 
 			signingSig := getTestSigningSig(t, testReqTsValid, testSecret1, []byte(encodedBody))
 
-			originalReqDoneCh := make(chan struct{})
-			respDoneCh := make(chan struct{})
+			respDoneCh := make(chan struct{}, 1)
 
-			ctxCancelledCh := make(chan struct{})
+			ctxCancelledCh := make(chan struct{}, 1)
 
-			var sendMsg = func(ctx context.Context, cmd *slack.SlashCommand) {
-				_ = <-originalReqDoneCh
-
-				select {
-				case <-time.After(tc.executeTime):
-					respDoneCh <- struct{}{}
-				case <-ctx.Done():
+			sendMsg := func(ctx context.Context, cmd *slack.SlashCommand) {
+				time.Sleep(tc.executeTime)
+				if ctx.Err() != nil {
 					ctxCancelledCh <- struct{}{}
+					return
 				}
+				respDoneCh <- struct{}{}
 			}
 
 			r.Post("/send_message", func(w http.ResponseWriter, r *http.Request) {
@@ -134,7 +131,6 @@ func TestRespondSlash(t *testing.T) {
 					t.Fatal("unexpected error")
 				}
 				client.RespondSlash(r, sendMsg, cmd)
-				originalReqDoneCh <- struct{}{}
 			})
 
 			testServ := httptest.NewServer(r)
@@ -151,15 +147,18 @@ func TestRespondSlash(t *testing.T) {
 				if !tc.wantTimeout {
 					t.Fatal("unexpected timeout")
 				}
-				select {
-				case <-logReceivedCh:
-					if !tc.responseCfg.WarnDeadlineExceeded {
-						t.Fatal("unexpected warning log message")
-					}
-				case <-time.After(1500 * time.Millisecond): // buffer for log message to go through
-					if tc.responseCfg.WarnDeadlineExceeded {
+				if tc.responseCfg.WarnDeadlineExceeded {
+					select {
+					case <-logReceivedCh:
+					case <-time.After(5 * time.Second):
 						t.Fatal("expected warning log message, did not receive")
 					}
+					return
+				}
+				select {
+				case <-logReceivedCh:
+					t.Fatal("unexpected log message")
+				case <-time.After(100 * time.Millisecond):
 				}
 			}
 		})
@@ -185,16 +184,16 @@ func TestRespondCallback(t *testing.T) {
 				GlobalResponseTimeout: 5 * time.Millisecond,
 			},
 			wantTimeout: true,
-			executeTime: 10 * time.Millisecond,
+			executeTime: 100 * time.Millisecond,
 		},
 		{
 			description: "response execution takes longer than configured global timeout, log message sent",
 			responseCfg: ResponseConfig{
-				GlobalResponseTimeout: 5 * time.Millisecond,
+				GlobalResponseTimeout: 7 * time.Millisecond,
 				WarnDeadlineExceeded:  true,
 			},
 			wantTimeout: true,
-			executeTime: 10 * time.Millisecond,
+			executeTime: 100 * time.Millisecond,
 		},
 		{
 			description: "response execution takes longer than configured global timeout, but overwritten by timeout map so no timeout",
@@ -209,27 +208,27 @@ func TestRespondCallback(t *testing.T) {
 		{
 			description: "global timeout would cover execution time, but overwritten by timeout map so timeout occurs",
 			responseCfg: ResponseConfig{
-				GlobalResponseTimeout: 30 * time.Millisecond,
+				GlobalResponseTimeout: 2 * time.Second,
 				ResponseTimeoutMap: map[string]time.Duration{
-					"/callback": 5 * time.Millisecond,
+					"/callback": 10 * time.Millisecond,
 				},
 			},
 			wantTimeout: true,
-			executeTime: 10 * time.Millisecond,
+			executeTime: 100 * time.Millisecond,
 		},
 	}
 
 	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			tc := tc
-			t.Parallel()
+		tc := tc
+		t.Run(tc.description, func(st *testing.T) {
+			st.Parallel()
 
-			logReceivedCh := make(chan struct{})
+			logReceivedCh := make(chan struct{}, 1)
 
 			mux := http.NewServeMux()
 			mux.HandleFunc("/chat.postMessage", func(w http.ResponseWriter, r *http.Request) {
 				logReceivedCh <- struct{}{}
-				_, _ = w.Write([]byte("ok"))
+				_, _ = w.Write([]byte(mockSuccessResp))
 			})
 
 			testServSlack := httptest.NewServer(mux)
@@ -247,20 +246,17 @@ func TestRespondCallback(t *testing.T) {
 
 			signingSig := getTestSigningSig(t, testReqTsValid, testSecret1, []byte(mockCallbackRaw))
 
-			originalReqDoneCh := make(chan struct{})
-			respDoneCh := make(chan struct{})
+			respDoneCh := make(chan struct{}, 1)
 
-			ctxCancelledCh := make(chan struct{})
+			ctxCancelledCh := make(chan struct{}, 1)
 
-			var sendMsg = func(ctx context.Context, cmd *slack.InteractionCallback) {
-				_ = <-originalReqDoneCh
-
-				select {
-				case <-time.After(tc.executeTime):
-					respDoneCh <- struct{}{}
-				case <-ctx.Done():
+			sendMsg := func(ctx context.Context, cmd *slack.InteractionCallback) {
+				time.Sleep(tc.executeTime)
+				if ctx.Err() != nil {
 					ctxCancelledCh <- struct{}{}
+					return
 				}
+				respDoneCh <- struct{}{}
 			}
 
 			r.Post("/callback", func(w http.ResponseWriter, r *http.Request) {
@@ -269,7 +265,6 @@ func TestRespondCallback(t *testing.T) {
 					t.Fatal("unexpected error", err)
 				}
 				client.RespondCallback(r, sendMsg, callback)
-				originalReqDoneCh <- struct{}{}
 			})
 
 			testServ := httptest.NewServer(r)
@@ -286,15 +281,18 @@ func TestRespondCallback(t *testing.T) {
 				if !tc.wantTimeout {
 					t.Fatal("unexpected timeout")
 				}
-				select {
-				case <-logReceivedCh:
-					if !tc.responseCfg.WarnDeadlineExceeded {
-						t.Fatal("unexpected warning log message")
-					}
-				case <-time.After(1500 * time.Millisecond): // buffer for log message to go through
-					if tc.responseCfg.WarnDeadlineExceeded {
+				if tc.responseCfg.WarnDeadlineExceeded {
+					select {
+					case <-logReceivedCh:
+					case <-time.After(5 * time.Second):
 						t.Fatal("expected warning log message, did not receive")
 					}
+					return
+				}
+				select {
+				case <-logReceivedCh:
+					t.Fatal("unexpected log message")
+				case <-time.After(100 * time.Millisecond):
 				}
 			}
 		})

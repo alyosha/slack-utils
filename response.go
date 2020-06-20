@@ -35,7 +35,7 @@ func (c *Client) RespondSlash(r *http.Request, respond slashRespond, cmd *slack.
 
 	go func() {
 		defer cancel()
-		doneCh := make(chan struct{})
+		doneCh := make(chan struct{}, 1)
 
 		go func() {
 			respond(newCtx, cmd)
@@ -63,7 +63,7 @@ func (c *Client) RespondCallback(r *http.Request, respond callbackRespond, callb
 
 	go func() {
 		defer cancel()
-		doneCh := make(chan struct{})
+		doneCh := make(chan struct{}, 1)
 
 		go func() {
 			respond(newCtx, callback)
