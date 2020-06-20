@@ -57,11 +57,11 @@ func TestVerifySlashCommand(t *testing.T) {
 			description:   "using middleware and valid signing signature, expected extra success response received",
 			useMiddleware: true,
 			succeedFunc: func(w http.ResponseWriter, r *http.Request, cmd *slack.SlashCommand) {
-				_, _ = w.Write([]byte("OK"))
+				_, _ = w.Write([]byte(mockSuccessResp))
 			},
 			secret:       testSecret1,
 			ts:           testReqTsValid,
-			wantRespBody: "OK",
+			wantRespBody: mockSuccessResp,
 		},
 		{
 			description:   "using middleware with valid secret but timestamp is too old, verify fails and req killed, expected fail response received",
@@ -148,7 +148,7 @@ func TestVerifySlashCommand(t *testing.T) {
 
 			mux.HandleFunc("/chat.postMessage", func(w http.ResponseWriter, r *http.Request) {
 				logReqReceived = true
-				_, _ = w.Write([]byte("ok"))
+				_, _ = w.Write([]byte(mockSuccessResp))
 			})
 
 			testServSlack := httptest.NewServer(mux)
@@ -177,7 +177,7 @@ func TestVerifySlashCommand(t *testing.T) {
 					return
 				}
 				if diff := pretty.Compare(wantCmd, cmd); diff != "" {
-					t.Fatalf("+got -want %s\n", diff)
+					t.Fatalf("-got +want %s\n", diff)
 				}
 			})
 
@@ -237,11 +237,11 @@ func TestVerifyInteractionCallback(t *testing.T) {
 			description:   "using middleware and valid signing signature, expected extra success response received",
 			useMiddleware: true,
 			succeedFunc: func(w http.ResponseWriter, r *http.Request, cmd *slack.InteractionCallback) {
-				_, _ = w.Write([]byte("OK"))
+				_, _ = w.Write([]byte(mockSuccessResp))
 			},
 			secret:       testSecret1,
 			ts:           testReqTsValid,
-			wantRespBody: "OK",
+			wantRespBody: mockSuccessResp,
 		},
 		{
 			description:   "using middleware with valid secret but timestamp is too old, verify fails and req killed, expected fail response received",
@@ -338,7 +338,7 @@ func TestVerifyInteractionCallback(t *testing.T) {
 			mux := http.NewServeMux()
 			mux.HandleFunc("/chat.postMessage", func(w http.ResponseWriter, r *http.Request) {
 				logReqReceived = true
-				_, _ = w.Write([]byte("ok"))
+				_, _ = w.Write([]byte(mockSuccessResp))
 			})
 
 			testServSlack := httptest.NewServer(mux)
@@ -367,7 +367,7 @@ func TestVerifyInteractionCallback(t *testing.T) {
 					return
 				}
 				if diff := pretty.Compare(wantCallback, callback); diff != "" {
-					t.Fatalf("+got -want %s\n", diff)
+					t.Fatalf("-got +want %s\n", diff)
 				}
 			})
 

@@ -71,7 +71,7 @@ func (v VerifyFail) optType() verifyOptType {
 // additional behavior on sucess/failure or would like to enable request logging
 func (c *Client) VerifySlashCommand(signingSecret string, verifyOpts ...VerifyOpt) func(next http.Handler) http.Handler {
 	var logConfig RequestLoggingConfig
-	var successActions []VerifySucceedSlash
+	var succeedActions []VerifySucceedSlash
 	var failActions []VerifyFail
 
 	for _, opt := range verifyOpts {
@@ -79,7 +79,7 @@ func (c *Client) VerifySlashCommand(signingSecret string, verifyOpts ...VerifyOp
 		case verifyOptTypeRequestLoggingConfig:
 			logConfig = opt.(RequestLoggingConfig)
 		case verifyOptTypeSucceedSlashAction:
-			successActions = append(successActions, opt.(VerifySucceedSlash))
+			succeedActions = append(succeedActions, opt.(VerifySucceedSlash))
 		case verifyOptTypeFailAction:
 			failActions = append(failActions, opt.(VerifyFail))
 		}
@@ -90,14 +90,13 @@ func (c *Client) VerifySlashCommand(signingSecret string, verifyOpts ...VerifyOp
 			cmd, err := verifySlashCommand(r, signingSecret)
 			if err != nil {
 				for _, fail := range failActions {
-					c.logVerifyFail(r.URL.Path, err)
 					fail(w, r, err)
 				}
 				return
 			}
 			ctx := withSlashCommand(r.Context(), cmd)
 			c.logRequest(logConfig, r.URL.Path, cmd.UserID)
-			for _, succeed := range successActions {
+			for _, succeed := range succeedActions {
 				succeed(w, r, cmd)
 			}
 			next.ServeHTTP(w, r.WithContext(ctx))
@@ -111,7 +110,7 @@ func (c *Client) VerifySlashCommand(signingSecret string, verifyOpts ...VerifyOp
 // behavior on sucess/failure or would like to enable request logging
 func (c *Client) VerifyInteractionCallback(signingSecret string, verifyOpts ...VerifyOpt) func(next http.Handler) http.Handler {
 	var logConfig RequestLoggingConfig
-	var successActions []VerifySucceedCallback
+	var succeedActions []VerifySucceedCallback
 	var failActions []VerifyFail
 
 	for _, opt := range verifyOpts {
@@ -119,7 +118,7 @@ func (c *Client) VerifyInteractionCallback(signingSecret string, verifyOpts ...V
 		case verifyOptTypeRequestLoggingConfig:
 			logConfig = opt.(RequestLoggingConfig)
 		case verifyOptTypeSucceedCallbackAction:
-			successActions = append(successActions, opt.(VerifySucceedCallback))
+			succeedActions = append(succeedActions, opt.(VerifySucceedCallback))
 		case verifyOptTypeFailAction:
 			failActions = append(failActions, opt.(VerifyFail))
 		}
@@ -130,14 +129,13 @@ func (c *Client) VerifyInteractionCallback(signingSecret string, verifyOpts ...V
 			callback, err := verifyInteractionCallback(r, signingSecret)
 			if err != nil {
 				for _, fail := range failActions {
-					c.logVerifyFail(r.URL.Path, err)
 					fail(w, r, err)
 				}
 				return
 			}
 			ctx := withInteractionCallback(r.Context(), callback)
 			c.logRequest(logConfig, r.URL.Path, callback.User.ID)
-			for _, succeed := range successActions {
+			for _, succeed := range succeedActions {
 				succeed(w, r, callback)
 			}
 			next.ServeHTTP(w, r.WithContext(ctx))

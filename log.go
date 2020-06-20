@@ -92,14 +92,6 @@ func (c *Client) logRequest(cfg RequestLoggingConfig, endpoint, userID string) {
 	}
 }
 
-func (c *Client) logVerifyFail(endpoint string, err error) {
-	if c.errChannel == "" {
-		return
-	}
-
-	c.SendToErrChannel(getBasicLogMsg(endpoint), err)
-}
-
 func (c *Client) skipAdminLog(excludeAdmin bool, userID string) bool {
 	if excludeAdmin && c.adminID == userID {
 		return true
