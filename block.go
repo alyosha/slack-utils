@@ -80,14 +80,14 @@ func DateOptToTime(opt string) (time.Time, error) {
 	return time.Parse(datePickTimeFmt, opt)
 }
 
-// GetAttributeEmbeddedValue takes a map of attributes to embed and generates
+// NewAttributeEmbeddedValue takes a map of attributes to embed and generates
 // a value string for use with block actions. When the block is interacted
 // with, the value will be sent back into the callback endpoint, where its
 // embedded values can be extracted and used for response actions. This
 // functionality is intended for situations where the time-to-interact with
 // the block is hard to predict (surveys, etc.) and a time-limited memory cache
 // might not be a good option.
-func GetAttributeEmbeddedValue(attributesToEmbed map[string]interface{}) (string, error) {
+func NewAttributeEmbeddedValue(attributesToEmbed map[string]interface{}) (string, error) {
 	if err := validateAttributes(attributesToEmbed); err != nil {
 		return "", fmt.Errorf("validateAttributes() > %w", err)
 	}

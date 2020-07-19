@@ -476,8 +476,8 @@ func TestEmbedAndExtractAttribute(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			val1, err1 := GetAttributeEmbeddedValue(tc.embedAttributes1)
-			val2, err2 := GetAttributeEmbeddedValue(tc.embedAttributes2)
+			val1, err1 := NewAttributeEmbeddedValue(tc.embedAttributes1)
+			val2, err2 := NewAttributeEmbeddedValue(tc.embedAttributes2)
 
 			if err1 != nil || err2 != nil {
 				if err1.Error() != tc.wantErrString || err2.Error() != tc.wantErrString {
