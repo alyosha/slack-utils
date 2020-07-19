@@ -104,17 +104,23 @@ func GetAttributeEmbeddedValue(attributesToEmbed map[string]interface{}) (string
 // GetAttributeEmbeddedValue to restore the embedded attributes back to their
 // original types. The destination map should contain the same keys used when
 // embedding the attributes mapped to the zero value for the type.
-func ExtractEmbeddedAttributes(val string, dest map[string]interface{}) error {
-	tmpDest := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(val), &tmpDest); err != nil {
+func ExtractEmbeddedAttributes(embeddedValueString string, dest map[string]interface{}) error {
+	embedded := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(embeddedValueString), &embedded); err != nil {
 		return fmt.Errorf("json.Unmarshal() > %w", err)
 	}
 
-	for k, v := range tmpDest {
+	typeMap := map[string]reflect.Type{}
+
+	for k, v := range embedded {
 		destVal, ok := dest[k]
 		if !ok {
 			return fmt.Errorf("emedded attribute of key: %s not found in destination map", k)
 		}
+
+		destMapType := reflect.TypeOf(destVal)
+		typeMap[k] = destMapType
+
 		switch val := destVal.(type) {
 		case string, bool, float64, []interface{}, map[string]interface{}:
 			dest[k] = v
@@ -128,33 +134,42 @@ func ExtractEmbeddedAttributes(val string, dest map[string]interface{}) error {
 			if err != nil {
 				return fmt.Errorf("json.Unmarshal() > %w", err)
 			}
+			if reflect.ValueOf(val).Kind() == reflect.Ptr {
+				dest[k] = concreteTypePtr
+				continue
+			}
 			dest[k] = concreteTypePtr.(concreteTyper).concreteTypeVal()
 		default:
-			origType, jsonType := reflect.TypeOf(val), reflect.TypeOf(v)
-			origVal, jsonVal := reflect.ValueOf(val), reflect.ValueOf(v)
-			switch valKind := origVal.Kind(); valKind {
+			switch reflect.ValueOf(destVal).Kind() {
 			case reflect.Struct:
 				return errors.New("unsupported embedded attribute type: only structs implementing concreteTyper interface can be embedded")
 			case reflect.Map:
-				convertedMap, err := convertJSONInterfaceMap(v, val, origVal, origType)
+				convertedMap, err := convertJSONInterfaceMap(v, val, destMapType)
 				if err != nil {
 					return fmt.Errorf("convertJSONInterfaceMap() > %w", err)
 				}
 				dest[k] = convertedMap
 			case reflect.Slice, reflect.Array:
-				convertedSliceOrArray, err := convertJSONInterfaceSliceOrArray(v, val, origType, valKind)
+				convertedSliceOrArray, err := convertJSONInterfaceSliceOrArray(v, val, destMapType)
 				if err != nil {
 					return fmt.Errorf("convertJSONInterfaceSliceOrArray() > %w", err)
 				}
 				dest[k] = convertedSliceOrArray
 			default:
-				if !jsonType.ConvertibleTo(origType) {
+				if !reflect.TypeOf(v).ConvertibleTo(destMapType) {
 					return fmt.Errorf("cannot convert type %T to type %T", v, val)
 				}
-				dest[k] = jsonVal.Convert(origType).Interface()
+				dest[k] = reflect.ValueOf(v).Convert(destMapType).Interface()
 			}
 		}
 	}
+
+	for k, v := range dest {
+		if finalType := reflect.TypeOf(v); finalType != typeMap[k] {
+			return fmt.Errorf("entry at key: %s should be type: %v, but is: %v", k, typeMap[k], finalType)
+		}
+	}
+
 	return nil
 }
 
@@ -177,60 +192,62 @@ func validateAttributes(attributesToEmbed map[string]interface{}) error {
 	return nil
 }
 
-func convertJSONInterfaceMap(interfaceVal, destVal interface{}, origVal reflect.Value, origType reflect.Type) (interface{}, error) {
-	stringInterfaceMap, ok := interfaceVal.(map[string]interface{})
+func convertJSONInterfaceMap(embeddedVal, destVal interface{}, destMapType reflect.Type) (interface{}, error) {
+	stringInterfaceMap, ok := embeddedVal.(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("dest map and embedded attribute vals at same key are of different types: %T => %T", destVal, interfaceVal)
+		return nil, fmt.Errorf("dest map and embedded attribute vals at same key are of different types: %T => %T", destVal, embeddedVal)
 	}
+
+	destMapValue := reflect.ValueOf(destVal)
 
 	for k, v := range stringInterfaceMap {
 		keyVal, elemVal := reflect.ValueOf(k), reflect.ValueOf(v)
 		elemType := reflect.TypeOf(v)
 		mapType := reflect.MapOf(reflect.TypeOf(k), elemType)
 
-		if origType.Elem() != elemType {
-			if !elemType.ConvertibleTo(origType.Elem()) {
-				return nil, fmt.Errorf("attempted to append elem of type: %v to slice of type: %v", elemType, origType.Elem())
+		if destMapType.Elem() != elemType {
+			if !elemType.ConvertibleTo(destMapType.Elem()) {
+				return nil, fmt.Errorf("attempted to append elem of type: %v to map of type: %v", elemType, destMapType.Elem())
 			}
-			origVal.SetMapIndex(keyVal, elemVal.Convert(origType.Elem()))
+			destMapValue.SetMapIndex(keyVal, elemVal.Convert(destMapType.Elem()))
 			continue
 		}
 
-		if mapType != origType {
-			return nil, fmt.Errorf("dest map and embedded attribute map types do not match: %v => %v", mapType, origType)
+		if mapType != destMapType {
+			return nil, fmt.Errorf("dest map and embedded attribute map types do not match: %v => %v", mapType, destMapType)
 		}
 
-		origVal.SetMapIndex(keyVal, elemVal)
+		destMapValue.SetMapIndex(keyVal, elemVal)
 	}
 
-	return origVal.Interface(), nil
+	return destMapValue.Interface(), nil
 }
 
-func convertJSONInterfaceSliceOrArray(interfaceVal, destVal interface{}, origType reflect.Type, valKind reflect.Kind) (interface{}, error) {
-	interfaceSlice, ok := interfaceVal.([]interface{})
+func convertJSONInterfaceSliceOrArray(embeddedVal, destVal interface{}, destMapType reflect.Type) (interface{}, error) {
+	interfaceSlice, ok := embeddedVal.([]interface{})
 	if !ok {
-		return nil, fmt.Errorf("dest map and embedded attribute vals at same key are of different types: %T => %T", destVal, interfaceVal)
+		return nil, fmt.Errorf("dest map and embedded attribute vals at same key are of different types: %T => %T", destVal, embeddedVal)
 	}
 
-	newSlice := reflect.MakeSlice(reflect.SliceOf(origType.Elem()), 0, cap(interfaceSlice))
+	newSlice := reflect.MakeSlice(reflect.SliceOf(destMapType.Elem()), 0, cap(interfaceSlice))
 
 	for _, elem := range interfaceSlice {
 		elemType := reflect.TypeOf(elem)
-		if origType.Elem() != elemType {
-			if !elemType.ConvertibleTo(origType.Elem()) {
+		if destMapType.Elem() != elemType {
+			if !elemType.ConvertibleTo(destMapType.Elem()) {
 				return nil, fmt.Errorf("attempted to append elem of type: %T to slice of type: %T", elem, destVal)
 			}
-			newSlice = reflect.Append(newSlice, reflect.ValueOf(elem).Convert(origType.Elem()))
+			newSlice = reflect.Append(newSlice, reflect.ValueOf(elem).Convert(destMapType.Elem()))
 			continue
 		}
 		newSlice = reflect.Append(newSlice, reflect.ValueOf(elem))
 	}
 
-	if valKind == reflect.Slice {
+	if destMapType.Kind() == reflect.Slice {
 		return newSlice.Interface(), nil
 	}
 
-	newArray := reflect.New(reflect.ArrayOf(newSlice.Len(), origType.Elem())).Elem()
+	newArray := reflect.New(reflect.ArrayOf(newSlice.Len(), destMapType.Elem())).Elem()
 	reflect.Copy(newArray, newSlice)
 	return newArray.Interface(), nil
 }

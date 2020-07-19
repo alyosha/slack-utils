@@ -26,6 +26,16 @@ var mockTextObj = &slack.TextBlockObject{
 	Verbatim: false,
 }
 
+type fakeConcreteTyper struct{}
+
+func (f fakeConcreteTyper) concreteTypePtr() interface{} {
+	return &Msg{}
+}
+
+func (f fakeConcreteTyper) concreteTypeVal() interface{} {
+	return Msg{}
+}
+
 func TestNewButton(t *testing.T) {
 	t.Parallel()
 
@@ -451,6 +461,16 @@ func TestEmbedAndExtractAttribute(t *testing.T) {
 				reverseMapKey: map[int]string{},
 			},
 			wantErrString: "validateAttributes() > cannot have map with key of type: int",
+		},
+		{
+			description: "fails when provided/return dest maps have different types - no panic",
+			embedAttributes1: map[string]interface{}{
+				"concrete_typer_key": fakeConcreteTyper{},
+			},
+			dest1: map[string]interface{}{
+				"concrete_typer_key": fakeConcreteTyper{},
+			},
+			wantErrString: "entry at key: concrete_typer_key should be type: utils.fakeConcreteTyper, but is: utils.Msg",
 		},
 	}
 
