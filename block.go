@@ -249,5 +249,6 @@ func convertJSONInterfaceSliceOrArray(embeddedVal, destVal interface{}, destMapT
 
 	newArray := reflect.New(reflect.ArrayOf(newSlice.Len(), destMapType.Elem())).Elem()
 	reflect.Copy(newArray, newSlice)
+
 	return newArray.Interface(), nil
 }

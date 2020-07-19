@@ -12,6 +12,21 @@ type Msg struct {
 	IconURL string // Incompatible with AsUser option
 }
 
+// GetBasicMsg returns a simple text Msg struct
+func GetBasicMsg(body string) Msg {
+	return Msg{
+		Body: body,
+	}
+}
+
+// GetBasicBotDM returns a simple text Msg for direct messaging the user as bot
+func GetBasicBotDM(body string) Msg {
+	return Msg{
+		Body:   body,
+		AsUser: true,
+	}
+}
+
 // PostMsg sends the provided message to the conversation designated by conversationID
 func (c *Client) PostMsg(msg Msg, conversationID string) (string, error) {
 	_, ts, err := c.SlackAPI.PostMessage(
