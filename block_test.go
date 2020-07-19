@@ -476,7 +476,7 @@ func TestEmbedAndExtractAttribute(t *testing.T) {
 			defer testServSlack.Close()
 
 			client := &Client{
-				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServSlack.URL))),
+				SlackAPI: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServSlack.URL))),
 			}
 
 			btn1 := NewButton(actionID1, val1, "Click me", slack.StylePrimary)

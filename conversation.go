@@ -18,9 +18,9 @@ const (
 // CreateConversation opens a new public/private channel and invites the provided
 // members, optionally posting an initial message
 func (c *Client) CreateConversation(conversationName string, isPrivate bool, userIDs []string, initMsg Msg) (string, error) {
-	conversation, err := c.Client.CreateConversation(conversationName, isPrivate)
+	conversation, err := c.SlackAPI.CreateConversation(conversationName, isPrivate)
 	if err != nil {
-		return "", fmt.Errorf("c.Client.CreateConversation() > %w", err)
+		return "", fmt.Errorf("c.SlackAPI.CreateConversation() > %w", err)
 	}
 
 	if err = c.InviteUsers(conversation.ID, userIDs); err != nil {
@@ -28,12 +28,12 @@ func (c *Client) CreateConversation(conversationName string, isPrivate bool, use
 	}
 
 	if initMsg.Body != "" || initMsg.Blocks != nil {
-		_, _, err := c.Client.PostMessage(
+		_, _, err := c.SlackAPI.PostMessage(
 			conversation.ID,
 			initMsg.getCommonOpts()...,
 		)
 		if err != nil {
-			return conversation.ID, fmt.Errorf("c.Client.PostMessage() > %w", err)
+			return conversation.ID, fmt.Errorf("c.SlackAPI.PostMessage() > %w", err)
 		}
 	}
 
@@ -43,9 +43,9 @@ func (c *Client) CreateConversation(conversationName string, isPrivate bool, use
 // InviteUsers invites multiple users to a conversation
 func (c *Client) InviteUsers(conversationID string, userIDs []string) error {
 	for _, user := range userIDs {
-		_, err := c.Client.InviteUsersToConversation(conversationID, user)
+		_, err := c.SlackAPI.InviteUsersToConversation(conversationID, user)
 		if err != nil && err.Error() != errInviteSelfMsg {
-			return fmt.Errorf("c.Client.InviteUsersToConversation() > %w", err)
+			return fmt.Errorf("c.SlackAPI.InviteUsersToConversation() > %w", err)
 		}
 	}
 
@@ -55,9 +55,9 @@ func (c *Client) InviteUsers(conversationID string, userIDs []string) error {
 // ArchiveConversations archives multiple conversations
 func (c *Client) ArchiveConversations(conversationIDs []string) error {
 	for _, conversationID := range conversationIDs {
-		err := c.Client.ArchiveConversation(conversationID)
+		err := c.SlackAPI.ArchiveConversation(conversationID)
 		if err != nil && err.Error() != errAlreadyArchivedMsg {
-			return fmt.Errorf("c.Client.ArchiveConversation() > %w", err)
+			return fmt.Errorf("c.SlackAPI.ArchiveConversation() > %w", err)
 		}
 	}
 
@@ -66,9 +66,9 @@ func (c *Client) ArchiveConversations(conversationIDs []string) error {
 
 // GetConversationMembers returns a list of members for a given conversation
 func (c *Client) GetConversationMembers(conversationID string) ([]string, error) {
-	conversation, err := c.Client.GetConversationInfo(conversationID, false)
+	conversation, err := c.SlackAPI.GetConversationInfo(conversationID, false)
 	if err != nil {
-		return nil, fmt.Errorf("c.Client.GetConversationInfo() > %w", err)
+		return nil, fmt.Errorf("c.SlackAPI.GetConversationInfo() > %w", err)
 	}
 
 	return conversation.Members, nil
@@ -81,9 +81,9 @@ func (c *Client) GetConversationMemberEmails(conversationID string) ([]string, e
 	var allUsers []slack.User
 
 	eg.Go(func() error {
-		conversation, err := c.Client.GetConversationInfo(conversationID, false)
+		conversation, err := c.SlackAPI.GetConversationInfo(conversationID, false)
 		if err != nil {
-			return fmt.Errorf("c.Client.GetConversationInfo() > %w", err)
+			return fmt.Errorf("c.SlackAPI.GetConversationInfo() > %w", err)
 		}
 		memberIDs = conversation.Members
 		return nil

@@ -41,9 +41,9 @@ func (c *Client) EmailsToSlackIDsInclusive(emails []string) ([][]string, error) 
 }
 
 func (c *Client) getAll() ([]slack.User, error) {
-	users, err := c.Client.GetUsers()
+	users, err := c.SlackAPI.GetUsers()
 	if err != nil {
-		return nil, fmt.Errorf("c.Client.GetUsers() > %w", err)
+		return nil, fmt.Errorf("c.SlackAPI.GetUsers() > %w", err)
 	}
 
 	if len(users) == 0 {

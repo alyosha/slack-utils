@@ -155,7 +155,7 @@ func TestVerifySlashCommand(t *testing.T) {
 			defer testServSlack.Close()
 
 			client := &Client{
-				Client:     slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServSlack.URL))),
+				SlackAPI:   slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServSlack.URL))),
 				logChannel: "C1H9RESGL",
 			}
 
@@ -345,7 +345,7 @@ func TestVerifyInteractionCallback(t *testing.T) {
 			defer testServSlack.Close()
 
 			client := &Client{
-				Client:     slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServSlack.URL))),
+				SlackAPI:   slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServSlack.URL))),
 				logChannel: "C1H9RESGL",
 			}
 

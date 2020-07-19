@@ -32,7 +32,7 @@ func TestCreateConversation(t *testing.T) {
 			inviteMembers:     []string{},
 			initMsg:           Msg{},
 			respChannelCreate: []byte(mockChannelCreateErrResp),
-			wantErr:           "c.Client.CreateConversation() > invalid_name_specials",
+			wantErr:           "c.SlackAPI.CreateConversation() > invalid_name_specials",
 		},
 		{
 			description:       "successful conversation creation including additional invites",
@@ -56,7 +56,7 @@ func TestCreateConversation(t *testing.T) {
 			initMsg:           Msg{},
 			respChannelCreate: []byte(mockChannelCreateResp),
 			respInviteMembers: []byte(mockInviteMembersErrResp),
-			wantErr:           "c.InviteUsers() > c.Client.InviteUsersToConversation() > cant_invite",
+			wantErr:           "c.InviteUsers() > c.SlackAPI.InviteUsersToConversation() > cant_invite",
 		},
 		{
 			description:       "successful conversation creation including additional invites, successful message post",
@@ -74,7 +74,7 @@ func TestCreateConversation(t *testing.T) {
 			respChannelCreate: []byte(mockChannelCreateResp),
 			respInviteMembers: []byte(mockInviteMembersResp),
 			respPostMsg:       []byte(mockPostMsgErrResp),
-			wantErr:           "c.Client.PostMessage() > invalid_blocks",
+			wantErr:           "c.SlackAPI.PostMessage() > invalid_blocks",
 		},
 	}
 
@@ -95,7 +95,7 @@ func TestCreateConversation(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+				SlackAPI: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
 			conversationID, err := client.CreateConversation("general", false, tc.inviteMembers, tc.initMsg)
@@ -142,7 +142,7 @@ func TestInviteUsers(t *testing.T) {
 			description:       "expect error",
 			inviteMembers:     []string{"UABC123EFG"},
 			respInviteMembers: []byte(mockInviteMembersErrResp),
-			wantErr:           "c.Client.InviteUsersToConversation() > cant_invite",
+			wantErr:           "c.SlackAPI.InviteUsersToConversation() > cant_invite",
 		},
 	}
 
@@ -157,7 +157,7 @@ func TestInviteUsers(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+				SlackAPI: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
 			err := client.InviteUsers("C1H9RESGL", tc.inviteMembers)
@@ -193,7 +193,7 @@ func TestGetConversationMembers(t *testing.T) {
 		{
 			description:          "failure to retrieve member IDs",
 			respConversationInfo: []byte(mockChannelInfoErrResp),
-			wantErr:              "c.Client.GetConversationInfo() > channel_not_found",
+			wantErr:              "c.SlackAPI.GetConversationInfo() > channel_not_found",
 		},
 	}
 
@@ -208,7 +208,7 @@ func TestGetConversationMembers(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+				SlackAPI: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
 			members, err := client.GetConversationMembers("C1H9RESGL")
@@ -257,13 +257,13 @@ func TestGetConversationMemberEmails(t *testing.T) {
 			description:          "failure to retrieve conversation info",
 			respConversationInfo: []byte(mockChannelInfoErrResp),
 			respUsersList:        []byte(mockUsersListResp),
-			wantErr:              "c.Client.GetConversationInfo() > channel_not_found",
+			wantErr:              "c.SlackAPI.GetConversationInfo() > channel_not_found",
 		},
 		{
 			description:          "failure to retrieve user list",
 			respConversationInfo: []byte(mockChannelInfoResp),
 			respUsersList:        []byte(mockUsersListErrResp),
-			wantErr:              "c.getAll() > c.Client.GetUsers() > invalid_cursor",
+			wantErr:              "c.getAll() > c.SlackAPI.GetUsers() > invalid_cursor",
 		},
 	}
 
@@ -281,7 +281,7 @@ func TestGetConversationMemberEmails(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+				SlackAPI: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
 			emails, err := client.GetConversationMemberEmails("C1H9RESGL")
@@ -329,7 +329,7 @@ func TestArchiveConversations(t *testing.T) {
 		{
 			description:         "failure to archive conversations",
 			respArchiveChannels: []byte(mockChannelsArchiveErrResp),
-			wantErr:             "c.Client.ArchiveConversation() > invalid_auth",
+			wantErr:             "c.SlackAPI.ArchiveConversation() > invalid_auth",
 		},
 	}
 
@@ -344,7 +344,7 @@ func TestArchiveConversations(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+				SlackAPI: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
 			err := client.ArchiveConversations([]string{"C1H9RESGL"})

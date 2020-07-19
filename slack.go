@@ -23,7 +23,7 @@ type (
 
 // Client wraps the slack client for additional utility
 type Client struct {
-	Client                 *slack.Client
+	SlackAPI               *slack.Client
 	adminID                string
 	logChannel             string
 	errChannel             string
@@ -52,7 +52,7 @@ func NewClient(cfg ClientConfig, opts ...slack.Option) (*Client, error) {
 	}
 
 	c := &Client{
-		Client:                 slack.New(cfg.BotToken, opts...),
+		SlackAPI:               slack.New(cfg.BotToken, opts...),
 		adminID:                cfg.AdminID,
 		logChannel:             cfg.LogChannelID,
 		errChannel:             cfg.ErrChannelID,
@@ -63,16 +63,16 @@ func NewClient(cfg ClientConfig, opts ...slack.Option) (*Client, error) {
 	var eg errgroup.Group
 
 	eg.Go(func() error {
-		if _, err := c.Client.GetUserInfo(cfg.AdminID); err != nil {
-			return fmt.Errorf("c.Client.GetUserInfo() > %w", err)
+		if _, err := c.SlackAPI.GetUserInfo(cfg.AdminID); err != nil {
+			return fmt.Errorf("c.SlackAPI.GetUserInfo() > %w", err)
 		}
 		return nil
 	})
 
 	eg.Go(func() error {
 		if cfg.LogChannelID != "" {
-			if _, err := c.Client.GetConversationInfo(cfg.LogChannelID, false); err != nil {
-				return fmt.Errorf("c.Client.GetConversationInfo() > %w", err)
+			if _, err := c.SlackAPI.GetConversationInfo(cfg.LogChannelID, false); err != nil {
+				return fmt.Errorf("c.SlackAPI.GetConversationInfo() > %w", err)
 			}
 		}
 		return nil
@@ -80,8 +80,8 @@ func NewClient(cfg ClientConfig, opts ...slack.Option) (*Client, error) {
 
 	eg.Go(func() error {
 		if cfg.ErrChannelID != "" {
-			if _, err := c.Client.GetConversationInfo(cfg.ErrChannelID, false); err != nil {
-				return fmt.Errorf("c.Client.GetConversationInfo() > %w", err)
+			if _, err := c.SlackAPI.GetConversationInfo(cfg.ErrChannelID, false); err != nil {
+				return fmt.Errorf("c.SlackAPI.GetConversationInfo() > %w", err)
 			}
 		}
 		return nil

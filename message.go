@@ -14,7 +14,7 @@ type Msg struct {
 
 // PostMsg sends the provided message to the conversation designated by conversationID
 func (c *Client) PostMsg(msg Msg, conversationID string) (string, error) {
-	_, ts, err := c.Client.PostMessage(
+	_, ts, err := c.SlackAPI.PostMessage(
 		conversationID,
 		msg.getCommonOpts()...,
 	)
@@ -28,7 +28,7 @@ func (c *Client) PostMsg(msg Msg, conversationID string) (string, error) {
 
 // PostThreadMsg posts a message response into an existing thread
 func (c *Client) PostThreadMsg(msg Msg, conversationID string, threadTs string) error {
-	_, _, err := c.Client.PostMessage(
+	_, _, err := c.SlackAPI.PostMessage(
 		conversationID,
 		append(msg.getCommonOpts(), slack.MsgOptionTS(threadTs))...,
 	)
@@ -38,7 +38,7 @@ func (c *Client) PostThreadMsg(msg Msg, conversationID string, threadTs string) 
 
 // PostEphemeralMsg sends an ephemeral message in the conversation designated by conversationID
 func (c *Client) PostEphemeralMsg(msg Msg, conversationID, userID string) error {
-	_, _, err := c.Client.PostMessage(
+	_, _, err := c.SlackAPI.PostMessage(
 		conversationID,
 		append(msg.getCommonOpts(), slack.MsgOptionPostEphemeral(userID))...,
 	)
@@ -48,7 +48,7 @@ func (c *Client) PostEphemeralMsg(msg Msg, conversationID, userID string) error 
 
 // UpdateMsg updates the provided message in the conversation designated by conversationID
 func (c *Client) UpdateMsg(msg Msg, conversationID, timestamp string) error {
-	_, _, _, err := c.Client.UpdateMessage(
+	_, _, _, err := c.SlackAPI.UpdateMessage(
 		conversationID,
 		timestamp,
 		msg.getCommonOpts()...,
@@ -59,7 +59,7 @@ func (c *Client) UpdateMsg(msg Msg, conversationID, timestamp string) error {
 
 // DeleteMsg deletes the provided message in the conversation designated by conversationID
 func (c *Client) DeleteMsg(conversationID, timestamp, responseURL string) error {
-	_, _, _, err := c.Client.UpdateMessage(
+	_, _, _, err := c.SlackAPI.UpdateMessage(
 		conversationID,
 		timestamp,
 		slack.MsgOptionDeleteOriginal(responseURL),

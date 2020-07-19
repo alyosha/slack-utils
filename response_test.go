@@ -101,7 +101,7 @@ func TestRespondSlash(t *testing.T) {
 			defer testServSlack.Close()
 
 			client := &Client{
-				Client:              slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServSlack.URL))),
+				SlackAPI:            slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServSlack.URL))),
 				slashResponseConfig: tc.responseCfg,
 				errChannel:          "C1H9RESGL",
 			}
@@ -235,7 +235,7 @@ func TestRespondCallback(t *testing.T) {
 			defer testServSlack.Close()
 
 			client := &Client{
-				Client:                 slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServSlack.URL))),
+				SlackAPI:               slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServSlack.URL))),
 				callbackResponseConfig: tc.responseCfg,
 				errChannel:             "C1H9RESGL",
 			}

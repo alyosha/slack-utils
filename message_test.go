@@ -46,7 +46,7 @@ func TestPostMsg(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+				SlackAPI: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
 			ts, err := client.PostMsg(Msg{}, "C1H9RESGL")
@@ -104,7 +104,7 @@ func TestPostThreadMsg(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+				SlackAPI: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
 			err := client.PostThreadMsg(Msg{}, "C1H9RESGL", "1503435956.000247")
@@ -162,7 +162,7 @@ func TestPostEphemeralMsg(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+				SlackAPI: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
 			err := client.PostEphemeralMsg(Msg{}, "C1H9RESGL", "U12345")
@@ -216,7 +216,7 @@ func TestUpdateMsg(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+				SlackAPI: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
 			err := client.UpdateMsg(Msg{}, "C1H9RESGL", "1503435957.000237")
@@ -269,7 +269,7 @@ func TestDeleteMsg(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+				SlackAPI: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
 			err := client.DeleteMsg("C1H9RESGL", "1503435957.000237", fmt.Sprintf("%s%s", testServ.URL, responseURLPath))

@@ -51,7 +51,7 @@ func TestSendToLogChannel(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+				SlackAPI: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
 			if !tc.missingLogChannel {
@@ -134,7 +134,7 @@ func TestSendToErrChannel(t *testing.T) {
 			defer testServ.Close()
 
 			client := &Client{
-				Client: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
+				SlackAPI: slack.New("x012345", slack.OptionAPIURL(fmt.Sprintf("%v/", testServ.URL))),
 			}
 
 			if !tc.missingErrChannel {
