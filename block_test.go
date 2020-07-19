@@ -272,8 +272,6 @@ func TestEmbedAndExtractAttribute(t *testing.T) {
 	reader := bytes.Buffer{}
 	reader.WriteString("yo")
 
-	prefixVal1, prefixVal2 := "val1", "val2"
-
 	blockID := "actionblock"
 
 	actionID1 := "action1"
@@ -458,8 +456,8 @@ func TestEmbedAndExtractAttribute(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			val1, err1 := GetAttributeEmbeddedValue(prefixVal1, tc.embedAttributes1)
-			val2, err2 := GetAttributeEmbeddedValue(prefixVal2, tc.embedAttributes2)
+			val1, err1 := GetAttributeEmbeddedValue(tc.embedAttributes1)
+			val2, err2 := GetAttributeEmbeddedValue(tc.embedAttributes2)
 
 			if err1 != nil || err2 != nil {
 				if err1.Error() != tc.wantErrString || err2.Error() != tc.wantErrString {
@@ -490,7 +488,7 @@ func TestEmbedAndExtractAttribute(t *testing.T) {
 				t.Fatal("unexpected err", err)
 			}
 
-			err = ExtractEmbeddedAttributes(val1, prefixVal1, tc.dest1)
+			err = ExtractEmbeddedAttributes(val1, tc.dest1)
 
 			if err != nil {
 				if err.Error() != tc.wantErrString {
@@ -509,7 +507,7 @@ func TestEmbedAndExtractAttribute(t *testing.T) {
 				}
 			}
 
-			err = ExtractEmbeddedAttributes(val2, prefixVal2, tc.dest2)
+			err = ExtractEmbeddedAttributes(val2, tc.dest2)
 
 			if err != nil {
 				if err.Error() != tc.wantErrString {

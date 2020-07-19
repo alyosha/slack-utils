@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strings"
 	"time"
 
 	"github.com/slack-go/slack"
@@ -81,14 +80,14 @@ func DateOptToTime(opt string) (time.Time, error) {
 	return time.Parse(datePickTimeFmt, opt)
 }
 
-// GetAttributeEmbeddedValue takes a map of attributes to embed and unique prefix
-// to generate a value string for use with block actions. When the block is
-// interacted with, the value will be sent back into the callback endpoint,
-// where its embedded value can be extracted and used for response actions.
-// This functionality is intended for situations where the time-to-interact
-// with the block is hard to predict (surveys, etc.) and where a memory cache
+// GetAttributeEmbeddedValue takes a map of attributes to embed and generates
+// a value string for use with block actions. When the block is interacted
+// with, the value will be sent back into the callback endpoint, where its
+// embedded values can be extracted and used for response actions. This
+// functionality is intended for situations where the time-to-interact with
+// the block is hard to predict (surveys, etc.) and a time-limited memory cache
 // might not be a good option.
-func GetAttributeEmbeddedValue(prefix string, attributesToEmbed map[string]interface{}) (string, error) {
+func GetAttributeEmbeddedValue(attributesToEmbed map[string]interface{}) (string, error) {
 	if err := validateAttributes(attributesToEmbed); err != nil {
 		return "", fmt.Errorf("validateAttributes() > %w", err)
 	}
@@ -98,18 +97,16 @@ func GetAttributeEmbeddedValue(prefix string, attributesToEmbed map[string]inter
 		return "", fmt.Errorf("json.Marshal() > %w", err)
 	}
 
-	return fmt.Sprintf("%s_%s", prefix, string(marshalledAttributes)), nil
+	return string(marshalledAttributes), nil
 }
 
 // ExtractEmbeddedAttributes is used with value strings generated via
 // GetAttributeEmbeddedValue to restore the embedded attributes back to their
 // original types. The destination map should contain the same keys used when
 // embedding the attributes mapped to the zero value for the type.
-func ExtractEmbeddedAttributes(val, prefix string, dest map[string]interface{}) error {
-	trimmedVal := strings.Replace(val, prefix+"_", "", -1)
-
+func ExtractEmbeddedAttributes(val string, dest map[string]interface{}) error {
 	tmpDest := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(trimmedVal), &tmpDest); err != nil {
+	if err := json.Unmarshal([]byte(val), &tmpDest); err != nil {
 		return fmt.Errorf("json.Unmarshal() > %w", err)
 	}
 

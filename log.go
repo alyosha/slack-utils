@@ -25,8 +25,8 @@ func (c *Client) SendToLogChannel(msg Msg) error {
 	return nil
 }
 
-// SendToLogChannel creates an error message based on the provided
-// message/error and also posts the error stack in the thread
+// SendToErrChannel creates an error message based on the provided
+// message/error and also posts the stack in the thread
 func (c *Client) SendToErrChannel(msgStr string, err error) error {
 	if c.errChannel == "" {
 		return errLogChannelNotConfigured
@@ -63,7 +63,7 @@ func (c *Client) SendToErrChannel(msgStr string, err error) error {
 }
 
 func (c *Client) logRequest(cfg RequestLoggingConfig, endpoint, userID string) {
-	if c.logChannel == "" || !cfg.Enabled || c.skipAdminLog(cfg.ExcludeAdmin, userID) {
+	if c.logChannel == "" || !c.shouldLog(cfg, userID) {
 		return
 	}
 
@@ -92,12 +92,11 @@ func (c *Client) logRequest(cfg RequestLoggingConfig, endpoint, userID string) {
 	}
 }
 
-func (c *Client) skipAdminLog(excludeAdmin bool, userID string) bool {
-	if excludeAdmin && c.adminID == userID {
-		return true
+func (c *Client) shouldLog(cfg RequestLoggingConfig, userID string) bool {
+	if !cfg.Enabled || (cfg.ExcludeAdmin && c.adminID == userID) {
+		return false
 	}
-
-	return false
+	return true
 }
 
 func getBasicLogMsg(endpoint string) string {
