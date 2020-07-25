@@ -31,15 +31,15 @@ type (
 func (c *Client) RespondSlash(r *http.Request, respond slashRespond, cmd *slack.SlashCommand) {
 	endpoint := r.URL.Path
 	timeout := c.getTimeout(endpoint, c.slashResponseConfig)
-	newCtx, cancel := context.WithTimeout(context.Background(), timeout)
+	newCtx, cancel := context.WithTimeout(copyContext(r.Context()), timeout)
 
 	go func() {
 		defer cancel()
-		doneCh := make(chan struct{}, 1)
+		doneCh := make(chan struct{})
 
 		go func() {
 			respond(newCtx, cmd)
-			doneCh <- struct{}{}
+			close(doneCh)
 		}()
 
 		select {
@@ -59,15 +59,15 @@ func (c *Client) RespondSlash(r *http.Request, respond slashRespond, cmd *slack.
 func (c *Client) RespondCallback(r *http.Request, respond callbackRespond, callback *slack.InteractionCallback) {
 	endpoint := r.URL.Path
 	timeout := c.getTimeout(endpoint, c.callbackResponseConfig)
-	newCtx, cancel := context.WithTimeout(context.Background(), timeout)
+	newCtx, cancel := context.WithTimeout(copyContext(r.Context()), timeout)
 
 	go func() {
 		defer cancel()
-		doneCh := make(chan struct{}, 1)
+		doneCh := make(chan struct{})
 
 		go func() {
 			respond(newCtx, callback)
-			doneCh <- struct{}{}
+			close(doneCh)
 		}()
 
 		select {
@@ -103,3 +103,12 @@ func (c *Client) warnResponseTimeout(endpoint string, timeout time.Duration, err
 		err,
 	)
 }
+
+func copyContext(ctx context.Context) context.Context { return contextCopy{ctx} }
+
+type contextCopy struct{ parent context.Context }
+
+func (v contextCopy) Deadline() (time.Time, bool)       { return time.Time{}, false }
+func (v contextCopy) Done() <-chan struct{}             { return nil }
+func (v contextCopy) Err() error                        { return nil }
+func (v contextCopy) Value(key interface{}) interface{} { return v.parent.Value(key) }
