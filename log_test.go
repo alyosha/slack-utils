@@ -36,7 +36,7 @@ func TestSendToLogChannel(t *testing.T) {
 			description: "failure to post error message",
 			msg:         Msg{Body: "Hey!"},
 			respPostMsg: []byte(mockPostMsgErrResp),
-			wantErr:     "c.PostMsg() > invalid_blocks",
+			wantErr:     "c.PostMsg > invalid_blocks",
 		},
 	}
 
@@ -106,14 +106,14 @@ func TestSendToErrChannel(t *testing.T) {
 			msg:               Msg{Body: "Hey!"},
 			respPostMsg:       []byte(mockPostMsgErrResp),
 			respPostThreadMsg: []byte(mockPostMsgResp),
-			wantErr:           "c.PostMsg() > invalid_blocks",
+			wantErr:           "c.PostMsg > invalid_blocks",
 		},
 		{
 			description:       "failure to post thread message",
 			msg:               Msg{Body: "Hey!"},
 			respPostMsg:       []byte(mockPostMsgResp),
 			respPostThreadMsg: []byte(mockPostMsgErrResp),
-			wantErr:           "c.PostThreadMsg() > invalid_blocks",
+			wantErr:           "c.PostThreadMsg > invalid_blocks",
 		},
 	}
 

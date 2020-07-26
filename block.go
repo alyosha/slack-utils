@@ -89,12 +89,12 @@ func DateOptToTime(opt string) (time.Time, error) {
 // might not be a good option.
 func NewAttributeEmbeddedValue(attributesToEmbed map[string]interface{}) (string, error) {
 	if err := validateAttributes(attributesToEmbed); err != nil {
-		return "", fmt.Errorf("validateAttributes() > %w", err)
+		return "", fmt.Errorf("validateAttributes > %w", err)
 	}
 
 	marshalledAttributes, err := json.Marshal(attributesToEmbed)
 	if err != nil {
-		return "", fmt.Errorf("json.Marshal() > %w", err)
+		return "", fmt.Errorf("json.Marshal > %w", err)
 	}
 
 	return string(marshalledAttributes), nil
@@ -107,7 +107,7 @@ func NewAttributeEmbeddedValue(attributesToEmbed map[string]interface{}) (string
 func ExtractEmbeddedAttributes(embeddedValueString string, dest map[string]interface{}) error {
 	embedded := make(map[string]interface{})
 	if err := json.Unmarshal([]byte(embeddedValueString), &embedded); err != nil {
-		return fmt.Errorf("json.Unmarshal() > %w", err)
+		return fmt.Errorf("json.Unmarshal > %w", err)
 	}
 
 	typeMap := map[string]reflect.Type{}
@@ -127,12 +127,12 @@ func ExtractEmbeddedAttributes(embeddedValueString string, dest map[string]inter
 		case concreteTyper:
 			data, err := json.Marshal(v)
 			if err != nil {
-				return fmt.Errorf("json.Marshal() > %w", err)
+				return fmt.Errorf("json.Marshal > %w", err)
 			}
 			concreteTypePtr := val.concreteTypePtr()
 			err = json.Unmarshal(data, concreteTypePtr)
 			if err != nil {
-				return fmt.Errorf("json.Unmarshal() > %w", err)
+				return fmt.Errorf("json.Unmarshal > %w", err)
 			}
 			if reflect.ValueOf(val).Kind() == reflect.Ptr {
 				dest[k] = concreteTypePtr
@@ -146,13 +146,13 @@ func ExtractEmbeddedAttributes(embeddedValueString string, dest map[string]inter
 			case reflect.Map:
 				convertedMap, err := convertJSONInterfaceMap(v, val, destMapType)
 				if err != nil {
-					return fmt.Errorf("convertJSONInterfaceMap() > %w", err)
+					return fmt.Errorf("convertJSONInterfaceMap > %w", err)
 				}
 				dest[k] = convertedMap
 			case reflect.Slice, reflect.Array:
 				convertedSliceOrArray, err := convertJSONInterfaceSliceOrArray(v, val, destMapType)
 				if err != nil {
-					return fmt.Errorf("convertJSONInterfaceSliceOrArray() > %w", err)
+					return fmt.Errorf("convertJSONInterfaceSliceOrArray > %w", err)
 				}
 				dest[k] = convertedSliceOrArray
 			default:

@@ -32,7 +32,7 @@ func TestCreateConversation(t *testing.T) {
 			inviteMembers:     []string{},
 			initMsg:           Msg{},
 			respChannelCreate: []byte(mockChannelCreateErrResp),
-			wantErr:           "c.SlackAPI.CreateConversation() > invalid_name_specials",
+			wantErr:           "c.SlackAPI.CreateConversation > invalid_name_specials",
 		},
 		{
 			description:       "successful conversation creation including additional invites",
@@ -56,7 +56,7 @@ func TestCreateConversation(t *testing.T) {
 			initMsg:           Msg{},
 			respChannelCreate: []byte(mockChannelCreateResp),
 			respInviteMembers: []byte(mockInviteMembersErrResp),
-			wantErr:           "c.InviteUsers() > c.SlackAPI.InviteUsersToConversation() > cant_invite",
+			wantErr:           "c.InviteUsers > c.SlackAPI.InviteUsersToConversation > cant_invite",
 		},
 		{
 			description:       "successful conversation creation including additional invites, successful message post",
@@ -74,7 +74,7 @@ func TestCreateConversation(t *testing.T) {
 			respChannelCreate: []byte(mockChannelCreateResp),
 			respInviteMembers: []byte(mockInviteMembersResp),
 			respPostMsg:       []byte(mockPostMsgErrResp),
-			wantErr:           "c.SlackAPI.PostMessage() > invalid_blocks",
+			wantErr:           "c.SlackAPI.PostMessage > invalid_blocks",
 		},
 	}
 
@@ -142,7 +142,7 @@ func TestInviteUsers(t *testing.T) {
 			description:       "expect error",
 			inviteMembers:     []string{"UABC123EFG"},
 			respInviteMembers: []byte(mockInviteMembersErrResp),
-			wantErr:           "c.SlackAPI.InviteUsersToConversation() > cant_invite",
+			wantErr:           "c.SlackAPI.InviteUsersToConversation > cant_invite",
 		},
 	}
 
@@ -193,7 +193,7 @@ func TestGetConversationMembers(t *testing.T) {
 		{
 			description:          "failure to retrieve member IDs",
 			respConversationInfo: []byte(mockChannelInfoErrResp),
-			wantErr:              "c.SlackAPI.GetConversationInfo() > channel_not_found",
+			wantErr:              "c.SlackAPI.GetConversationInfo > channel_not_found",
 		},
 	}
 
@@ -257,13 +257,13 @@ func TestGetConversationMemberEmails(t *testing.T) {
 			description:          "failure to retrieve conversation info",
 			respConversationInfo: []byte(mockChannelInfoErrResp),
 			respUsersList:        []byte(mockUsersListResp),
-			wantErr:              "c.SlackAPI.GetConversationInfo() > channel_not_found",
+			wantErr:              "c.SlackAPI.GetConversationInfo > channel_not_found",
 		},
 		{
 			description:          "failure to retrieve user list",
 			respConversationInfo: []byte(mockChannelInfoResp),
 			respUsersList:        []byte(mockUsersListErrResp),
-			wantErr:              "c.getAll() > c.SlackAPI.GetUsers() > invalid_cursor",
+			wantErr:              "c.getAll > c.SlackAPI.GetUsers > invalid_cursor",
 		},
 	}
 
@@ -329,7 +329,7 @@ func TestArchiveConversations(t *testing.T) {
 		{
 			description:         "failure to archive conversations",
 			respArchiveChannels: []byte(mockChannelsArchiveErrResp),
-			wantErr:             "c.SlackAPI.ArchiveConversation() > invalid_auth",
+			wantErr:             "c.SlackAPI.ArchiveConversation > invalid_auth",
 		},
 	}
 

@@ -19,7 +19,7 @@ func (c *Client) SendToLogChannel(msg Msg) error {
 
 	_, err := c.PostMsg(msg, c.logChannel)
 	if err != nil {
-		return fmt.Errorf("c.PostMsg() > %w", err)
+		return fmt.Errorf("c.PostMsg > %w", err)
 	}
 
 	return nil
@@ -52,11 +52,11 @@ func (c *Client) SendToErrChannel(msgStr string, err error) error {
 
 	ts, err := c.PostMsg(errMsg, c.errChannel)
 	if err != nil {
-		return fmt.Errorf("c.PostMsg() > %w", err)
+		return fmt.Errorf("c.PostMsg > %w", err)
 	}
 
 	if err := c.PostThreadMsg(threadMsg, c.errChannel, ts); err != nil {
-		return fmt.Errorf("c.PostThreadMsg() > %w", err)
+		return fmt.Errorf("c.PostThreadMsg > %w", err)
 	}
 
 	return nil

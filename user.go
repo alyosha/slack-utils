@@ -23,7 +23,7 @@ var ErrNoUsersInWorkplace = errors.New("no users in workplace")
 func (c *Client) EmailsToSlackIDs(emails []string) ([]string, error) {
 	users, err := c.getAll()
 	if err != nil {
-		return nil, fmt.Errorf("c.getAll() > %w", err)
+		return nil, fmt.Errorf("c.getAll > %w", err)
 	}
 
 	return toSlackIDs(users, emails), nil
@@ -34,7 +34,7 @@ func (c *Client) EmailsToSlackIDs(emails []string) ([]string, error) {
 func (c *Client) EmailsToSlackIDsInclusive(emails []string) ([][]string, error) {
 	users, err := c.getAll()
 	if err != nil {
-		return nil, fmt.Errorf("c.getAll() > %w", err)
+		return nil, fmt.Errorf("c.getAll > %w", err)
 	}
 
 	return toSlackIDsInclusive(users, emails), nil
@@ -43,7 +43,7 @@ func (c *Client) EmailsToSlackIDsInclusive(emails []string) ([][]string, error) 
 func (c *Client) getAll() ([]slack.User, error) {
 	users, err := c.SlackAPI.GetUsers()
 	if err != nil {
-		return nil, fmt.Errorf("c.SlackAPI.GetUsers() > %w", err)
+		return nil, fmt.Errorf("c.SlackAPI.GetUsers > %w", err)
 	}
 
 	if len(users) == 0 {

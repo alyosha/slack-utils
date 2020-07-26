@@ -20,11 +20,11 @@ const (
 func (c *Client) CreateConversation(conversationName string, isPrivate bool, userIDs []string, initMsg Msg) (string, error) {
 	conversation, err := c.SlackAPI.CreateConversation(conversationName, isPrivate)
 	if err != nil {
-		return "", fmt.Errorf("c.SlackAPI.CreateConversation() > %w", err)
+		return "", fmt.Errorf("c.SlackAPI.CreateConversation > %w", err)
 	}
 
 	if err = c.InviteUsers(conversation.ID, userIDs); err != nil {
-		return conversation.ID, fmt.Errorf("c.InviteUsers() > %w", err)
+		return conversation.ID, fmt.Errorf("c.InviteUsers > %w", err)
 	}
 
 	if initMsg.Body != "" || initMsg.Blocks != nil {
@@ -33,7 +33,7 @@ func (c *Client) CreateConversation(conversationName string, isPrivate bool, use
 			initMsg.getCommonOpts()...,
 		)
 		if err != nil {
-			return conversation.ID, fmt.Errorf("c.SlackAPI.PostMessage() > %w", err)
+			return conversation.ID, fmt.Errorf("c.SlackAPI.PostMessage > %w", err)
 		}
 	}
 
@@ -45,7 +45,7 @@ func (c *Client) InviteUsers(conversationID string, userIDs []string) error {
 	for _, user := range userIDs {
 		_, err := c.SlackAPI.InviteUsersToConversation(conversationID, user)
 		if err != nil && err.Error() != errInviteSelfMsg {
-			return fmt.Errorf("c.SlackAPI.InviteUsersToConversation() > %w", err)
+			return fmt.Errorf("c.SlackAPI.InviteUsersToConversation > %w", err)
 		}
 	}
 
@@ -57,7 +57,7 @@ func (c *Client) ArchiveConversations(conversationIDs []string) error {
 	for _, conversationID := range conversationIDs {
 		err := c.SlackAPI.ArchiveConversation(conversationID)
 		if err != nil && err.Error() != errAlreadyArchivedMsg {
-			return fmt.Errorf("c.SlackAPI.ArchiveConversation() > %w", err)
+			return fmt.Errorf("c.SlackAPI.ArchiveConversation > %w", err)
 		}
 	}
 
@@ -68,7 +68,7 @@ func (c *Client) ArchiveConversations(conversationIDs []string) error {
 func (c *Client) GetConversationMembers(conversationID string) ([]string, error) {
 	conversation, err := c.SlackAPI.GetConversationInfo(conversationID, false)
 	if err != nil {
-		return nil, fmt.Errorf("c.SlackAPI.GetConversationInfo() > %w", err)
+		return nil, fmt.Errorf("c.SlackAPI.GetConversationInfo > %w", err)
 	}
 
 	return conversation.Members, nil
@@ -83,7 +83,7 @@ func (c *Client) GetConversationMemberEmails(conversationID string) ([]string, e
 	eg.Go(func() error {
 		conversation, err := c.SlackAPI.GetConversationInfo(conversationID, false)
 		if err != nil {
-			return fmt.Errorf("c.SlackAPI.GetConversationInfo() > %w", err)
+			return fmt.Errorf("c.SlackAPI.GetConversationInfo > %w", err)
 		}
 		memberIDs = conversation.Members
 		return nil
@@ -92,7 +92,7 @@ func (c *Client) GetConversationMemberEmails(conversationID string) ([]string, e
 	eg.Go(func() error {
 		users, err := c.getAll()
 		if err != nil {
-			return fmt.Errorf("c.getAll() > %w", err)
+			return fmt.Errorf("c.getAll > %w", err)
 		}
 		allUsers = users
 		return nil

@@ -28,7 +28,7 @@ func TestEmailsToSlackIDs(t *testing.T) {
 		{
 			description:   "failure to retrieve users list",
 			respUsersList: []byte(mockUsersListErrResp),
-			wantErr:       "c.getAll() > c.SlackAPI.GetUsers() > invalid_cursor",
+			wantErr:       "c.getAll > c.SlackAPI.GetUsers > invalid_cursor",
 		},
 	}
 	for _, tc := range testCases {
@@ -92,7 +92,7 @@ func TestEmailsToSlackIDsInclusive(t *testing.T) {
 		{
 			description:   "failure to retrieve users list",
 			respUsersList: []byte(mockUsersListErrResp),
-			wantErr:       "c.getAll() > c.SlackAPI.GetUsers() > invalid_cursor",
+			wantErr:       "c.getAll > c.SlackAPI.GetUsers > invalid_cursor",
 		},
 	}
 	for _, tc := range testCases {

@@ -380,7 +380,7 @@ func TestEmbedAndExtractAttribute(t *testing.T) {
 			dest2: map[string]interface{}{
 				userChanKey: make(chan string),
 			},
-			wantErrString: "json.Marshal() > json: unsupported type: chan string",
+			wantErrString: "json.Marshal > json: unsupported type: chan string",
 		},
 		{
 			description: "unsupported type func",
@@ -396,7 +396,7 @@ func TestEmbedAndExtractAttribute(t *testing.T) {
 			dest2: map[string]interface{}{
 				userFuncKey: func(string) {},
 			},
-			wantErrString: "json.Marshal() > json: unsupported type: func(string)",
+			wantErrString: "json.Marshal > json: unsupported type: func(string)",
 		},
 		{
 			description: "unsupported non-concrete typer struct",
@@ -412,7 +412,7 @@ func TestEmbedAndExtractAttribute(t *testing.T) {
 			dest2: map[string]interface{}{
 				readerKey: bytes.Buffer{},
 			},
-			wantErrString: "validateAttributes() > due to JSON marshalling restrictions, all structs must implement concreteTyper interface to be embedded",
+			wantErrString: "validateAttributes > due to JSON marshalling restrictions, all structs must implement concreteTyper interface to be embedded",
 		},
 		{
 			description: "dest map and embedded attributes have mismatched types - default case - no panic",
@@ -444,7 +444,7 @@ func TestEmbedAndExtractAttribute(t *testing.T) {
 			dest2: map[string]interface{}{
 				processedUsersKey: []string{},
 			},
-			wantErrString: "convertJSONInterfaceSliceOrArray() > attempted to append elem of type: string to slice of type: []int",
+			wantErrString: "convertJSONInterfaceSliceOrArray > attempted to append elem of type: string to slice of type: []int",
 		},
 		{
 			description: "fails for unsupported map key types - no panic",
@@ -460,7 +460,7 @@ func TestEmbedAndExtractAttribute(t *testing.T) {
 			dest2: map[string]interface{}{
 				reverseMapKey: map[int]string{},
 			},
-			wantErrString: "validateAttributes() > cannot have map with key of type: int",
+			wantErrString: "validateAttributes > cannot have map with key of type: int",
 		},
 		{
 			description: "fails when provided/return dest maps have different types - no panic",

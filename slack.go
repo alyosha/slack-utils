@@ -64,7 +64,7 @@ func NewClient(cfg ClientConfig, opts ...slack.Option) (*Client, error) {
 
 	eg.Go(func() error {
 		if _, err := c.SlackAPI.GetUserInfo(cfg.AdminID); err != nil {
-			return fmt.Errorf("c.SlackAPI.GetUserInfo() > %w", err)
+			return fmt.Errorf("c.SlackAPI.GetUserInfo > %w", err)
 		}
 		return nil
 	})
@@ -72,7 +72,7 @@ func NewClient(cfg ClientConfig, opts ...slack.Option) (*Client, error) {
 	eg.Go(func() error {
 		if cfg.LogChannelID != "" {
 			if _, err := c.SlackAPI.GetConversationInfo(cfg.LogChannelID, false); err != nil {
-				return fmt.Errorf("c.SlackAPI.GetConversationInfo() > %w", err)
+				return fmt.Errorf("c.SlackAPI.GetConversationInfo > %w", err)
 			}
 		}
 		return nil
@@ -81,7 +81,7 @@ func NewClient(cfg ClientConfig, opts ...slack.Option) (*Client, error) {
 	eg.Go(func() error {
 		if cfg.ErrChannelID != "" {
 			if _, err := c.SlackAPI.GetConversationInfo(cfg.ErrChannelID, false); err != nil {
-				return fmt.Errorf("c.SlackAPI.GetConversationInfo() > %w", err)
+				return fmt.Errorf("c.SlackAPI.GetConversationInfo > %w", err)
 			}
 		}
 		return nil

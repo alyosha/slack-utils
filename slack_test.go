@@ -37,7 +37,7 @@ func TestNewClient(t *testing.T) {
 			},
 			respUserInfo:         []byte(mockUserInfoErrResp),
 			respConversationInfo: []byte(mockSuccessResp),
-			wantErr:              "c.SlackAPI.GetUserInfo() > user_not_found",
+			wantErr:              "c.SlackAPI.GetUserInfo > user_not_found",
 		},
 		{
 			description: "failure to retrieve channel info for log/err channel",
@@ -49,7 +49,7 @@ func TestNewClient(t *testing.T) {
 			},
 			respConversationInfo: []byte(mockChannelInfoErrResp),
 			respUserInfo:         []byte(mockSuccessResp),
-			wantErr:              "c.SlackAPI.GetConversationInfo() > channel_not_found",
+			wantErr:              "c.SlackAPI.GetConversationInfo > channel_not_found",
 		},
 		{
 			description: "success - channel info not verified if ID missing from config",
