@@ -17,15 +17,15 @@ type Msg struct {
 	IconURL string // Incompatible with AsUser option
 }
 
-// GetBasicMsg returns a simple text Msg struct
-func GetBasicMsg(body string) Msg {
+// NewBasicMsg returns a simple text Msg struct
+func NewBasicMsg(body string) Msg {
 	return Msg{
 		Body: body,
 	}
 }
 
-// GetBasicBotDM returns a simple text Msg for direct messaging the user as bot
-func GetBasicBotDM(body string) Msg {
+// NewBasicBotDM returns a simple text Msg for direct messaging the user as bot
+func NewBasicBotDM(body string) Msg {
 	return Msg{
 		Body:   body,
 		AsUser: true,
@@ -99,7 +99,7 @@ func (c *Client) ForwardMsg(originalChannelID, originalMsgTimestamp, forwardChan
 		return fmt.Errorf("c.SlackAPI.GetPermalink > %w", err)
 	}
 
-	if _, err := c.PostMsg(GetBasicMsg(permalink), forwardChannelID); err != nil {
+	if _, err := c.PostMsg(NewBasicMsg(permalink), forwardChannelID); err != nil {
 		return fmt.Errorf("c.PostMsg > %w", err)
 	}
 
