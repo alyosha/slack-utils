@@ -1,8 +1,13 @@
 package utils
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/slack-go/slack"
 )
+
+var ErrInvalidForwardChannelID = errors.New("forward channel cannot be the same as original message channel")
 
 // Msg is an intermediary struct used for posting messages
 type Msg struct {
@@ -81,6 +86,24 @@ func (c *Client) DeleteMsg(conversationID, timestamp, responseURL string) error 
 	)
 
 	return err
+}
+
+// ForwardMsg shares a message permalink to another conversation
+func (c *Client) ForwardMsg(originalChannelID, originalMsgTimestamp, forwardChannelID string) error {
+	if originalChannelID == forwardChannelID {
+		return ErrInvalidForwardChannelID
+	}
+
+	permalink, err := c.SlackAPI.GetPermalink(&slack.PermalinkParameters{Channel: originalChannelID, Ts: originalMsgTimestamp})
+	if err != nil {
+		return fmt.Errorf("c.SlackAPI.GetPermalink > %w", err)
+	}
+
+	if _, err := c.PostMsg(GetBasicMsg(permalink), forwardChannelID); err != nil {
+		return fmt.Errorf("c.PostMsg > %w", err)
+	}
+
+	return nil
 }
 
 func (msg Msg) getCommonOpts() []slack.MsgOption {
