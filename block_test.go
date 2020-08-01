@@ -28,11 +28,11 @@ var mockTextObj = &slack.TextBlockObject{
 
 type fakeConcreteTyper struct{}
 
-func (f fakeConcreteTyper) concreteTypePtr() interface{} {
+func (f fakeConcreteTyper) ConcreteTypePtr() interface{} {
 	return &Msg{}
 }
 
-func (f fakeConcreteTyper) concreteTypeVal() interface{} {
+func (f fakeConcreteTyper) ConcreteTypeVal() interface{} {
 	return Msg{}
 }
 

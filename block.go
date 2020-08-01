@@ -17,15 +17,15 @@ const (
 const datePickTimeFmt = "2006-01-02"
 
 type concreteTyper interface {
-	concreteTypePtr() interface{}
-	concreteTypeVal() interface{}
+	ConcreteTypePtr() interface{}
+	ConcreteTypeVal() interface{}
 }
 
-func (msg Msg) concreteTypePtr() interface{} {
+func (msg Msg) ConcreteTypePtr() interface{} {
 	return &msg
 }
 
-func (msg Msg) concreteTypeVal() interface{} {
+func (msg Msg) ConcreteTypeVal() interface{} {
 	return msg
 }
 
@@ -129,7 +129,7 @@ func ExtractEmbeddedAttributes(embeddedValueString string, dest map[string]inter
 			if err != nil {
 				return fmt.Errorf("json.Marshal > %w", err)
 			}
-			concreteTypePtr := val.concreteTypePtr()
+			concreteTypePtr := val.ConcreteTypePtr()
 			err = json.Unmarshal(data, concreteTypePtr)
 			if err != nil {
 				return fmt.Errorf("json.Unmarshal > %w", err)
@@ -138,7 +138,7 @@ func ExtractEmbeddedAttributes(embeddedValueString string, dest map[string]inter
 				dest[k] = concreteTypePtr
 				continue
 			}
-			dest[k] = concreteTypePtr.(concreteTyper).concreteTypeVal()
+			dest[k] = concreteTypePtr.(concreteTyper).ConcreteTypeVal()
 		default:
 			switch reflect.ValueOf(destVal).Kind() {
 			case reflect.Struct:
