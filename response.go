@@ -27,7 +27,9 @@ type (
 // RespondSlash allows the parent goroutine to finish executing while
 // the response function continues. Slack requires a 2xx response to be
 // returned within three seconds of interaction or an error is shown to
-// the end-user, but using this method bypasses that behavior
+// the end-user, but using this method bypasses that behavior. Depending
+// on the interaction, such a delay might lead an end user to believe the
+// request did not go through and cause them to retry, so use with caution.
 func (c *Client) RespondSlash(r *http.Request, respond slashRespond, cmd *slack.SlashCommand) {
 	endpoint := r.URL.Path
 	timeout := c.getTimeout(endpoint, c.slashResponseConfig)
@@ -55,7 +57,9 @@ func (c *Client) RespondSlash(r *http.Request, respond slashRespond, cmd *slack.
 // RespondCallback allows the parent goroutine to finish executing while
 // the response function continues. Slack requires a 2xx response to be
 // returned within three seconds of interaction or an error is shown to
-// the end-user, but using this method bypasses that behavior
+// the end-user, but using this method bypasses that behavior. Depending
+// on the interaction, such a delay might lead an end user to believe the
+// request did not go through and cause them to retry, so use with caution.
 func (c *Client) RespondCallback(r *http.Request, respond callbackRespond, callback *slack.InteractionCallback) {
 	endpoint := r.URL.Path
 	timeout := c.getTimeout(endpoint, c.callbackResponseConfig)
