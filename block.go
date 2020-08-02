@@ -14,7 +14,10 @@ const (
 	DeleteActionID = "delete_action"
 )
 
-const datePickTimeFmt = "2006-01-02"
+const (
+	datePickTimeFmt      = "2006-01-02"
+	valueStringMaxLength = 2000
+)
 
 type concreteTyper interface {
 	ConcreteTypePtr() interface{}
@@ -97,7 +100,13 @@ func NewAttributeEmbeddedValue(attributesToEmbed map[string]interface{}) (string
 		return "", fmt.Errorf("json.Marshal > %w", err)
 	}
 
-	return string(marshalledAttributes), nil
+	attributeEmbeddedVal := string(marshalledAttributes)
+
+	if len(attributeEmbeddedVal) > valueStringMaxLength {
+		return "", fmt.Errorf("embedded value string cannot be longer than %d characters", valueStringMaxLength)
+	}
+
+	return attributeEmbeddedVal, nil
 }
 
 // ExtractEmbeddedAttributes is used with value strings generated via
