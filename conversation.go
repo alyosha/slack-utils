@@ -66,12 +66,12 @@ func (c *Client) ArchiveConversations(conversationIDs []string) error {
 
 // GetConversationMembers returns a list of members for a given conversation
 func (c *Client) GetConversationMembers(conversationID string) ([]string, error) {
-	conversation, err := c.SlackAPI.GetConversationInfo(conversationID, false)
+	members, _, err := c.SlackAPI.GetUsersInConversation(&slack.GetUsersInConversationParameters{ChannelID: conversationID})
 	if err != nil {
-		return nil, fmt.Errorf("c.SlackAPI.GetConversationInfo > %w", err)
+		return nil, fmt.Errorf("c.SlackAPI.GetUsersInConversation > %w", err)
 	}
 
-	return conversation.Members, nil
+	return members, nil
 }
 
 // GetConversationMemberEmails returns a list of emails for members of a given conversation
@@ -81,11 +81,11 @@ func (c *Client) GetConversationMemberEmails(conversationID string) ([]string, e
 	var allUsers []slack.User
 
 	eg.Go(func() error {
-		conversation, err := c.SlackAPI.GetConversationInfo(conversationID, false)
+		members, _, err := c.SlackAPI.GetUsersInConversation(&slack.GetUsersInConversationParameters{ChannelID: conversationID})
 		if err != nil {
-			return fmt.Errorf("c.SlackAPI.GetConversationInfo > %w", err)
+			return fmt.Errorf("c.SlackAPI.GetConversationMembers > %w", err)
 		}
-		memberIDs = conversation.Members
+		memberIDs = members
 		return nil
 	})
 

@@ -187,20 +187,20 @@ func TestGetConversationMembers(t *testing.T) {
 	}{
 		{
 			description:          "successful retrieval of member IDs",
-			respConversationInfo: []byte(mockChannelInfoResp),
+			respConversationInfo: []byte(mockChannelMembersResp),
 			wantIDs:              []string{"U0G9QF9C6", "U1QNSQB9U"},
 		},
 		{
 			description:          "failure to retrieve member IDs",
-			respConversationInfo: []byte(mockChannelInfoErrResp),
-			wantErr:              "c.SlackAPI.GetConversationInfo > channel_not_found",
+			respConversationInfo: []byte(mockChannelMembersErrResp),
+			wantErr:              "c.SlackAPI.GetUsersInConversation > channel_not_found",
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			mux := http.NewServeMux()
-			mux.HandleFunc("/conversations.info", func(w http.ResponseWriter, r *http.Request) {
+			mux.HandleFunc("/conversations.members", func(w http.ResponseWriter, r *http.Request) {
 				_, _ = w.Write(tc.respConversationInfo)
 			})
 
@@ -249,19 +249,19 @@ func TestGetConversationMemberEmails(t *testing.T) {
 	}{
 		{
 			description:          "successful retrieval of member emails",
-			respConversationInfo: []byte(mockChannelInfoResp),
+			respConversationInfo: []byte(mockChannelMembersResp),
 			respUsersList:        []byte(mockUsersListResp),
 			wantEmails:           []string{"spengler@ghostbusters.example.com"},
 		},
 		{
 			description:          "failure to retrieve conversation info",
-			respConversationInfo: []byte(mockChannelInfoErrResp),
+			respConversationInfo: []byte(mockChannelMembersErrResp),
 			respUsersList:        []byte(mockUsersListResp),
-			wantErr:              "c.SlackAPI.GetConversationInfo > channel_not_found",
+			wantErr:              "c.SlackAPI.GetConversationMembers > channel_not_found",
 		},
 		{
 			description:          "failure to retrieve user list",
-			respConversationInfo: []byte(mockChannelInfoResp),
+			respConversationInfo: []byte(mockChannelMembersResp),
 			respUsersList:        []byte(mockUsersListErrResp),
 			wantErr:              "c.getAll > c.SlackAPI.GetUsers > invalid_cursor",
 		},
@@ -270,7 +270,7 @@ func TestGetConversationMemberEmails(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			mux := http.NewServeMux()
-			mux.HandleFunc("/conversations.info", func(w http.ResponseWriter, r *http.Request) {
+			mux.HandleFunc("/conversations.members", func(w http.ResponseWriter, r *http.Request) {
 				_, _ = w.Write(tc.respConversationInfo)
 			})
 			mux.HandleFunc("/users.list", func(w http.ResponseWriter, r *http.Request) {

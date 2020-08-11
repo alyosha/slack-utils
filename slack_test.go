@@ -49,7 +49,7 @@ func TestNewClient(t *testing.T) {
 				LogChannelID: "C1234",
 				ErrChannelID: "C2345",
 			},
-			respConversationInfo: []byte(mockChannelInfoErrResp),
+			respConversationInfo: []byte(mockChannelMembersErrResp),
 			respUserInfo:         []byte(mockSuccessResp),
 			wantErr:              "c.SlackAPI.GetConversationInfo > channel_not_found",
 		},
@@ -59,7 +59,7 @@ func TestNewClient(t *testing.T) {
 				AdminID:  "U1234",
 				BotToken: "B1234",
 			},
-			respConversationInfo: []byte(mockChannelInfoErrResp),
+			respConversationInfo: []byte(mockChannelMembersErrResp),
 			respUserInfo:         []byte(mockSuccessResp),
 		},
 		{
