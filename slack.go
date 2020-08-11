@@ -123,9 +123,9 @@ func InteractionCallback(ctx context.Context) (*slack.InteractionCallback, error
 }
 
 // SendResp can be used to send simple responses
-func SendResp(w http.ResponseWriter, msg slack.Message) error {
+func SendResp(w http.ResponseWriter, resp interface{}) error {
 	w.Header().Add("Content-type", "application/json")
-	return json.NewEncoder(w).Encode(&msg)
+	return json.NewEncoder(w).Encode(&resp)
 }
 
 func withSlashCommand(ctx context.Context, cmd *slack.SlashCommand) context.Context {
