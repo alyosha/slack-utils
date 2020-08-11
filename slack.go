@@ -2,8 +2,10 @@ package utils
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/slack-go/slack"
 	"golang.org/x/sync/errgroup"
@@ -118,6 +120,12 @@ func InteractionCallback(ctx context.Context) (*slack.InteractionCallback, error
 	}
 
 	return callback, nil
+}
+
+// SendResp can be used to send simple responses
+func SendResp(w http.ResponseWriter, msg slack.Message) error {
+	w.Header().Add("Content-type", "application/json")
+	return json.NewEncoder(w).Encode(&msg)
 }
 
 func withSlashCommand(ctx context.Context, cmd *slack.SlashCommand) context.Context {
