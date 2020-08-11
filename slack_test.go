@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -101,5 +103,42 @@ func TestNewClient(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+func TestSendResp(t *testing.T) {
+	var msg slack.Message
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		err := SendResp(w, slack.Message{})
+		if err != nil {
+			t.Fatalf("unexpected error handing request: %s", err)
+		}
+	}
+
+	req := httptest.NewRequest("GET", "http://example.com/foo", nil)
+	w := httptest.NewRecorder()
+	handler(w, req)
+
+	resp := w.Result()
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected status code 200, got: %v", resp.StatusCode)
+	}
+
+	if resp.Header.Get("Content-Type") != "application/json" {
+		t.Fatalf("content type application/json, got: %v", resp.Header.Get("Content-Type"))
+	}
+
+	err := json.Unmarshal(body, &msg)
+	if err != nil {
+		t.Fatalf("failed to unmarshal response with error: %s", err)
+	}
+
+	if msg.ReplaceOriginal {
+		t.Fatal("replace original should be false, but is true")
+	}
+
+	if msg.DeleteOriginal {
+		t.Fatal("delete original should be false, but is true")
 	}
 }
