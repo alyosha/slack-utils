@@ -37,7 +37,7 @@ func (c *Client) SendToErrChannel(msgStr string, err error) error {
 	if msgStr == "" {
 		errMsgBody = fmt.Sprintf("`%v`", err)
 	} else {
-		errMsgBody = fmt.Sprintf("*%s*: `%v`", msgStr, err)
+		errMsgBody = fmt.Sprintf("%s\n*error*: `%v`", msgStr, err)
 	}
 
 	errMsg := Msg{

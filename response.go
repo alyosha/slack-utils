@@ -111,7 +111,7 @@ func (c *Client) getTimeout(endpoint string, responseCfg ResponseConfig) time.Du
 func (c *Client) notifyResponseTimeout(endpoint string, timeout time.Duration, err error) {
 	c.SendToErrChannel(
 		fmt.Sprintf(
-			"response timeout\n*endpoint*: `%s`\n*timeout duration*: `%d`\n*timestamp*: `%d`",
+			"*response timeout*\n*endpoint*: `%s`\n*timeout duration*: `%d`\n*timestamp*: `%d`",
 			endpoint,
 			timeout,
 			time.Now().Unix(),
@@ -123,7 +123,7 @@ func (c *Client) notifyResponseTimeout(endpoint string, timeout time.Duration, e
 func (c *Client) notifyResponseFailure(endpoint string, err error) {
 	c.SendToErrChannel(
 		fmt.Sprintf(
-			"response failure\n*endpoint*: `%s`\n*timestamp*: `%d`",
+			"*response failure*\n*endpoint*: `%s`\n*timestamp*: `%d`",
 			endpoint,
 			time.Now().Unix(),
 		),
