@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -35,14 +36,20 @@ func TestRespondSlash(t *testing.T) {
 	encodedBody := body.Encode()
 
 	testCases := []struct {
-		description string
-		responseCfg ResponseConfig
-		executeTime time.Duration
-		wantTimeout bool
+		description     string
+		responseCfg     ResponseConfig
+		executeTime     time.Duration
+		wantTimeout     bool
+		wantResponseErr bool
 	}{
 		{
 			description: "default config allows response to continue as expected",
 			executeTime: 10 * time.Millisecond,
+		},
+		{
+			description:     "default config allows response to continue as expected, err on execution",
+			executeTime:     10 * time.Millisecond,
+			wantResponseErr: true,
 		},
 		{
 			description: "response execution takes longer than configured global timeout, no log message",
@@ -116,13 +123,17 @@ func TestRespondSlash(t *testing.T) {
 
 			ctxCancelledCh := make(chan struct{}, 1)
 
-			sendMsg := func(ctx context.Context, cmd *slack.SlashCommand) {
+			sendMsg := func(ctx context.Context, cmd *slack.SlashCommand) error {
 				time.Sleep(tc.executeTime)
 				if ctx.Err() != nil {
 					ctxCancelledCh <- struct{}{}
-					return
+					return ctx.Err()
 				}
 				respDoneCh <- struct{}{}
+				if tc.wantResponseErr {
+					return errors.New("fail")
+				}
+				return nil
 			}
 
 			r.Post("/send_message", func(w http.ResponseWriter, r *http.Request) {
@@ -142,6 +153,19 @@ func TestRespondSlash(t *testing.T) {
 			case <-respDoneCh:
 				if tc.wantTimeout {
 					t.Fatal("expected timeout")
+				}
+				if tc.wantResponseErr {
+					select {
+					case <-logReceivedCh:
+					case <-time.After(5 * time.Second):
+						t.Fatal("expected warning log message, did not receive")
+					}
+					return
+				}
+				select {
+				case <-logReceivedCh:
+					t.Fatal("unexpected log message")
+				case <-time.After(100 * time.Millisecond):
 				}
 			case <-ctxCancelledCh:
 				if !tc.wantTimeout {
@@ -169,14 +193,20 @@ func TestRespondCallback(t *testing.T) {
 	t.Parallel()
 
 	testCases := []struct {
-		description string
-		responseCfg ResponseConfig
-		executeTime time.Duration
-		wantTimeout bool
+		description     string
+		responseCfg     ResponseConfig
+		executeTime     time.Duration
+		wantTimeout     bool
+		wantResponseErr bool
 	}{
 		{
 			description: "default config allows response to continue as expected",
 			executeTime: 10 * time.Millisecond,
+		},
+		{
+			description:     "default config allows response to continue as expected, err on execution",
+			executeTime:     10 * time.Millisecond,
+			wantResponseErr: true,
 		},
 		{
 			description: "response execution takes longer than configured global timeout, no log message",
@@ -250,13 +280,17 @@ func TestRespondCallback(t *testing.T) {
 
 			ctxCancelledCh := make(chan struct{}, 1)
 
-			sendMsg := func(ctx context.Context, cmd *slack.InteractionCallback) {
+			sendMsg := func(ctx context.Context, cmd *slack.InteractionCallback) error {
 				time.Sleep(tc.executeTime)
 				if ctx.Err() != nil {
 					ctxCancelledCh <- struct{}{}
-					return
+					return ctx.Err()
 				}
 				respDoneCh <- struct{}{}
+				if tc.wantResponseErr {
+					return errors.New("fail")
+				}
+				return nil
 			}
 
 			r.Post("/callback", func(w http.ResponseWriter, r *http.Request) {
@@ -276,6 +310,19 @@ func TestRespondCallback(t *testing.T) {
 			case <-respDoneCh:
 				if tc.wantTimeout {
 					t.Fatal("expected timeout")
+				}
+				if tc.wantResponseErr {
+					select {
+					case <-logReceivedCh:
+					case <-time.After(5 * time.Second):
+						t.Fatal("expected warning log message, did not receive")
+					}
+					return
+				}
+				select {
+				case <-logReceivedCh:
+					t.Fatal("unexpected log message")
+				case <-time.After(100 * time.Millisecond):
 				}
 			case <-ctxCancelledCh:
 				if !tc.wantTimeout {

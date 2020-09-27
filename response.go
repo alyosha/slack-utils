@@ -12,8 +12,8 @@ import (
 const defaultResponseTimeout = 10 * time.Second
 
 type (
-	slashRespond    func(ctx context.Context, cmd *slack.SlashCommand)
-	callbackRespond func(ctx context.Context, callback *slack.InteractionCallback)
+	slashRespond    func(ctx context.Context, cmd *slack.SlashCommand) error
+	callbackRespond func(ctx context.Context, callback *slack.InteractionCallback) error
 
 	// ResponseConfig is used to configure various behavioral characteristics of
 	// the async responder methods, including max timeout, logging, etc.
@@ -37,19 +37,25 @@ func (c *Client) RespondSlash(r *http.Request, respond slashRespond, cmd *slack.
 
 	go func() {
 		defer cancel()
-		doneCh := make(chan struct{})
+		respondCh := make(chan error)
 
 		go func() {
-			respond(newCtx, cmd)
-			close(doneCh)
+			select {
+			case err := <-respondCh:
+				if err != nil {
+					c.notifyResponseFailure(endpoint, err)
+				}
+			case <-newCtx.Done():
+			}
 		}()
 
 		select {
+		case respondCh <- respond(newCtx, cmd):
 		case <-newCtx.Done():
 			if c.slashResponseConfig.WarnDeadlineExceeded {
-				c.warnResponseTimeout(endpoint, timeout, newCtx.Err())
+				c.notifyResponseTimeout(endpoint, timeout, newCtx.Err())
 			}
-		case <-doneCh:
+			return
 		}
 	}()
 }
@@ -67,19 +73,25 @@ func (c *Client) RespondCallback(r *http.Request, respond callbackRespond, callb
 
 	go func() {
 		defer cancel()
-		doneCh := make(chan struct{})
+		respondCh := make(chan error)
 
 		go func() {
-			respond(newCtx, callback)
-			close(doneCh)
+			select {
+			case err := <-respondCh:
+				if err != nil {
+					c.notifyResponseFailure(endpoint, err)
+				}
+			case <-newCtx.Done():
+			}
 		}()
 
 		select {
+		case respondCh <- respond(newCtx, callback):
 		case <-newCtx.Done():
 			if c.callbackResponseConfig.WarnDeadlineExceeded {
-				c.warnResponseTimeout(endpoint, timeout, newCtx.Err())
+				c.notifyResponseTimeout(endpoint, timeout, newCtx.Err())
 			}
-		case <-doneCh:
+			return
 		}
 	}()
 }
@@ -96,12 +108,23 @@ func (c *Client) getTimeout(endpoint string, responseCfg ResponseConfig) time.Du
 	return responseCfg.GlobalResponseTimeout
 }
 
-func (c *Client) warnResponseTimeout(endpoint string, timeout time.Duration, err error) {
+func (c *Client) notifyResponseTimeout(endpoint string, timeout time.Duration, err error) {
 	c.SendToErrChannel(
 		fmt.Sprintf(
-			"response timeout/failure\n*endpoint*: `%s`\n*timeout duration*: `%d`\n*timestamp*: `%d`",
+			"response timeout\n*endpoint*: `%s`\n*timeout duration*: `%d`\n*timestamp*: `%d`",
 			endpoint,
 			timeout,
+			time.Now().Unix(),
+		),
+		err,
+	)
+}
+
+func (c *Client) notifyResponseFailure(endpoint string, err error) {
+	c.SendToErrChannel(
+		fmt.Sprintf(
+			"response failure\n*endpoint*: `%s`\n*timestamp*: `%d`",
+			endpoint,
 			time.Now().Unix(),
 		),
 		err,
